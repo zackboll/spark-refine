@@ -1,0 +1,21 @@
+id = "P4"
+name = "p4_release_wrong_id"
+description = """
+Release increments Top but pushes a different identity (the successor of
+Id, wrapping at Max_Objects) instead of Id. The released object stays
+allocated and some other identity is pushed, which may already be free."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = "      P.Free_Stack (P.Top) := Id;"
+replace = "      P.Free_Stack (P.Top) := (if Id = Max_Objects then 1 else Id + 1);"
+
+# The pushed identity may already be in the prefix (uniqueness violated),
+# and the abstract Add relation does not hold.
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Fixed_Pool.Release"
+
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Release"

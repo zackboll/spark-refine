@@ -1,0 +1,54 @@
+with "sparklib";
+
+project Fixed_Pool is
+
+   --  FIXED_POOL_SRC selects the implementation directory under analysis.
+   --  It defaults to the positive baseline in "src". The negative-fixture
+   --  gate and the ablation study (scripts/) materialise each modified copy
+   --  under obj/<kind>_src/<name> and point this variable at it, using
+   --  FIXED_POOL_VARIANT to keep each run's object/proof artefacts isolated.
+   Impl_Dir := external ("FIXED_POOL_SRC", "src");
+   Variant  := external ("FIXED_POOL_VARIANT", "baseline");
+
+   --  FIXED_POOL_ASSERTIONS=on builds the runtime tests with -gnata so that
+   --  executable contracts are also checked at run time. See README.md for
+   --  what that does and does not cover for the ghost Functional.Sets model.
+   type On_Off is ("on", "off");
+   Assertions : On_Off := external ("FIXED_POOL_ASSERTIONS", "off");
+
+   for Source_Dirs use (Impl_Dir, "proof", "tests");
+   for Main use ("fixed_pool_runtime_tests.adb");
+
+   Common_Switches := ("-gnat2022", "-gnatwa", "-gnatW8", "-g");
+
+   case Assertions is
+      when "off" =>
+         for Object_Dir use "obj/" & Variant;
+         for Exec_Dir use "bin";
+      when "on" =>
+         for Object_Dir use "obj/" & Variant & "-assertions";
+         for Exec_Dir use "bin/assertions";
+   end case;
+
+   package Compiler is
+      case Assertions is
+         when "off" =>
+            for Default_Switches ("Ada") use Common_Switches;
+         when "on" =>
+            for Default_Switches ("Ada") use Common_Switches & ("-gnata");
+      end case;
+   end Compiler;
+
+   package Prove is
+      --  Identical to the ring-buffer benchmark (Tasks 001/002):
+      --  -U                   analyse every unit (package, client proof)
+      --  --level=2            cvc5,z3,altergo; timeout 5 s; no step limit
+      --  --no-loop-unrolling  Max_Objects = 32 must not be unrolled; loop
+      --                       invariants must carry every loop proof
+      for Proof_Switches ("Ada") use
+        ("-U", "--mode=all", "--level=2", "--no-loop-unrolling",
+         "--report=statistics", "--checks-as-errors=on",
+         "--warnings=error");
+   end Prove;
+
+end Fixed_Pool;

@@ -112,3 +112,62 @@ jobs:
             examples/ring_buffer/obj/negative_summary.json
             examples/ring_buffer/obj/negative_summary_head_tail_count.json
           if-no-files-found: warn
+
+  # Task 003: fixed object pool (free-index stack refined against a
+  # SPARK.Containers.Functional.Sets free set). Independent of the
+  # ring-buffer job; same pinned toolchain family (see
+  # examples/fixed_pool/alire.toml) and same proof switches. Green only if it
+  # builds, runtime tests pass with and without -gnata, the proof inventory
+  # partitions the sources, no forbidden trust construct is present, the
+  # positive proof has 0 unproved / 0 justified checks (from SARIF/.spark),
+  # and each negative fixture P1-P6 fails at its expected (rule, entity).
+  spark-fixed-pool-baseline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/fixed_pool
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Repository checks
+        working-directory: .
+        run: python3 scripts/check_repo.py
+      - uses: alire-project/setup-alire@v6.0.0
+        with:
+          version: '2.1.1'
+          toolchain: '--disable-assistant'
+      - name: Resolve pinned toolchain
+        run: |
+          alr -n update
+          alr -n exec -- gnat --version | head -1
+          alr -n exec -- gnatprove --version
+      - name: Proof inventory is consistent
+        run: python3 scripts/proof_inventory.py
+      - name: Trust / forbidden-assumption scan
+        run: python3 scripts/check_proof_results.py trust-scan
+      - name: Build
+        run: alr -n build
+      - name: Runtime tests (production build)
+        run: ./bin/fixed_pool_runtime_tests
+      - name: Runtime tests (contracts, invariant and ghost set model executed, -gnata)
+        run: |
+          alr -n build -- -XFIXED_POOL_ASSERTIONS=on
+          ./bin/assertions/fixed_pool_runtime_tests
+      - name: Positive GNATprove gate
+        run: python3 scripts/check_proof_results.py positive
+      - name: Negative proof fixtures (P1-P6)
+        run: python3 scripts/check_proof_results.py negative
+      - name: Upload proof results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixed-pool-proof-results
+          path: |
+            examples/fixed_pool/obj/baseline/proof_summary.json
+            examples/fixed_pool/obj/baseline/gnatprove/gnatprove.out
+            examples/fixed_pool/obj/baseline/gnatprove/gnatprove.sarif
+            examples/fixed_pool/obj/*/gnatprove.log
+            examples/fixed_pool/obj/negative_summary.json
+          if-no-files-found: warn

@@ -1,0 +1,16 @@
+id = "P1"
+name = "p1_duplicate_initial"
+description = """
+Initialize builds a free stack whose first two active entries are both 1
+(identity 2 never appears), so one identity is free twice and could be
+allocated twice."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = "P := (Free_Stack => [for I in Object_Id => I],"
+replace = "P := (Free_Stack => [for I in Object_Id => (if I = 2 then 1 else I)],"
+
+# The active-prefix uniqueness invariant fails on exit from Initialize.
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Fixed_Pool.Initialize"

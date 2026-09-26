@@ -17,6 +17,9 @@ REQUIRED = [
     "docs/BENCHMARKS.md",
     "docs/RESEARCH.md",
     "examples/ring_buffer/spark-refine.toml",
+    "examples/fixed_pool/BASELINE_METRICS.md",
+    "examples/fixed_pool/proof_inventory.toml",
+    "docs/tasks/003-fixed-pool-proof-baseline.md",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

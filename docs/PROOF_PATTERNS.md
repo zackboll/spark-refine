@@ -231,6 +231,38 @@ substantial generic lemmas, for example about no duplicates in
 `Free_Stack (1 .. Top)`, membership, or `Length (Free_Set) = Top` across
 push and pop.
 
+#### Evidence from Task 003 (free-index stack → `Functional.Sets` free set)
+
+The model is one derived set, `Free_Model`; "allocated" is defined as its
+complement. The minimal proof support was **36 SLOC, all generic**:
+
+```text
+Type_Invariant   Free_Stack (1 .. Top) has no duplicates      (+ Top := 0)
+Refined_Post     Length (Model) = Top
+                 Contains (Model, Id) = (exists I in 1 .. Top : Free_Stack (I) = Id)
+Model body       R := Add (R, Free_Stack (I)) for I in 1 .. Top
+                 + 2 loop invariants (length, membership)
+Lemma            any set of Object_Id has Length <= Max_Objects
+                 (pigeonhole; called once in Release for Top + 1)
+```
+
+**Not needed:** separate no-duplicate, popped-element or
+`not Contains` → not-in-prefix lemmas; operation-specific contracts or
+assertions; intermediate models; initialization invariants.
+`Allocate` = `Remove` and `Release` = `Add` follow from SPARKlib contracts.
+
+**Pattern-level lessons:**
+
+* A set model over a prefix requires **injectivity** of the prefix.
+* A pool whose release takes an arbitrary identity requires a
+  **finite-universe cardinality** fact that SPARKlib `Functional.Sets`
+  does not provide.
+* That lemma is the only artifact that needs a particular prover
+  (Alt-Ergo).
+
+Decision under the pre-registered rule: **REVIEW** (P = 36, G = 100 %,
+M = 5). Measurements: `examples/fixed_pool/BASELINE_METRICS.md`.
+
 ## Pattern 003 candidate: bitmap set/allocator
 
 ### Abstract meaning
