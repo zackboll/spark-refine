@@ -1,0 +1,20 @@
+id = "B1"
+name = "tail_not_advanced"
+description = """
+Push writes Content (Tail) and increments Count but leaves Tail unchanged,
+so the next Push overwrites the element just written."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = """      B.Content (B.Tail) := E;
+      B.Tail  := Physical_Index (B.Tail, 1);
+      B.Count := B.Count + 1;"""
+replace = """      B.Content (B.Tail) := E;
+      B.Count := B.Count + 1;"""
+
+# Model is derived from Head/Count, so this Push still appends correctly;
+# the fault is only visible as a broken representation relation
+# Tail = Physical_Index (Head, Count) on exit from Push.
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Ring_Buffer.Push"

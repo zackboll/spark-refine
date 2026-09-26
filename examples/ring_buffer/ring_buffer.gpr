@@ -9,8 +9,34 @@ project Ring_Buffer is
    --  "obj/negative_src/<name>" and points this variable at it, using
    --  RING_BUFFER_VARIANT to keep each variant's object/proof artifacts
    --  isolated from the baseline.
-   Impl_Dir := external ("RING_BUFFER_SRC", "src");
-   Variant  := external ("RING_BUFFER_VARIANT", "baseline");
+   --
+   --  RING_BUFFER_REPR selects which private representation is the default
+   --  implementation (Task 002). Both share the identical public spec, the
+   --  client proof in "proof" and the runtime tests in "tests":
+   --
+   --    first_length     Task 001 baseline  src/                      (default)
+   --    head_tail_count  Task 002           variants/head_tail_count/
+   --
+   --  Each representation has its own object and executable directories, so
+   --  building one never overwrites the other.
+   type Representation_Kind is ("first_length", "head_tail_count");
+   Representation : Representation_Kind :=
+     external ("RING_BUFFER_REPR", "first_length");
+
+   Default_Impl_Dir := "src";
+   Default_Variant  := "baseline";
+   Bin_Dir          := "bin";
+   case Representation is
+      when "first_length" =>
+         null;
+      when "head_tail_count" =>
+         Default_Impl_Dir := "variants/head_tail_count";
+         Default_Variant  := "head_tail_count";
+         Bin_Dir          := "bin/head_tail_count";
+   end case;
+
+   Impl_Dir := external ("RING_BUFFER_SRC", Default_Impl_Dir);
+   Variant  := external ("RING_BUFFER_VARIANT", Default_Variant);
 
    --  RING_BUFFER_ASSERTIONS=on builds the runtime tests with -gnata, so
    --  that every contract (including the ghost Model and the SPARKlib
@@ -28,10 +54,10 @@ project Ring_Buffer is
    case Assertions is
       when "off" =>
          for Object_Dir use "obj/" & Variant;
-         for Exec_Dir use "bin";
+         for Exec_Dir use Bin_Dir;
       when "on" =>
          for Object_Dir use "obj/" & Variant & "-assertions";
-         for Exec_Dir use "bin/assertions";
+         for Exec_Dir use Bin_Dir & "/assertions";
    end case;
 
    package Compiler is

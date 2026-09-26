@@ -1,0 +1,18 @@
+id = "B4"
+name = "count_not_incremented"
+description = """
+Push writes Content (Tail) and advances Tail but leaves Count unchanged, so
+the element is written but never becomes part of the queue."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = """      B.Tail  := Physical_Index (B.Tail, 1);
+      B.Count := B.Count + 1;"""
+replace = """      B.Tail  := Physical_Index (B.Tail, 1);"""
+
+# Observed: only the representation relation is reported, on exit from Push.
+# As for B3, the violated append postcondition is masked: once the invariant
+# is assumed after its (failed) check, the path is contradictory.
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Ring_Buffer.Push"

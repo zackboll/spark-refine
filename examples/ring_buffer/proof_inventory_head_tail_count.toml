@@ -1,0 +1,165 @@
+# Machine-readable classification of representation B (Task 002):
+# Content + Head + Tail + Count, in variants/head_tail_count/.
+#
+# Same rules as proof_inventory.toml (Task 001, representation A): every
+# non-blank, non-comment line of the two package files is counted exactly
+# once; lines not covered by an [[artifact]] range are "production";
+# `anchor` must occur on the first line of each range. Checked by
+#   python3 scripts/proof_inventory.py --variant head_tail_count
+#
+# The specification ranges are identical to representation A because the
+# visible part is identical (enforced by
+# scripts/check_public_api_equivalence.py). They are developer-owned and
+# are NOT generator savings.
+#
+# Mechanical support is the Task 001 support with First/Length renamed to
+# Head/Count, plus one new artifact: the Type_Invariant relating the
+# redundant Tail to Head and Count (category representation_predicate).
+
+format_version = 1
+
+# ---------------------------------------------------------------- spec ----
+
+[[artifact]]
+name = "SPARKlib functional-vector dependency"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [1, 1]
+anchor = "with SPARK.Containers.Functional.Vectors;"
+
+[[artifact]]
+name = "Sequences (abstract model type instantiation)"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [13, 16]
+anchor = "package Sequences is new"
+
+[[artifact]]
+name = "Model (public ghost abstraction + capacity bound)"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [20, 22]
+anchor = "function Model (B : Buffer)"
+
+[[artifact]]
+name = "Is_Empty contract"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [26, 26]
+anchor = "Is_Empty'Result"
+
+[[artifact]]
+name = "Is_Full contract"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [29, 29]
+anchor = "Is_Full'Result"
+
+[[artifact]]
+name = "Initialize contract"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [32, 32]
+anchor = "Post => Model (B) = Sequences.Empty_Sequence"
+
+[[artifact]]
+name = "Clear contract"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [35, 35]
+anchor = "Post => Model (B) = Sequences.Empty_Sequence"
+
+[[artifact]]
+name = "Push contract"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [38, 39]
+anchor = "with Pre  => not Is_Full (B)"
+
+[[artifact]]
+name = "Pop contract"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [42, 44]
+anchor = "with Pre  => not Is_Empty (B)"
+
+[[artifact]]
+name = "Peek contract"
+group = "specification"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [47, 48]
+anchor = "with Pre  => not Is_Empty (B)"
+
+# ---------------------------------------------------------- mechanical ----
+
+[[artifact]]
+name = "Representation invariant Tail = Physical_Index (Head, Count)"
+entity = "Ring_Buffer.Buffer'Type_Invariant"
+group = "mechanical"
+category = "representation_predicate"
+file = "variants/head_tail_count/ring_buffer.ads"
+lines = [66, 67]
+anchor = "with Type_Invariant =>"
+generic = true
+application_specific = false
+why = "Tail is redundant state that Push writes through; the derived model uses Head/Count. Without the relation Push's append postcondition is unprovable (ablation no_type_invariant). Dynamic_Predicate also works but forces whole-record updates in Clear/Push/Pop (ablation alt_dynamic_predicate*)."
+
+[[artifact]]
+name = "Model body (derived model construction loop)"
+entity = "Ring_Buffer.Model"
+group = "mechanical"
+category = "model_construction"
+file = "variants/head_tail_count/ring_buffer.adb"
+lines = [11, 11]
+anchor = "function Model (B : Buffer) return Sequences.Sequence"
+generic = true
+application_specific = false
+why = "Body of the ghost Model function: appends Content (Physical_Index (Head, J - 1)) for J in 1 .. Count. Identical to representation A with First/Length renamed to Head/Count; Tail is not used."
+
+[[artifact]]
+name = "Model Refined_Post (abstraction relation)"
+entity = "Ring_Buffer.Model'Refined_Post"
+group = "mechanical"
+category = "operation_refinement_contract"
+file = "variants/head_tail_count/ring_buffer.adb"
+lines = [12, 16]
+anchor = "with Refined_Post =>"
+generic = true
+application_specific = false
+why = "Exposes Last (Model) = Count and Get (Model, K) = Content (Physical_Index (Head, K - 1)) to the operation bodies (ablation no_refined_post)."
+
+[[artifact]]
+name = "Model body (derived model construction loop)"
+entity = "Ring_Buffer.Model"
+group = "mechanical"
+category = "model_construction"
+file = "variants/head_tail_count/ring_buffer.adb"
+lines = [17, 21]
+anchor = "   is"
+generic = true
+application_specific = false
+why = "See above."
+
+[[artifact]]
+name = "Model loop invariants"
+entity = "Ring_Buffer.Model (2 x Loop_Invariant)"
+group = "mechanical"
+category = "loop_invariant"
+file = "variants/head_tail_count/ring_buffer.adb"
+lines = [22, 26]
+anchor = "pragma Loop_Invariant (Sequences.Last (R) = J);"
+generic = true
+application_specific = false
+why = "Needed to prove the Refined_Post and the Add precondition of the model loop under --no-loop-unrolling (ablations no_loop_invariant_*)."
+
+[[artifact]]
+name = "Model body (derived model construction loop)"
+entity = "Ring_Buffer.Model"
+group = "mechanical"
+category = "model_construction"
+file = "variants/head_tail_count/ring_buffer.adb"
+lines = [27, 29]
+anchor = "end loop;"
+generic = true
+application_specific = false
+why = "See above."

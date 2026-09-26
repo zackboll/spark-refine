@@ -1,0 +1,14 @@
+id = "B2"
+name = "tail_advances_twice"
+description = """
+Push advances Tail by two slots instead of one (wrong circular step)."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = "B.Tail  := Physical_Index (B.Tail, 1);"
+replace = "B.Tail  := Physical_Index (B.Tail, 2);"
+
+# The representation relation is broken on exit from Push.
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Ring_Buffer.Push"

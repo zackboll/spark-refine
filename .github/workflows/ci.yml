@@ -17,14 +17,20 @@ jobs:
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
 
-  # Task 001: manual ring-buffer proof baseline.
+  # Ring-buffer proof benchmarks, one toolchain setup for both
+  # representations:
+  #   A  Task 001  Content + First + Length        (src/)
+  #   B  Task 002  Content + Head + Tail + Count   (variants/head_tail_count/)
   # Toolchain is pinned in examples/ring_buffer/alire.toml
   # (gnat_native = gnatprove = sparklib = 16.1.0, gprbuild = 26.0.1).
-  # The job is green only if: repository checks pass, the example builds,
-  # runtime tests pass, the positive proof has 0 unproved / 0 justified
-  # checks, every negative fixture fails in the expected (rule, entity)
-  # obligation, and no forbidden trust construct is present. Proof results
-  # are verified from GNATprove's SARIF/.spark output, not from exit codes.
+  # The job is green only if, for each representation, it builds, the same
+  # runtime tests pass (with and without -gnata), the positive proof has
+  # 0 unproved / 0 justified checks and every negative fixture fails in the
+  # expected (rule, entity) obligation; and, in common, the public API is
+  # identical, the client proof and runtime tests are unchanged since the
+  # Task 002 base, no forbidden trust construct is present, and both proof
+  # inventories are consistent. Proof results are verified from GNATprove's
+  # SARIF/.spark output, not from exit codes.
   spark-ring-buffer-baseline:
     runs-on: ubuntu-latest
     defaults:
@@ -32,6 +38,8 @@ jobs:
         working-directory: examples/ring_buffer
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the representation-independence check diffs against the Task 002 base
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -49,22 +57,45 @@ jobs:
           alr -n update
           alr -n exec -- gnat --version | head -1
           alr -n exec -- gnatprove --version
-      - name: Build ring buffer
+      # ---- common controls ----------------------------------------------
+      - name: Public API equivalence (A vs B visible part)
+        run: python3 scripts/check_public_api_equivalence.py
+      - name: Client proof and runtime tests unchanged since Task 002 base
+        run: |
+          git diff --exit-code 0f6da9702ab5683157efa855df80e7c562c53d95 -- \
+            proof/ring_buffer_client_proof.ads \
+            proof/ring_buffer_client_proof.adb \
+            tests/ring_buffer_runtime_tests.adb
+      - name: Proof-support inventories are consistent (A and B)
+        run: python3 scripts/proof_inventory.py --all
+      - name: Trust / forbidden-assumption scan (A, B, proof, tests, fixtures)
+        run: python3 scripts/check_proof_results.py trust-scan
+      # ---- representation A: Task 001 (First + Length) ------------------
+      - name: "A: build"
         run: alr -n build
-      - name: Runtime tests (production build)
+      - name: "A: runtime tests (production build)"
         run: ./bin/ring_buffer_runtime_tests
-      - name: Runtime tests (contracts and ghost model executed, -gnata)
+      - name: "A: runtime tests (contracts and ghost model executed, -gnata)"
         run: |
           alr -n build -- -XRING_BUFFER_ASSERTIONS=on
           ./bin/assertions/ring_buffer_runtime_tests
-      - name: Proof-support inventory is consistent
-        run: python3 scripts/proof_inventory.py
-      - name: Trust / forbidden-assumption scan
-        run: python3 scripts/check_proof_results.py trust-scan
-      - name: Positive GNATprove baseline
+      - name: "A: positive GNATprove baseline"
         run: python3 scripts/check_proof_results.py positive
-      - name: Negative proof fixtures
+      - name: "A: negative proof fixtures (N1-N5)"
         run: python3 scripts/check_proof_results.py negative
+      # ---- representation B: Task 002 (Head + Tail + Count) -------------
+      - name: "B: build"
+        run: alr -n build -- -XRING_BUFFER_REPR=head_tail_count
+      - name: "B: same runtime tests (production build)"
+        run: ./bin/head_tail_count/ring_buffer_runtime_tests
+      - name: "B: same runtime tests (contracts, invariant and ghost model executed, -gnata)"
+        run: |
+          alr -n build -- -XRING_BUFFER_REPR=head_tail_count -XRING_BUFFER_ASSERTIONS=on
+          ./bin/head_tail_count/assertions/ring_buffer_runtime_tests
+      - name: "B: positive GNATprove"
+        run: python3 scripts/check_proof_results.py positive --variant head_tail_count
+      - name: "B: negative proof fixtures (B1-B6)"
+        run: python3 scripts/check_proof_results.py negative --variant head_tail_count
       - name: Upload proof results
         if: always()
         uses: actions/upload-artifact@v4
@@ -74,6 +105,10 @@ jobs:
             examples/ring_buffer/obj/baseline/proof_summary.json
             examples/ring_buffer/obj/baseline/gnatprove/gnatprove.out
             examples/ring_buffer/obj/baseline/gnatprove/gnatprove.sarif
+            examples/ring_buffer/obj/head_tail_count/proof_summary.json
+            examples/ring_buffer/obj/head_tail_count/gnatprove/gnatprove.out
+            examples/ring_buffer/obj/head_tail_count/gnatprove/gnatprove.sarif
             examples/ring_buffer/obj/*/gnatprove.log
             examples/ring_buffer/obj/negative_summary.json
+            examples/ring_buffer/obj/negative_summary_head_tail_count.json
           if-no-files-found: warn

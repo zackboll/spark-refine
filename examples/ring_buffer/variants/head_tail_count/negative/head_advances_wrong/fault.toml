@@ -1,0 +1,19 @@
+id = "B3"
+name = "head_advances_wrong"
+description = """
+Pop advances Head by two slots instead of one while correctly decrementing
+Count, skipping the second logical element."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = "B.Head  := Physical_Index (B.Head, 1);"
+replace = "B.Head  := Physical_Index (B.Head, 2);"
+
+# Observed: only the representation relation Tail = Physical_Index (Head,
+# Count) is reported, on exit from Pop. GNATprove checks the Type_Invariant
+# before the postcondition and then assumes it; with the relation assumed the
+# path is contradictory, so the (genuinely violated) functional postcondition
+# is discharged vacuously. The invariant is therefore the detecting check.
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Ring_Buffer.Pop"

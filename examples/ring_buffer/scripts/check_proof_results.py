@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
-"""Machine-checked GNATprove gate for the Task 001 ring-buffer baseline.
+"""Machine-checked GNATprove gate for the ring-buffer benchmarks.
+
+Two private representations share one public spec, client proof and test
+driver. --variant selects which one is gated (default: first_length, so the
+Task 001 invocations are unchanged):
+
+  first_length     Task 001  Content + First + Length        src/
+  head_tail_count  Task 002  Content + Head + Tail + Count   variants/head_tail_count/
 
 Sub-commands:
 
-  positive    Run GNATprove on the baseline (src/ + proof/) from a clean
-              output directory and require zero unproved checks, zero
+  positive    Run GNATprove on the selected implementation (+ proof/) from a
+              clean output directory and require zero unproved checks, zero
               justified checks, zero pragma Assume and no unexpected
-              warnings. Writes obj/baseline/proof_summary.json.
-  negative    For every fixture in negative/*/fault.toml: materialise a copy
-              of src/ with exactly that fault applied, run GNATprove, and
-              require that each expected (rule, entity) obligation is
-              reported unproved. Writes obj/negative_summary.json.
-  trust-scan  Scan the baseline, client proof, tests and negative fault
-              patches for forbidden trust-affecting constructs.
+              warnings. Writes obj/<obj_name>/proof_summary.json
+              (obj/baseline/ for first_length).
+  negative    For every fixture in the variant's negative/*/fault.toml:
+              materialise a copy of the implementation with exactly that
+              fault applied, run GNATprove, and require that each expected
+              (rule, entity) obligation is reported unproved. Writes
+              obj/negative_summary.json (first_length) or
+              obj/negative_summary_<variant>.json.
+  trust-scan  Scan every implementation, the client proof, tests and all
+              negative fault patches for forbidden trust-affecting
+              constructs (variant-independent).
   all         trust-scan, positive, negative (in that order).
 
 Results are read from GNATprove's SARIF output (gnatprove.sarif, produced by
@@ -44,11 +55,35 @@ SRC = EXAMPLE / "src"
 NEGATIVE = EXAMPLE / "negative"
 OBJ = EXAMPLE / "obj"
 
+# impl       implementation directory (relative to EXAMPLE)
+# obj_name   RING_BUFFER_VARIANT used for the positive proof
+# negative   directory holding <fixture>/fault.toml
+# min_fixtures  lower bound on the number of fixtures in a full run
+# neg_prefix    prefix of the RING_BUFFER_VARIANT of each negative run
+# neg_summary   file (under obj/) receiving the negative report
+VARIANTS = {
+    "first_length": {
+        "impl": "src", "obj_name": "baseline", "negative": NEGATIVE,
+        "min_fixtures": 5, "neg_prefix": "negative_",
+        "neg_src": OBJ / "negative_src",
+        "neg_summary": "negative_summary.json",
+    },
+    "head_tail_count": {
+        "impl": "variants/head_tail_count", "obj_name": "head_tail_count",
+        "negative": EXAMPLE / "variants" / "head_tail_count" / "negative",
+        "min_fixtures": 6, "neg_prefix": "negative_htc_",
+        "neg_src": OBJ / "negative_src" / "head_tail_count",
+        "neg_summary": "negative_summary_head_tail_count.json",
+    },
+}
+
 # Units whose .spark results are cross-checked (the project is analysed
 # with -U, so every unit in the source dirs is included).
 GATED_UNITS = ("ring_buffer", "ring_buffer_client_proof")
 
-TRUST_SCAN_GLOBS = ("src/*.ad[sb]", "proof/*.ad[sb]", "tests/*.ad[sb]")
+TRUST_SCAN_GLOBS = ("src/*.ad[sb]", "variants/*/*.ad[sb]", "proof/*.ad[sb]",
+                    "tests/*.ad[sb]")
+FAULT_GLOBS = ("negative/*/fault.toml", "variants/*/negative/*/fault.toml")
 
 FORBIDDEN_PATTERNS = {
     "pragma Assume": re.compile(r"pragma\s+Assume\b", re.I),
@@ -186,18 +221,49 @@ def load_results(out_dir: Path) -> dict:
 
 
 
+def prover_effort(out_dir: Path) -> dict:
+    """Measurement only (never a pass/fail criterion): the largest per-check
+    step count and time in GNATprove's own per-check "stats" (the prover
+    that won each check), from the gated units' .spark files.
+
+    Under --level=2 with -j0 the three provers race and the losers are
+    killed, so which prover wins, and therefore the reported steps, varies
+    between identical runs. Treat these numbers as indicative only; for a
+    deterministic comparison run a single prover (--prover=...), see
+    REFACTOR_METRICS.md."""
+    worst = []
+    for unit in GATED_UNITS:
+        data = json.loads((out_dir / f"{unit}.spark").read_text(
+            encoding="utf-8"))
+        for entry in data.get("proof", []):
+            for prover, st in (entry.get("stats") or {}).items():
+                worst.append((st.get("max_steps", 0),
+                              st.get("max_time", 0.0),
+                              f"{entry['rule']} {entry['file']}:"
+                              f"{entry['line']} ({prover})"))
+    worst.sort(reverse=True)
+    return {"max_prover_steps": worst[0][0] if worst else 0,
+            "max_check_seconds": round(max((w[1] for w in worst),
+                                           default=0.0), 3),
+            "most_expensive_checks": [f"{s} steps: {w}"
+                                      for s, _, w in worst[:3]]}
+
+
 # --------------------------------------------------------------------------
 # Gates
 # --------------------------------------------------------------------------
 
-def gate_positive(_args) -> None:
-    print("== positive baseline ==")
-    run = run_gnatprove("baseline", "src")
+def gate_positive(args) -> None:
+    var = VARIANTS[args.variant]
+    print(f"== positive {args.variant} ({var['impl']}) ==")
+    run = run_gnatprove(var["obj_name"], var["impl"])
     res = load_results(run["out_dir"])
     by_rule: dict[str, int] = {}
     for item in res["proved"]:
         by_rule[item["rule"]] = by_rule.get(item["rule"], 0) + 1
     summary = {
+        "variant": args.variant,
+        "implementation": var["impl"],
         "gnatprove": res["tool"],
         "command_line": res["command_line"],
         "returncode": run["returncode"],
@@ -211,8 +277,9 @@ def gate_positive(_args) -> None:
         "allowed_foundation_warnings": len(res["allowed_warnings"]),
         "pragma_assume": res["pragma_assume"],
         "proved_by_rule": dict(sorted(by_rule.items())),
+        **prover_effort(run["out_dir"]),
     }
-    (OBJ / "baseline" / "proof_summary.json").write_text(
+    (OBJ / var["obj_name"] / "proof_summary.json").write_text(
         json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in summary.items()
                       if k != "proved_by_rule"}, indent=2))
@@ -238,17 +305,17 @@ def gate_positive(_args) -> None:
     if summary["total_checks"] == 0:
         problems.append("no checks found; proof did not run")
     if problems:
-        raise GateError("positive baseline FAILED:\n  "
+        raise GateError(f"positive {args.variant} FAILED:\n  "
                         + "\n  ".join(problems))
-    print(f"positive baseline: PASS ({summary['proved']} proved, "
+    print(f"positive {args.variant}: PASS ({summary['proved']} proved, "
           "0 unproved, 0 justified)")
 
 
-def apply_fault(spec: dict, dest: Path) -> None:
+def apply_fault(spec: dict, dest: Path, impl: Path = SRC) -> None:
     if dest.exists():
         shutil.rmtree(dest)
     dest.mkdir(parents=True)
-    for f in SRC.glob("*.ad[sb]"):
+    for f in impl.glob("*.ad[sb]"):
         shutil.copy2(f, dest / f.name)
     for edit in spec["edit"]:
         target = dest / edit["file"]
@@ -264,19 +331,21 @@ def apply_fault(spec: dict, dest: Path) -> None:
 
 
 def gate_negative(args) -> None:
-    fixtures = sorted(NEGATIVE.glob("*/fault.toml"))
+    var = VARIANTS[args.variant]
+    fixtures = sorted(var["negative"].glob("*/fault.toml"))
     if args.only:
         fixtures = [f for f in fixtures if f.parent.name in args.only]
-    elif len(fixtures) < 5:
-        raise GateError(f"expected at least 5 negative fixtures, "
+    elif len(fixtures) < var["min_fixtures"]:
+        raise GateError(f"expected at least {var['min_fixtures']} negative "
+                        f"fixtures for {args.variant}, "
                         f"found {len(fixtures)}")
     report, failures = [], []
     for path in fixtures:
         spec = tomllib.loads(path.read_text(encoding="utf-8"))
         name = spec["name"]
-        variant = f"negative_{name}"
-        impl = OBJ / "negative_src" / name
-        apply_fault(spec, impl)
+        variant = f"{var['neg_prefix']}{name}"
+        impl = var["neg_src"] / name
+        apply_fault(spec, impl, EXAMPLE / var["impl"])
         print(f"== {spec['id']} {name} ==")
         run = run_gnatprove(variant, impl.relative_to(EXAMPLE).as_posix())
         try:
@@ -314,13 +383,13 @@ def gate_negative(args) -> None:
             "detected": not missing and bool(res["unproved"]),
         })
     OBJ.mkdir(exist_ok=True)
-    (OBJ / "negative_summary.json").write_text(
+    (OBJ / var["neg_summary"]).write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8")
     if failures:
         raise GateError("negative fixtures FAILED:\n  "
                         + "\n  ".join(failures))
-    print(f"negative fixtures: PASS ({len(report)} fixtures detected "
-          "as expected)")
+    print(f"negative fixtures ({args.variant}): PASS ({len(report)} "
+          "fixtures detected as expected)")
 
 
 def gate_trust(_args) -> None:
@@ -338,7 +407,7 @@ def gate_trust(_args) -> None:
                     if rx.search(code) and (rel, label) not in TRUST_EXEMPTIONS:
                         problems.append(f"{rel}:{lineno}: {label}: "
                                         f"{line.strip()}")
-    for path in sorted(NEGATIVE.glob("*/fault.toml")):
+    for path in sorted(p for g in FAULT_GLOBS for p in EXAMPLE.glob(g)):
         scanned += 1
         spec = tomllib.loads(path.read_text(encoding="utf-8"))
         for edit in spec.get("edit", []):
@@ -358,6 +427,10 @@ def main() -> int:
                         choices=("positive", "negative", "trust-scan", "all"))
     parser.add_argument("--only", nargs="*",
                         help="negative fixture directory names to run")
+    parser.add_argument("--variant", choices=tuple(VARIANTS),
+                        default="first_length",
+                        help="private representation to gate "
+                             "(default: first_length, the Task 001 baseline)")
     args = parser.parse_args()
     try:
         if args.command in ("trust-scan", "all"):

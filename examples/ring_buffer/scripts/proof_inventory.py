@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""Reproducible proof-support inventory for the Task 001 baseline.
+"""Reproducible proof-support inventory for the ring-buffer representations.
 
-Reads proof_inventory.toml, validates every classified line range against
-its anchor text, and reports source LOC (non-blank, non-comment lines) per
-group/category plus structural counts (ghost declarations, loop invariants,
-lemmas, public contracts, assertions in the client proof).
+Reads the representation's inventory TOML, validates every classified line
+range against its anchor text, and reports source LOC (non-blank,
+non-comment lines) per group/category plus structural counts (ghost
+declarations, loop invariants, lemmas, type invariants/predicates, public
+contracts, assertions in the client proof).
 
-  python3 scripts/proof_inventory.py            # human-readable table
-  python3 scripts/proof_inventory.py --json     # machine-readable output
+  python3 scripts/proof_inventory.py                    # Task 001 (A)
+  python3 scripts/proof_inventory.py --variant head_tail_count   # Task 002 (B)
+  python3 scripts/proof_inventory.py --all              # both (CI)
+  python3 scripts/proof_inventory.py --json [...]       # machine-readable
 
-Task 002 can point the same script at generated output to compare
+A later task can point the same script at generated output to compare
 generated versus manual support without reconstructing numbers by hand.
 """
 
@@ -23,8 +26,11 @@ import tomllib
 from pathlib import Path
 
 EXAMPLE = Path(__file__).resolve().parents[1]
-INVENTORY = EXAMPLE / "proof_inventory.toml"
-SOURCES = ("src/ring_buffer.ads", "src/ring_buffer.adb")
+VARIANTS = {
+    "first_length": (EXAMPLE / "proof_inventory.toml", "src"),
+    "head_tail_count": (EXAMPLE / "proof_inventory_head_tail_count.toml",
+                        "variants/head_tail_count"),
+}
 CLIENT = ("proof/ring_buffer_client_proof.ads",
           "proof/ring_buffer_client_proof.adb")
 TESTS = ("tests/ring_buffer_runtime_tests.adb",)
@@ -89,11 +95,17 @@ def classify(inv: dict, files: dict) -> tuple[list, dict, list]:
     return artifacts, owner, errors
 
 
-def build() -> dict:
-    inv = tomllib.loads(INVENTORY.read_text(encoding="utf-8"))
+def build(variant: str = "first_length") -> dict:
+    inventory, impl = VARIANTS[variant]
+    sources = (f"{impl}/ring_buffer.ads", f"{impl}/ring_buffer.adb")
+    inv = tomllib.loads(inventory.read_text(encoding="utf-8"))
     files = {f: (EXAMPLE / f).read_text(encoding="utf-8").splitlines()
-             for f in SOURCES}
+             for f in sources}
     artifacts, owner, errors = classify(inv, files)
+    for art in inv["artifact"]:
+        if art["file"] not in sources:
+            errors.append(f"{art['name']}: file {art['file']} is not a "
+                          f"{variant} source")
 
     production = sum(1 for f, lines in files.items()
                      for n, line in enumerate(lines, 1)
@@ -107,8 +119,8 @@ def build() -> dict:
             if a["name"] not in mech[a["category"]]["artifacts"]:
                 mech[a["category"]]["artifacts"].append(a["name"])
 
-    src_text = [strip_comments("\n".join(files[f])) for f in SOURCES]
-    ads = strip_comments("\n".join(files["src/ring_buffer.ads"]))
+    src_text = [strip_comments("\n".join(files[f])) for f in sources]
+    ads = strip_comments("\n".join(files[sources[0]]))
     client_text = [strip_comments((EXAMPLE / f).read_text(encoding="utf-8"))
                    for f in CLIENT]
     structure = {
@@ -129,7 +141,7 @@ def build() -> dict:
         "production_loc": production,
         "specification_loc": spec_loc,
         "mechanical_loc": sum(v["loc"] for v in mech.values()),
-        "package_total_loc": sum(sloc(EXAMPLE / f) for f in SOURCES),
+        "package_total_loc": sum(sloc(EXAMPLE / f) for f in sources),
         "client_proof_loc": sum(sloc(EXAMPLE / f) for f in CLIENT),
         "runtime_tests_loc": sum(sloc(EXAMPLE / f) for f in TESTS),
     }
@@ -138,32 +150,48 @@ def build() -> dict:
         errors.append("classification does not partition the package SLOC")
     keep = ("name", "group", "category", "entity", "file", "lines", "loc",
             "generic", "application_specific", "why")
-    return {"errors": errors, "totals": totals, "mechanical": mech,
+    return {"variant": variant, "inventory": inventory.name,
+            "errors": errors, "totals": totals, "mechanical": mech,
             "structure": structure,
             "artifacts": [{k: a[k] for k in keep if k in a}
                           for a in artifacts]}
 
 
+def report(data: dict) -> None:
+    print(f"== {data['variant']} ({data['inventory']}) ==")
+    print("SLOC = non-blank, non-comment source lines")
+    for k, v in data["totals"].items():
+        print(f"  {k:30} {v}")
+    print("mechanical proof support by category (SLOC):")
+    for c, v in data["mechanical"].items():
+        print(f"  {c:30} {v['loc']:3}  {'; '.join(v['artifacts'])}")
+    print("structure:")
+    for k, v in data["structure"].items():
+        print(f"  {k:30} {v}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--variant", choices=tuple(VARIANTS),
+                    default="first_length")
+    ap.add_argument("--all", action="store_true",
+                    help="check and report every representation")
     args = ap.parse_args()
-    data = build()
+    variants = list(VARIANTS) if args.all else [args.variant]
+    results = [build(v) for v in variants]
     if args.json:
-        print(json.dumps(data, indent=2))
+        print(json.dumps(results[0] if len(results) == 1 else results,
+                         indent=2))
     else:
-        print("SLOC = non-blank, non-comment source lines")
-        for k, v in data["totals"].items():
-            print(f"  {k:30} {v}")
-        print("mechanical proof support by category (SLOC):")
-        for c, v in data["mechanical"].items():
-            print(f"  {c:30} {v['loc']:3}  {'; '.join(v['artifacts'])}")
-        print("structure:")
-        for k, v in data["structure"].items():
-            print(f"  {k:30} {v}")
-    for e in data["errors"]:
-        print(f"ERROR: {e}", file=sys.stderr)
-    return 1 if data["errors"] else 0
+        for data in results:
+            report(data)
+    failed = False
+    for data in results:
+        for e in data["errors"]:
+            print(f"ERROR [{data['variant']}]: {e}", file=sys.stderr)
+            failed = True
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

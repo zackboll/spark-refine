@@ -114,6 +114,13 @@ Avoid generating every imaginable lemma. Measure which ones eliminate real manua
 > more than it saves. M1/M3 should aim for a manifest no longer than the
 > support it replaces, and the value case should be re-tested on A3 and
 > Benchmark B before investing in Libadalang integration (M2).
+>
+> **A3 re-test (Task 002).** Representation B added exactly one artifact, the
+> representation invariant (2 SLOC), and nothing else from this list. The
+> minimum metadata that determines all B support is six role lines
+> (`pattern`, `storage`, `first`, `count`, `index`, `next`), against 21 SLOC
+> of support. The value case for M1–M3 is still unproven and now rests on
+> Benchmark B.
 
 ## Phase M4 — stock GNATprove gate
 
@@ -142,6 +149,19 @@ Measure:
 - public client proof changes.
 
 The ideal result is that client proofs do not change and most proof churn is generated.
+
+**M5 result without a generator (Task 002).** `Head + Tail + Count` was
+proved manually against the unchanged public spec, client proof and
+runtime tests (0 lines changed in each; CI-gated). The manual refactor cost
+6 renamed proof-support lines plus one new 2-line
+`Type_Invariant => Tail = Physical_Index (Head, Count)`. No lemmas,
+assertions or operation `Refined_Post`s were needed, and all wraparound
+arithmetic (including `Tail` preservation across `Pop`) proved
+automatically. Total support grew from 19 to 21 SLOC; checks went from
+116 to 134, in ≈ 2–2.8 s. So "most proof churn is generated" would mean
+generating about 8 lines. Hypothesis: **weaker** again. Recommendation:
+**more evidence** from a set-based benchmark (fixed pool) before any M1–M3
+investment. See `examples/ring_buffer/REFACTOR_METRICS.md` §11–12.
 
 ## CLI behavior for the MVP
 
