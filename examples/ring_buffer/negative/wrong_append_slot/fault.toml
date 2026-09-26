@@ -1,0 +1,15 @@
+id = "N1"
+name = "wrong_append_slot"
+description = """
+Push writes the new element into the slot of the current first element
+(offset 0) instead of the first free slot (offset Length)."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = "B.Content (Physical_Index (B.First, B.Length)) := E;"
+replace = "B.Content (Physical_Index (B.First, 0)) := E;"
+
+# The abstract append relation Model (B) = Add (Model (B)'Old, E) must fail.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Ring_Buffer.Push"

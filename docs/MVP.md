@@ -51,6 +51,24 @@ other
 
 This baseline is mandatory. We cannot claim to reduce proof effort without knowing what the manual proof costs.
 
+**M0 result (Task 001).** The baseline exists in `examples/ring_buffer`
+(capacity is a fixed constant, `Max_Size = 16`; generic capacity was
+deliberately deferred). Classified manual proof support:
+
+```text
+model construction         9 SLOC
+representation predicate   0
+index helpers              0   (production Physical_Index reused by the model)
+lemmas                     0
+loop invariants            5 SLOC (2 invariants)
+operation refinement       5 SLOC (Model'Refined_Post only; operations need none)
+other                      0
+total                     19 SLOC, all generic to circular sequences
+```
+
+Complete proof: 116/116 checks, ≈ 2 s. Details and the hypothesis assessment
+(**weaker**) are in `examples/ring_buffer/BASELINE_METRICS.md`.
+
 ## Phase M1 — manifest and IR
 
 Implement:
@@ -81,6 +99,21 @@ Generate a proof package containing at minimum:
 - standard append/remove helper lemmas that the baseline proves need.
 
 Avoid generating every imaginable lemma. Measure which ones eliminate real manual work.
+
+> **Revised by M0 evidence.** For representation A the baseline needed only
+> the model-length and element-wise relations (as `Model'Refined_Post`), the
+> derived `Model` body, and its two prefix loop invariants. The
+> mapping-in-range property, the representation validity predicate and the
+> append/remove lemmas were **not** needed, because the provers and SPARKlib
+> already handle them. M3 should start from the 3-artifact set in
+> BASELINE_METRICS §11, and add further artifacts only when a benchmark
+> (e.g. the A3 refactor) demonstrates the need. The manifest's `emit_lemmas`
+> and `emit_representation_predicate` flags have no justification yet.
+>
+> Because the manual support is only 19 SLOC, a verbose manifest could cost
+> more than it saves. M1/M3 should aim for a manifest no longer than the
+> support it replaces, and the value case should be re-tested on A3 and
+> Benchmark B before investing in Libadalang integration (M2).
 
 ## Phase M4 — stock GNATprove gate
 

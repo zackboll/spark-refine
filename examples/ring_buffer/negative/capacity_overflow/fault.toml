@@ -1,0 +1,24 @@
+id = "N3"
+name = "capacity_overflow"
+description = """
+The length component is allowed to exceed the storage capacity
+(Buffer_Length is 0 .. Max_Size + 1). Is_Full still means Length = Max_Size,
+so a buffer whose Length is already beyond capacity passes Push's
+precondition and is grown further."""
+
+[[edit]]
+file = "ring_buffer.ads"
+find = "subtype Buffer_Length is Natural range 0 .. Max_Size;"
+replace = "subtype Buffer_Length is Natural range 0 .. Max_Size + 1;"
+
+# Run-time safety: B.Length + 1 in Push can no longer be shown to stay
+# within Buffer_Length.
+[[expect]]
+rule = "VC_RANGE_CHECK"
+entity = "Ring_Buffer.Push"
+
+# Abstract requirement: the public capacity bound
+# Last (Model (B)) <= Max_Size no longer holds for the derived model.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Ring_Buffer.Model"

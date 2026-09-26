@@ -3,10 +3,9 @@ description = "Proof-engineering automation for SPARK refinement models"
 version = "0.0.0-dev"
 licenses = "Apache-2.0"
 authors = ["spark-refine contributors"]
-maintainers = ["spark-refine contributors"]
 project-files = ["spark_refine.gpr"]
 executables = ["spark_refine"]
-tags = ["ada", "spark", "formal-verification", "proof", "tooling"]
+tags = ["ada", "spark", "proof", "tooling"]
 
 [build-switches."*"]
 Compile_Checks = "none"

@@ -17,6 +17,63 @@ jobs:
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
 
-  # Add an Ada/SPARK proof job only after the manual ring-buffer baseline exists.
-  # The proof job should pin/record the GNATprove toolchain and fail if expected
-  # obligations are not proved.
+  # Task 001: manual ring-buffer proof baseline.
+  # Toolchain is pinned in examples/ring_buffer/alire.toml
+  # (gnat_native = gnatprove = sparklib = 16.1.0, gprbuild = 26.0.1).
+  # The job is green only if: repository checks pass, the example builds,
+  # runtime tests pass, the positive proof has 0 unproved / 0 justified
+  # checks, every negative fixture fails in the expected (rule, entity)
+  # obligation, and no forbidden trust construct is present. Proof results
+  # are verified from GNATprove's SARIF/.spark output, not from exit codes.
+  spark-ring-buffer-baseline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/ring_buffer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Repository checks
+        working-directory: .
+        run: |
+          python3 scripts/check_repo.py
+          python3 -m unittest discover -s tests -v
+      - uses: alire-project/setup-alire@v6.0.0
+        with:
+          version: '2.1.1'
+          toolchain: '--disable-assistant'
+      - name: Resolve pinned toolchain
+        run: |
+          alr -n update
+          alr -n exec -- gnat --version | head -1
+          alr -n exec -- gnatprove --version
+      - name: Build ring buffer
+        run: alr -n build
+      - name: Runtime tests (production build)
+        run: ./bin/ring_buffer_runtime_tests
+      - name: Runtime tests (contracts and ghost model executed, -gnata)
+        run: |
+          alr -n build -- -XRING_BUFFER_ASSERTIONS=on
+          ./bin/assertions/ring_buffer_runtime_tests
+      - name: Proof-support inventory is consistent
+        run: python3 scripts/proof_inventory.py
+      - name: Trust / forbidden-assumption scan
+        run: python3 scripts/check_proof_results.py trust-scan
+      - name: Positive GNATprove baseline
+        run: python3 scripts/check_proof_results.py positive
+      - name: Negative proof fixtures
+        run: python3 scripts/check_proof_results.py negative
+      - name: Upload proof results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ring-buffer-proof-results
+          path: |
+            examples/ring_buffer/obj/baseline/proof_summary.json
+            examples/ring_buffer/obj/baseline/gnatprove/gnatprove.out
+            examples/ring_buffer/obj/baseline/gnatprove/gnatprove.sarif
+            examples/ring_buffer/obj/*/gnatprove.log
+            examples/ring_buffer/obj/negative_summary.json
+          if-no-files-found: warn

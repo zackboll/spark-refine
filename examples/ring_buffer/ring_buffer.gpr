@@ -1,0 +1,59 @@
+with "sparklib";
+
+project Ring_Buffer is
+
+   --  RING_BUFFER_SRC selects the implementation directory under analysis.
+   --  It defaults to the positive baseline in "src". The negative-fixture
+   --  gate (scripts/check_proof_results.py) materialises each broken
+   --  variant (src + one negative/<name>/fault.toml patch) under
+   --  "obj/negative_src/<name>" and points this variable at it, using
+   --  RING_BUFFER_VARIANT to keep each variant's object/proof artifacts
+   --  isolated from the baseline.
+   Impl_Dir := external ("RING_BUFFER_SRC", "src");
+   Variant  := external ("RING_BUFFER_VARIANT", "baseline");
+
+   --  RING_BUFFER_ASSERTIONS=on builds the runtime tests with -gnata, so
+   --  that every contract (including the ghost Model and the SPARKlib
+   --  functional-sequence equalities in Push/Pop/Peek postconditions) is
+   --  also executed at run time. The default (off) is the production
+   --  configuration: ghost code is not compiled into the executable.
+   type On_Off is ("on", "off");
+   Assertions : On_Off := external ("RING_BUFFER_ASSERTIONS", "off");
+
+   for Source_Dirs use (Impl_Dir, "proof", "tests");
+   for Main use ("ring_buffer_runtime_tests.adb");
+
+   Common_Switches := ("-gnat2022", "-gnatwa", "-gnatW8", "-g");
+
+   case Assertions is
+      when "off" =>
+         for Object_Dir use "obj/" & Variant;
+         for Exec_Dir use "bin";
+      when "on" =>
+         for Object_Dir use "obj/" & Variant & "-assertions";
+         for Exec_Dir use "bin/assertions";
+   end case;
+
+   package Compiler is
+      case Assertions is
+         when "off" =>
+            for Default_Switches ("Ada") use Common_Switches;
+         when "on" =>
+            for Default_Switches ("Ada") use Common_Switches & ("-gnata");
+      end case;
+   end Compiler;
+
+   package Prove is
+      --  -U                   analyse every unit (package, client proof)
+      --  --level=2            cvc5,z3,altergo; timeout 5 s; no step limit
+      --  --no-loop-unrolling  do not let the fixed Max_Size = 16 unroll the
+      --                       model-construction loop; the recorded loop
+      --                       invariants must carry the proof, as they would
+      --                       for any realistic capacity
+      for Proof_Switches ("Ada") use
+        ("-U", "--mode=all", "--level=2", "--no-loop-unrolling",
+         "--report=statistics", "--checks-as-errors=on",
+         "--warnings=error");
+   end Prove;
+
+end Ring_Buffer;
