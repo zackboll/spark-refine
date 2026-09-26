@@ -185,6 +185,25 @@ Free_Set / Allocated_Set
 
 The representation change is intentionally substantial and exercises a different mathematical abstraction.
 
+> **Task 003 outcome (representation A only, `examples/fixed_pool/`).**
+> The abstract model is a single `Free_Model` set. `Allocated` is its
+> complement, so no second set is stored.
+>
+> * **Proof:** 136/136 checks proved.
+> * **Support:** `P = 36` SLOC, all generic (`G = 100 %`), with minimum
+>   metadata `M = 5`. It consists of one uniqueness `Type_Invariant`, the
+>   prefix-to-set `Refined_Post`, the model loop with 2 invariants, and one
+>   finite-universe (pigeonhole) lemma.
+> * **Robustness:** only Alt-Ergo proves the lemma on its own.
+> * **Invariant masking** reappeared in fixtures P1 and P5.
+> * **Decision:** the pre-registered rule gives **REVIEW** (not GO: 36 < 50;
+>   not PIVOT: 36 ≥ 30 and G ≥ 50 %).
+>
+> The bitmap representation (B) was **not** built. It would not resolve
+> the open question, which is whether the generic support needs *generation*
+> or only a reusable SPARK *library*. See
+> `docs/tasks/003-fixed-pool-proof-baseline.md`.
+
 ## Stop criteria
 
 The project should be willing to stop or pivot if the first two patterns show that:

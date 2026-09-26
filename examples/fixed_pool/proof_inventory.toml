@@ -1,0 +1,242 @@
+# Machine-readable classification of the Task 003 fixed-pool sources.
+#
+# Every non-blank, non-comment line of src/*.ad[sb] is counted exactly once.
+# Lines not covered by an [[artifact]] range are "production".
+# `anchor` must occur on the first line of the range; scripts/proof_inventory.py
+# fails if any range drifts, overlaps another, or covers blank/comment-only
+# text, so the numbers in BASELINE_METRICS.md cannot silently go stale.
+#
+# group:
+#   specification  authoritative, developer-owned abstract requirement
+#                  (NOT a generator target; not counted in P)
+#   mechanical     proof/refinement support (counted in P)
+#
+# category (mechanical only), per Task 003 section 25:
+#   model_construction, representation_invariant, membership_mapping,
+#   cardinality_relation, helper_lemma, loop_invariant,
+#   operation_refinement_contract, proof_assertion, proof_only_helper,
+#   proof_only_state_update, other
+#
+# generic = true only if another conventional free-index-stack pool (with a
+# different payload) would need essentially the same fact.
+# `ablation` names the case in scripts/ablate_proof_support.py whose result
+# demonstrates necessity (see BASELINE_METRICS.md section 6).
+
+format_version = 1
+
+# ---------------------------------------------------------------- spec ----
+
+[[artifact]]
+name = "SPARKlib Big_Integers / Functional.Sets dependencies"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [1, 2]
+anchor = "with SPARK.Big_Integers;"
+
+[[artifact]]
+name = "Id_Sets (abstract model type instantiation)"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [13, 15]
+anchor = "package Id_Sets is new"
+
+[[artifact]]
+name = "Free_Model (public ghost abstraction + capacity bound)"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [19, 22]
+anchor = "function Free_Model (P : Pool)"
+
+[[artifact]]
+name = "Free_Count contract"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [25, 26]
+anchor = "with Post => To_Big_Integer (Free_Count'Result)"
+
+[[artifact]]
+name = "Is_Free contract"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [29, 29]
+anchor = "Is_Free'Result"
+
+[[artifact]]
+name = "Is_Allocated contract"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [32, 33]
+anchor = "Is_Allocated'Result"
+
+[[artifact]]
+name = "Is_Exhausted contract"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [36, 36]
+anchor = "Is_Exhausted'Result"
+
+[[artifact]]
+name = "Initialize contract"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [39, 41]
+anchor = "with Post => Free_Count (P) = Max_Objects"
+
+[[artifact]]
+name = "Allocate contract"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [44, 48]
+anchor = "with Pre  => Free_Count (P) > 0"
+
+[[artifact]]
+name = "Release contract"
+group = "specification"
+file = "src/fixed_pool.ads"
+lines = [51, 53]
+anchor = "with Pre  => Is_Allocated (P, Id)"
+
+# ---------------------------------------------------------- mechanical ----
+
+[[artifact]]
+name = "Pool.Top default (invariant must hold on default value)"
+entity = "Fixed_Pool.Pool (Top => 0)"
+group = "mechanical"
+category = "representation_invariant"
+file = "src/fixed_pool.ads"
+lines = [60, 60]
+anchor = "Top        : Pool_Count := 0;"
+generic = true
+application_specific = false
+ablation = "no_top_default"
+why = "A Type_Invariant must hold for default-initialised objects; without a default for Top the uniqueness invariant fails on the default value (VC_INVARIANT_CHECK_ON_DEFAULT_VALUE). Only ' := 0' is proof-motivated, but the whole line is counted conservatively."
+
+[[artifact]]
+name = "Active-prefix uniqueness Type_Invariant"
+entity = "Fixed_Pool.Pool'Type_Invariant"
+group = "mechanical"
+category = "representation_invariant"
+file = "src/fixed_pool.ads"
+lines = [62, 65]
+anchor = "with Type_Invariant =>"
+generic = true
+application_specific = false
+ablation = "no_uniqueness_invariant, alt_dynamic_predicate"
+why = "No duplicates in Free_Stack (1 .. Top). Without it: VC_PRECONDITION (Add) in Free_Model and VC_POSTCONDITION in Allocate. As a Dynamic_Predicate the component-wise Release update fails (VC_PREDICATE_CHECK), so Type_Invariant is the minimal idiomatic form."
+
+[[artifact]]
+name = "Free_Model body (derived model construction loop)"
+entity = "Fixed_Pool.Free_Model"
+group = "mechanical"
+category = "model_construction"
+file = "src/fixed_pool.adb"
+lines = [7, 7]
+anchor = "function Free_Model (P : Pool) return Id_Sets.Set"
+generic = true
+application_specific = false
+ablation = "(required: the body is the model)"
+why = "Ghost Free_Model body: Add Free_Stack (I) for I in 1 .. Top to the empty set."
+
+[[artifact]]
+name = "Free_Model Refined_Post: cardinality relation"
+entity = "Fixed_Pool.Free_Model'Refined_Post (Length = Top)"
+group = "mechanical"
+category = "cardinality_relation"
+file = "src/fixed_pool.adb"
+lines = [8, 9]
+anchor = "with Refined_Post =>"
+generic = true
+application_specific = false
+ablation = "no_refined_post_cardinality"
+why = "Length (Model) = Top. Without it: Free_Count post, public Free_Model bound and Lemma_Universe_Bound post fail (3 VCs)."
+
+[[artifact]]
+name = "Free_Model Refined_Post: membership relation"
+entity = "Fixed_Pool.Free_Model'Refined_Post (Contains <=> in prefix)"
+group = "mechanical"
+category = "membership_mapping"
+file = "src/fixed_pool.adb"
+lines = [10, 12]
+anchor = "and (for all Id in Object_Id =>"
+generic = true
+application_specific = false
+ablation = "no_refined_post_membership, weak_membership_prefix_in_model"
+why = "Contains (Model, Id) = (exists I in 1 .. Top, Free_Stack (I) = Id). Without it 6 VCs fail (Is_Free, Initialize, Allocate pre/post, Release, lemma). The one-directional form is insufficient (4 VCs)."
+
+[[artifact]]
+name = "Free_Model body (derived model construction loop)"
+entity = "Fixed_Pool.Free_Model"
+group = "mechanical"
+category = "model_construction"
+file = "src/fixed_pool.adb"
+lines = [13, 17]
+anchor = "   is"
+generic = true
+application_specific = false
+ablation = "(required: the body is the model)"
+why = "See above."
+
+[[artifact]]
+name = "Free_Model loop invariant: cardinality"
+entity = "Fixed_Pool.Free_Model (Loop_Invariant Length (R) = I)"
+group = "mechanical"
+category = "loop_invariant"
+file = "src/fixed_pool.adb"
+lines = [18, 18]
+anchor = "pragma Loop_Invariant (Id_Sets.Length (R) = To_Big_Integer (I));"
+generic = true
+application_specific = false
+ablation = "no_loop_invariant_cardinality"
+why = "Without it the Refined_Post (cardinality) is unprovable under --no-loop-unrolling."
+
+[[artifact]]
+name = "Free_Model loop invariant: membership"
+entity = "Fixed_Pool.Free_Model (Loop_Invariant Contains <=> processed prefix)"
+group = "mechanical"
+category = "loop_invariant"
+file = "src/fixed_pool.adb"
+lines = [19, 22]
+anchor = "pragma Loop_Invariant"
+generic = true
+application_specific = false
+ablation = "no_loop_invariant_membership"
+why = "With the uniqueness invariant, this is exactly what discharges Add's precondition (new element not yet present). Without it Add's precondition and the Refined_Post fail."
+
+[[artifact]]
+name = "Free_Model body (derived model construction loop)"
+entity = "Fixed_Pool.Free_Model"
+group = "mechanical"
+category = "model_construction"
+file = "src/fixed_pool.adb"
+lines = [23, 25]
+anchor = "end loop;"
+generic = true
+application_specific = false
+ablation = "(required: the body is the model)"
+why = "See above."
+
+[[artifact]]
+name = "Lemma_Universe_Bound (finite-universe pigeonhole bound)"
+entity = "Fixed_Pool.Lemma_Universe_Bound"
+group = "mechanical"
+category = "helper_lemma"
+file = "src/fixed_pool.adb"
+lines = [36, 46]
+anchor = "procedure Lemma_Universe_Bound (S : Id_Sets.Set)"
+generic = true
+application_specific = false
+ablation = "no_lemma_assert, no_lemma_universe_witness"
+why = "Every set over Object_Id has Length <= Max_Objects (pigeonhole). Proved by taking the universe as the model of the identity stack and using SPARKlib's Num_Overlaps contract. Removing the universe witness or the Num_Overlaps assertion leaves the lemma's postcondition unproved."
+
+[[artifact]]
+name = "Lemma_Universe_Bound call in Release"
+entity = "Fixed_Pool.Release (lemma call)"
+group = "mechanical"
+category = "helper_lemma"
+file = "src/fixed_pool.adb"
+lines = [100, 100]
+anchor = "Lemma_Universe_Bound (Id_Sets.Add (Free_Model (P), Id));"
+generic = true
+application_specific = false
+ablation = "no_lemma_call"
+why = "Instantiates the bound for Add (Free_Model (P), Id), giving Top + 1 <= Max_Objects. Without it: VC_RANGE_CHECK at Release (P.Top + 1)."

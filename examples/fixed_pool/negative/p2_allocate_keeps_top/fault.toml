@@ -1,0 +1,18 @@
+id = "P2"
+name = "p2_allocate_keeps_top"
+description = """
+Allocate returns Free_Stack (Top) but does not decrement Top, so the
+returned identity is still in the active prefix, i.e. still mathematically
+free. The representation invariant still holds; only the refinement proof
+can catch it."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = """      Id := P.Free_Stack (P.Top);
+      P.Top := P.Top - 1;"""
+replace = """      Id := P.Free_Stack (P.Top);"""
+
+# Free_Model (P) = Remove (Free_Model (P)'Old, Id) must fail.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Allocate"

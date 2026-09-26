@@ -1,0 +1,49 @@
+id = "P6"
+name = "p6_model_omits_entry"
+description = """
+The derived Free_Model skips the bottom stack entry Free_Stack (1), and its
+Refined_Post and loop invariants are updated consistently (length Top - 1,
+membership over 2 .. Top), so the model function itself still proves. The
+abstraction is now wrong: one free identity is invisible, so public
+operation contracts that depend on the relation Length (Model) = Free_Count
+must fail."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = """     Id_Sets.Length (Free_Model'Result) = To_Big_Integer (P.Top)
+     and (for all Id in Object_Id =>
+            Id_Sets.Contains (Free_Model'Result, Id)
+            = (for some I in 1 .. P.Top => P.Free_Stack (I) = Id))"""
+replace = """     Id_Sets.Length (Free_Model'Result)
+       = To_Big_Integer (Natural'Max (P.Top - 1, 0))
+     and (for all Id in Object_Id =>
+            Id_Sets.Contains (Free_Model'Result, Id)
+            = (for some I in 2 .. P.Top => P.Free_Stack (I) = Id))"""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = """      for I in 1 .. P.Top loop
+         R := Id_Sets.Add (R, P.Free_Stack (I));
+         pragma Loop_Invariant (Id_Sets.Length (R) = To_Big_Integer (I));
+         pragma Loop_Invariant
+           (for all Id in Object_Id =>
+              Id_Sets.Contains (R, Id)
+              = (for some K in 1 .. I => P.Free_Stack (K) = Id));"""
+replace = """      for I in 2 .. P.Top loop
+         R := Id_Sets.Add (R, P.Free_Stack (I));
+         pragma Loop_Invariant (Id_Sets.Length (R) = To_Big_Integer (I - 1));
+         pragma Loop_Invariant
+           (for all Id in Object_Id =>
+              Id_Sets.Contains (R, Id)
+              = (for some K in 2 .. I => P.Free_Stack (K) = Id));"""
+
+# Free_Count'Result = Length (Free_Model) no longer holds (P.Top vs Top - 1).
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Free_Count"
+
+# Is_Free is still defined by the full active prefix, so its
+# postcondition against the model must fail too.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Is_Free"

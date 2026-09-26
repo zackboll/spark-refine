@@ -1,0 +1,19 @@
+name = "fixed_pool_baseline"
+description = "Task 003: manual SPARK proof baseline for a fixed-capacity object pool"
+version = "0.0.0-dev"
+licenses = "Apache-2.0"
+authors = ["spark-refine contributors"]
+project-files = ["fixed_pool.gpr"]
+executables = ["fixed_pool_runtime_tests"]
+tags = ["spark", "proof", "benchmark"]
+
+# Same compiler / prover generation as the ring-buffer benchmark (Tasks
+# 001/002). Do not mix generations.
+[[depends-on]]
+gnat_native = "=16.1.0"
+gnatprove = "=16.1.0"
+sparklib = "=16.1.0"
+gprbuild = "=26.0.1"
+
+[gpr-set-externals]
+SPARKLIB_MODE = "full"

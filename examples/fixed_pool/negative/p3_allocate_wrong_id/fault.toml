@@ -1,0 +1,17 @@
+id = "P3"
+name = "p3_allocate_wrong_id"
+description = """
+Allocate returns the bottom stack entry Free_Stack (1) instead of the top
+entry while still decrementing Top. When Top > 1 the returned identity is
+still in the active prefix (still free) and the popped top identity silently
+becomes allocated without being handed to anyone."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = "      Id := P.Free_Stack (P.Top);"
+replace = "      Id := P.Free_Stack (1);"
+
+# Free_Model (P) = Remove (Free_Model (P)'Old, Id) must fail.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Allocate"

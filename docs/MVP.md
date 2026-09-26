@@ -8,6 +8,20 @@ Prove or disprove one narrow hypothesis:
 
 The MVP is successful even if the answer is “only for representation X under constraints Y,” provided the result is measured and honest.
 
+> **Status after Task 003 (evidence only; no generator exists).**
+>
+> | Benchmark | Mechanical support | Lemmas |
+> |---|---:|---:|
+> | Circular buffer A | 19 SLOC | 0 |
+> | Circular buffer B | 21 SLOC | 0 |
+> | Fixed pool (free-index stack → set) | 36 SLOC | 1 |
+>
+> All of it is generic. The pre-registered rule gives **REVIEW** for the
+> fixed pool, so phases M1–M3 below remain **on hold**. The next
+> experiment (not started) tests whether this generic support can be a
+> reusable SPARK library instead of generated source.
+> See `docs/tasks/003-fixed-pool-proof-baseline.md`.
+
 ## Out of scope
 
 The MVP does not need:

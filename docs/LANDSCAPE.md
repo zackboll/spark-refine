@@ -67,6 +67,25 @@ A new diagnostics product that merely reformats prover output risks duplicating 
 
 The valuable niche is **refinement-aware diagnosis**. Because `spark-refine` knows that an obligation came from “logical-to-physical index validity” or “append preserves prefix,” it can map a low-level failure back to the developer's model layer. That belongs naturally in this project after generation works.
 
+> **Evidence update (Tasks 001–003).** Several diagnostic needs have now
+> appeared in two structurally different benchmarks, independent of any
+> generator:
+>
+> * **Invariant masking.** Faults that break both the type invariant and a
+>   functional postcondition are reported only at the invariant; the false
+>   postcondition shows as proved. This happened in ring buffer B3/B4 and
+>   in fixed pool P1/P5.
+> * **Client-insufficient public contracts.** In the ring buffer, `Is_Full`
+>   and `Is_Empty` had no model post. In the pool, clients could not derive
+>   `Free_Count` arithmetic from `Length (Remove …)`.
+> * **Mechanism choice.** `Dynamic_Predicate` fails where `Type_Invariant`
+>   succeeds, with component-wise updates, in both benchmarks.
+> * **Prover-portfolio fragility.** In the pool, only Alt-Ergo proves the
+>   pigeonhole lemma.
+>
+> Whether diagnostics becomes the *primary* direction is still open; see
+> the REVIEW decision in `docs/tasks/003-fixed-pool-proof-baseline.md`.
+
 ## 4. Concurrency and temporal verification
 
 SPARK's restrictions and analyses provide important race-freedom/tasking guarantees for supported tasking models, but system-level temporal properties can still require a different modeling discipline. A bridge between SPARK and TLA+/PlusCal or another temporal model could be valuable for protocols, scheduling, and lock-free algorithms.
