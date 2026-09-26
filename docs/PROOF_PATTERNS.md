@@ -93,6 +93,64 @@ Full_Equivalent
 
 The actual implementation should seek the smallest useful lemma set. Too many lemmas can slow proof and make generated output harder to understand.
 
+#### Evidence from the Task 001 manual baseline (representation A)
+
+With SPARKlib `Functional.Vectors` as the model and GNATprove FSF 16.1.0 at
+level 2, **none of the candidate lemmas above was needed**. Neither were a
+representation predicate, a proof-only index mapping, or operation
+`Refined_Post`s. The complete manual proof support was:
+
+```ada
+function Model (B : Buffer) return Sequences.Sequence
+with Refined_Post =>                                      -- abstraction relation
+  Sequences.Last (Model'Result) = B.Length
+  and then (for all K in 1 .. B.Length =>
+              Sequences.Get (Model'Result, K)
+              = B.Content (Physical_Index (B.First, K - 1)))
+is
+   R : Sequences.Sequence;
+begin
+   for J in 1 .. B.Length loop                            -- derived model
+      R := Sequences.Add (R, B.Content (Physical_Index (B.First, J - 1)));
+      pragma Loop_Invariant (Sequences.Last (R) = J);     -- prefix length
+      pragma Loop_Invariant                               -- prefix elements
+        (for all K in 1 .. J =>
+           Sequences.Get (R, K) = B.Content (Physical_Index (B.First, K - 1)));
+   end loop;
+   return R;
+end Model;
+```
+
+`Physical_Index` is production code (`Push`/`Pop` use it), so the mapping
+comes for free. The facts that actually had to be stated were therefore:
+
+```text
+Model'Length = Length                          (Refined_Post + invariant)
+Model(K) = Content(Logical_To_Physical(K-1))    (Refined_Post + invariant)
+```
+
+The following were discharged automatically by the provers from the Ada
+subtypes and SPARKlib's `Add`/`Remove`/`Range_Shifted` contracts:
+
+```text
+Length <= Capacity                              (subtype)
+Every logical position maps into Content'Range  (Physical_Index returns Storage_Index)
+Append with/without wrap                        (no lemma)
+Remove-first shift                              (SPARKlib Remove, no lemma)
+```
+
+`Empty(concrete) <=> Model'Length = 0` and the matching `Full` relation still
+matter, but as **public postconditions** on `Is_Empty`/`Is_Full`, written by
+the developer. Clients cannot call `Push`/`Pop` without them. Similarly the
+public `Last (Model) <= Capacity` bound is needed for clients, not for the
+implementation proof.
+
+Tail is expressed as `Remove (Model, 1)`; no custom `Tail` is needed.
+
+Loop unrolling caveat: with a small static capacity, GNATprove may unroll
+the model loop and prove it without invariants. Proof fixtures should use
+`--no-loop-unrolling` so that measurements reflect realistic capacities.
+
 ### Representation B
 
 ```text

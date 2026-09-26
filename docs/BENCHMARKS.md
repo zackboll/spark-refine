@@ -20,6 +20,25 @@ model:          abstract sequence
 
 Record all user-authored proof support.
 
+**Status: done (Task 001).** See
+[`examples/ring_buffer/BASELINE_METRICS.md`](../examples/ring_buffer/BASELINE_METRICS.md).
+Measured with GNAT/GNATprove/SPARKlib FSF 16.1.0 at `--level=2`
+(`--no-loop-unrolling`):
+
+```text
+production SLOC                     54
+public specification SLOC           19   (developer-owned; not a generation target)
+manual proof-support SLOC           19   model body 9, Refined_Post 5, loop invariants 5
+  lemmas / repr. predicate / index helpers / refined op contracts / ghost updates: 0
+checks (VCs + flow)                116   proved 116, unproved 0, justified 0
+proof wall time                     ~2 s (-j0), nothing > 1 s, max 73 prover steps
+negative fixtures                    5/5 detected at the expected (rule, entity)
+```
+
+The main finding is that the manual support is small and 100% generic. The
+circular-index and wraparound reasoning needed **no** manual lemmas. The
+hypothesis is assessed as *weaker*; see BASELINE_METRICS §10.
+
 ### A2. Generated refinement
 
 Express the same public contract and implementation with the minimum pattern metadata necessary. Generate the refinement layer and prove again.
@@ -43,6 +62,12 @@ Push(A); Push(B); Pop() returns A
 ```
 
 Verify the client proof is unaffected by the representation refactor.
+
+The client exists as of Task 001:
+`examples/ring_buffer/proof/ring_buffer_client_proof.ad[sb]`
+(`Push_Push_Pop` and `Rotate`). It exposed that `Is_Empty`/`Is_Full` need
+model-level postconditions, and `Model` a public capacity bound, before any
+client can discharge `Push`/`Pop` preconditions.
 
 ## Metrics
 
@@ -88,6 +113,13 @@ Examples:
 - generated helper accidentally uses an unchecked assumption.
 
 The expected result must be failure at validation or GNATprove, not a green proof.
+
+Task 001 implements five of these as machine-checked fixtures
+(`examples/ring_buffer/negative/`): wrong append slot, wraparound
+off-by-one, length exceeding capacity, wrong pop element, and a model that
+reorders wrapped elements. The gate reads GNATprove's SARIF output and
+requires each expected `(rule, entity)` obligation to be unproved; exit
+codes and English message text are not used.
 
 ## Benchmark B — fixed pool
 

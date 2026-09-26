@@ -1,0 +1,44 @@
+id = "N5"
+name = "wrong_model_order"
+description = """
+The derived model lists the live slots in physical order starting at slot 1
+instead of logical order starting at First. Whenever the buffer is wrapped
+(First /= 1) this reorders elements: wrapped elements appear before the
+elements they logically follow. The model function itself is internally
+consistent (its refined postcondition and loop invariants are edited the same
+way), so the fault must be caught by the operation refinement proofs."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = """                 Sequences.Get (Model'Result, K)
+                 = B.Content (Physical_Index (B.First, K - 1)))"""
+replace = """                 Sequences.Get (Model'Result, K)
+                 = B.Content (Physical_Index (1, K - 1)))"""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = "R := Sequences.Add (R, B.Content (Physical_Index (B.First, J - 1)));"
+replace = "R := Sequences.Add (R, B.Content (Physical_Index (1, J - 1)));"
+
+[[edit]]
+file = "ring_buffer.adb"
+find = """              Sequences.Get (R, K)
+              = B.Content (Physical_Index (B.First, K - 1)));"""
+replace = """              Sequences.Get (R, K)
+              = B.Content (Physical_Index (1, K - 1)));"""
+
+# Pop/Peek read B.Content (B.First), which is not Get (Model, 1) once
+# First /= 1, and Pop's advance of First is not Remove (Model, 1).
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Ring_Buffer.Pop"
+
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Ring_Buffer.Peek"
+
+# Push writes to slot First + Length, which is not the end of the
+# physically-ordered model once the buffer has wrapped.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Ring_Buffer.Push"

@@ -1,0 +1,18 @@
+name = "ring_buffer_baseline"
+description = "Task 001: manual SPARK proof baseline for a bounded circular buffer"
+version = "0.0.0-dev"
+licenses = "Apache-2.0"
+authors = ["spark-refine contributors"]
+project-files = ["ring_buffer.gpr"]
+executables = ["ring_buffer_runtime_tests"]
+tags = ["spark", "proof", "benchmark"]
+
+# Matching FSF compiler / prover generation. Do not mix generations.
+[[depends-on]]
+gnat_native = "=16.1.0"
+gnatprove = "=16.1.0"
+sparklib = "=16.1.0"
+gprbuild = "=26.0.1"
+
+[gpr-set-externals]
+SPARKLIB_MODE = "full"

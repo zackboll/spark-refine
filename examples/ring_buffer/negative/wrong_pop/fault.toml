@@ -1,0 +1,17 @@
+id = "N4"
+name = "wrong_pop"
+description = """
+Pop returns the most recently pushed (last logical) element instead of the
+first one, while still advancing First (LIFO/FIFO confusion)."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = """      E := B.Content (B.First);
+      B.First  := Physical_Index (B.First, 1);"""
+replace = """      E := B.Content (Physical_Index (B.First, B.Length - 1));
+      B.First  := Physical_Index (B.First, 1);"""
+
+# E = Get (Model (B)'Old, 1) must fail.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Ring_Buffer.Pop"

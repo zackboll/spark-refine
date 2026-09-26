@@ -1,0 +1,157 @@
+# Machine-readable classification of the Task 001 manual baseline sources.
+#
+# Every non-blank, non-comment line of src/*.ad[sb] is counted exactly once.
+# Lines not covered by an [[artifact]] range below are "production".
+# `anchor` must occur on the first line of the range; scripts/proof_inventory.py
+# fails if any range drifts, overlaps another, or covers blank/comment-only
+# text, so the numbers in BASELINE_METRICS.md cannot silently go stale.
+#
+# group:
+#   specification  authoritative, developer-owned abstract requirement
+#                  (NOT a generator target)
+#   mechanical     proof/refinement support (the future generation target)
+#
+# category (mechanical only) is one of:
+#   model_construction, representation_predicate, proof_index_mapping,
+#   helper_lemma, loop_invariant, operation_refinement_contract,
+#   proof_only_state_update, other
+#
+# The Model Refined_Post (abstraction relation) is recorded under
+# operation_refinement_contract: it is the refinement contract every
+# operation proof depends on. The operations themselves need none.
+
+format_version = 1
+
+# ---------------------------------------------------------------- spec ----
+
+[[artifact]]
+name = "SPARKlib functional-vector dependency"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [1, 1]
+anchor = "with SPARK.Containers.Functional.Vectors;"
+
+[[artifact]]
+name = "Sequences (abstract model type instantiation)"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [13, 16]
+anchor = "package Sequences is new"
+
+[[artifact]]
+name = "Model (public ghost abstraction + capacity bound)"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [20, 22]
+anchor = "function Model (B : Buffer)"
+
+[[artifact]]
+name = "Is_Empty contract"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [26, 26]
+anchor = "Is_Empty'Result"
+
+[[artifact]]
+name = "Is_Full contract"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [29, 29]
+anchor = "Is_Full'Result"
+
+[[artifact]]
+name = "Initialize contract"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [32, 32]
+anchor = "Post => Model (B) = Sequences.Empty_Sequence"
+
+[[artifact]]
+name = "Clear contract"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [35, 35]
+anchor = "Post => Model (B) = Sequences.Empty_Sequence"
+
+[[artifact]]
+name = "Push contract"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [38, 39]
+anchor = "with Pre  => not Is_Full (B)"
+
+[[artifact]]
+name = "Pop contract"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [42, 44]
+anchor = "with Pre  => not Is_Empty (B)"
+
+[[artifact]]
+name = "Peek contract"
+group = "specification"
+file = "src/ring_buffer.ads"
+lines = [47, 48]
+anchor = "with Pre  => not Is_Empty (B)"
+
+# ---------------------------------------------------------- mechanical ----
+
+[[artifact]]
+name = "Model body (derived model construction loop)"
+entity = "Ring_Buffer.Model"
+group = "mechanical"
+category = "model_construction"
+file = "src/ring_buffer.adb"
+lines = [15, 15]
+anchor = "function Model (B : Buffer) return Sequences.Sequence"
+generic = true
+application_specific = false
+why = "Body of the ghost Model function: builds the sequence by appending Content (Physical_Index (First, J - 1)) for J in 1 .. Length."
+
+[[artifact]]
+name = "Model Refined_Post (abstraction relation)"
+entity = "Ring_Buffer.Model'Refined_Post"
+group = "mechanical"
+category = "operation_refinement_contract"
+file = "src/ring_buffer.adb"
+lines = [16, 20]
+anchor = "with Refined_Post =>"
+generic = true
+application_specific = false
+why = "Exposes Last (Model) = Length and Get (Model, K) = Content (Physical_Index (First, K - 1)) to the operation bodies. Removing it leaves all 7 public operation contracts unprovable."
+
+[[artifact]]
+name = "Model body (derived model construction loop)"
+entity = "Ring_Buffer.Model"
+group = "mechanical"
+category = "model_construction"
+file = "src/ring_buffer.adb"
+lines = [21, 25]
+anchor = "   is"
+generic = true
+application_specific = false
+why = "See above."
+
+[[artifact]]
+name = "Model loop invariants"
+entity = "Ring_Buffer.Model (2 x Loop_Invariant)"
+group = "mechanical"
+category = "loop_invariant"
+file = "src/ring_buffer.adb"
+lines = [26, 30]
+anchor = "pragma Loop_Invariant (Sequences.Last (R) = J);"
+generic = true
+application_specific = false
+why = "Needed to prove the Refined_Post and the Add precondition of the model loop. With --no-loop-unrolling, removing either invariant makes the Refined_Post unprovable."
+
+[[artifact]]
+name = "Model body (derived model construction loop)"
+entity = "Ring_Buffer.Model"
+group = "mechanical"
+category = "model_construction"
+file = "src/ring_buffer.adb"
+lines = [31, 33]
+anchor = "end loop;"
+generic = true
+application_specific = false
+why = "See above."

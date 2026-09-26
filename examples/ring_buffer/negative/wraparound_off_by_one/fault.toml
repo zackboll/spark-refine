@@ -1,0 +1,16 @@
+id = "N2"
+name = "wraparound_off_by_one"
+description = """
+The logical-to-physical wraparound uses modulus Max_Size + 1 instead of
+Max_Size, so offset arithmetic can produce physical index Max_Size + 1."""
+
+[[edit]]
+file = "ring_buffer.ads"
+find = "mod Max_Size + 1));"
+replace = "mod (Max_Size + 1) + 1));"
+
+# The conversion of the computed slot to Storage_Index must fail its range
+# check inside the index-mapping helper.
+[[expect]]
+rule = "VC_RANGE_CHECK"
+entity = "Ring_Buffer.Physical_Index"
