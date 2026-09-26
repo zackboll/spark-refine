@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  structural:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Repository checks
+        run: python3 scripts/check_repo.py
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+
+  # Add an Ada/SPARK proof job only after the manual ring-buffer baseline exists.
+  # The proof job should pin/record the GNATprove toolchain and fail if expected
+  # obligations are not proved.

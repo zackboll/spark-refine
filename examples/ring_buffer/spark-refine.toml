@@ -1,0 +1,36 @@
+format_version = 1
+
+[project]
+gpr = "ring_buffer.gpr"
+generated_dir = "generated"
+
+[[refinement]]
+name = "queue_contents"
+target = "Ring_Buffer.Buffer"
+pattern = "circular_sequence"
+pattern_version = "1"
+model_function = "Ring_Buffer.Model"
+
+[refinement.representation]
+storage = "Content"
+first = "First"
+length = "Length"
+capacity = "Max_Size"
+index_origin = 1
+
+[refinement.generation]
+backend = "derived"
+emit_model_mapping = true
+emit_representation_predicate = true
+emit_lemmas = true
+emit_refined_contracts = true
+
+[[refinement.operation]]
+entity = "Ring_Buffer.Push"
+kind = "append"
+value_parameter = "E"
+
+[[refinement.operation]]
+entity = "Ring_Buffer.Pop"
+kind = "remove_first"
+result_parameter = "E"

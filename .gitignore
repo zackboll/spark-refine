@@ -1,0 +1,11 @@
+obj/
+bin/
+alire/
+.alire/
+*.ali
+*.o
+*.exe
+.pytest_cache/
+__pycache__/
+*.pyc
+.DS_Store
