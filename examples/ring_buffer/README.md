@@ -13,6 +13,14 @@ proved, 0 unproved, 0 justified, ≈ 2 s**. The hand-written proof support is
 19 SLOC (model body, `Refined_Post`, 2 loop invariants), all of it generic,
 with no lemmas and no representation predicate.
 
+**Task 002 (representation B).** The same public abstraction is also
+implemented as `Content + Head + Tail + Count` in
+`variants/head_tail_count/`. It uses the identical visible spec (CI-gated),
+the unchanged client proof and runtime tests, and a 2-line
+`Type_Invariant`. **134/134 checks proved.** See
+[`REFACTOR_METRICS.md`](REFACTOR_METRICS.md). Representation A below is
+still the default everywhere.
+
 ## Layout
 
 ```text
@@ -24,8 +32,23 @@ src/ring_buffer.ads/.adb   implementation, public spec, manual proof support
 proof/                     representation-independent client proof (A4)
 tests/                     executable runtime tests (public API only)
 negative/<fixture>/        five deliberately broken variants (fault.toml)
-scripts/                   proof gate, inventory and ablation tools
+variants/head_tail_count/  Task 002 representation B (.ads/.adb) + negative/B1-B6
+proof_inventory_head_tail_count.toml   classification of representation B
+REFACTOR_METRICS.md        Task 002 A-vs-B measurements and decision
+scripts/                   proof gate, inventory, ablation, API-equivalence, churn tools
 generated/                 reserved for future generator output (empty)
+```
+
+Representation B commands (add `-XRING_BUFFER_REPR=head_tail_count` to
+builds and `--variant head_tail_count` to scripts):
+
+```bash
+alr -n build -- -XRING_BUFFER_REPR=head_tail_count
+./bin/head_tail_count/ring_buffer_runtime_tests
+python3 scripts/check_proof_results.py positive --variant head_tail_count
+python3 scripts/check_proof_results.py negative --variant head_tail_count
+python3 scripts/check_public_api_equivalence.py
+python3 scripts/proof_inventory.py --all
 ```
 
 ## Public API

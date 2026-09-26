@@ -162,6 +162,43 @@ Count
 
 The same abstract pattern can have a separate adapter. This is the first representation-refactor benchmark.
 
+#### Evidence from Task 002 (representation B)
+
+`Head`/`Count` play exactly the *first*/*length* roles of representation
+A, so the model body, its `Refined_Post` and the two loop invariants carry
+over with the fields renamed. `Tail` is redundant state: the *next insert*
+slot. The complete additional proof support was one private invariant over
+the production index function:
+
+```ada
+type Buffer is record
+   Content : Storage_Array;
+   Head, Tail : Storage_Index;
+   Count   : Buffer_Length;
+end record
+with Type_Invariant =>
+  Buffer.Tail = Physical_Index (Buffer.Head, Buffer.Count);
+```
+
+* It is needed **only because production `Push` writes `Content (Tail)`**.
+  Without it the append postcondition is unprovable. If `Push` ignored
+  `Tail`, no invariant would be needed.
+* Re-establishing it in `Push` (`Tail` advanced) and in `Pop` (`Head`
+  advanced, `Tail` unchanged, i.e. two composed `mod`s) proved
+  automatically. Again **none** of the candidate lemmas above was needed.
+* Use `Type_Invariant`, not `Dynamic_Predicate`. A predicate is checked
+  after each component assignment, so ordinary field-by-field updates of
+  `Head`/`Tail`/`Count` fail predicate checks unless every mutator is
+  rewritten as a whole-record update.
+* Negative-test caveat: when a fault breaks both the invariant and a
+  functional postcondition, GNATprove reports only the invariant. The
+  postcondition is proved under the assumed (failed) invariant.
+
+Pattern rule suggested by A and B: each redundant role (such as `next`, or
+a *last* index) contributes exactly one invariant conjunct
+`role = index (first, offset)`. Everything else in the pattern is
+unchanged. Measurements: `examples/ring_buffer/REFACTOR_METRICS.md`.
+
 ## Pattern 002 candidate: fixed object pool
 
 ### Abstract meaning
@@ -185,6 +222,14 @@ No allocated identity is returned twice without release
 ```
 
 This is a strong second pattern because its abstract model is set-oriented, unlike the sequence-oriented first pattern.
+
+After Task 002 this is the deciding benchmark for generation. Circular
+sequences needed only 19–21 SLOC of generic support, because they map
+directly onto SPARKlib sequence primitives. The open question is whether a
+free-index stack refined to a `Functional.Sets` free/allocated set needs
+substantial generic lemmas, for example about no duplicates in
+`Free_Stack (1 .. Top)`, membership, or `Length (Free_Set) = Top` across
+push and pop.
 
 ## Pattern 003 candidate: bitmap set/allocator
 

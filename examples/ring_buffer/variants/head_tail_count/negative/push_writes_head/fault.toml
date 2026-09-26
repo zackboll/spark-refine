@@ -1,0 +1,17 @@
+id = "B5"
+name = "push_writes_head"
+description = """
+Push writes the new element into Content (Head) (the current first element)
+instead of Content (Tail), while updating Tail and Count correctly. The
+representation relation still holds, so only the refinement proof can catch
+it."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = "B.Content (B.Tail) := E;"
+replace = "B.Content (B.Head) := E;"
+
+# The abstract append relation Model (B) = Add (Model (B)'Old, E) must fail.
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Ring_Buffer.Push"

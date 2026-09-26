@@ -53,6 +53,31 @@ Content + Head + Tail + Count
 
 Keep the abstract contract unchanged.
 
+**Status: done (Task 002).** See
+[`examples/ring_buffer/REFACTOR_METRICS.md`](../examples/ring_buffer/REFACTOR_METRICS.md).
+Same toolchain, switches, public spec (token-identical, CI-gated), client
+proof and runtime tests (byte-identical, CI-gated):
+
+```text
+                                   A: First+Length   B: Head+Tail+Count
+production SLOC                         54                 58
+public specification SLOC               19                 19   (unchanged)
+manual proof-support SLOC               19                 21
+  representation invariant               0                  2   Type_Invariant: Tail = Physical_Index (Head, Count)
+  lemmas / assertions / op. Refined_Post 0                  0
+checks                                 116                134   (all proved, 0 justified)
+proof wall time                        ~2 s               ~2-2.8 s
+negative fixtures                      5/5 (N1-N5)        6/6 (B1-B6)
+refactor churn: public API / contracts / client proof / tests = 0 lines
+                proof support: 6 lines renamed, 2 lines new
+```
+
+Redundant state cost one invariant, needed only because `Push` writes
+through `Tail`. `Tail` preservation across `Pop` and all wraparound
+arithmetic proved automatically. The hypothesis is assessed as *weaker*
+again. The recommendation is **more evidence** (Benchmark B, fixed pool),
+with a pre-registered decision rule in REFACTOR_METRICS §12.
+
 ### A4. Client proof
 
 Add a small client that proves a property through the abstract API, such as:
@@ -62,6 +87,9 @@ Push(A); Push(B); Pop() returns A
 ```
 
 Verify the client proof is unaffected by the representation refactor.
+
+**Verified (Task 002):** the unchanged client proof proves against both
+representations, and CI fails if it changes.
 
 The client exists as of Task 001:
 `examples/ring_buffer/proof/ring_buffer_client_proof.ad[sb]`
@@ -121,9 +149,26 @@ reorders wrapped elements. The gate reads GNATprove's SARIF output and
 requires each expected `(rule, entity)` obligation to be unproved; exit
 codes and English message text are not used.
 
+Task 002 adds six representation-B fixtures
+(`examples/ring_buffer/variants/head_tail_count/negative/`): `Tail` not
+advanced, `Tail` advanced twice, `Head` advanced wrongly in `Pop`, `Count`
+not incremented, `Push` writing to `Head`, and `Clear` not resetting `Tail`.
+Lesson: with a type invariant, a fault that breaks both the invariant and a
+functional postcondition is reported **only** at the invariant. The
+postcondition is discharged under the (failed, then assumed) invariant.
+Fixtures must name the obligation that actually detects the fault.
+
 ## Benchmark B — fixed pool
 
 This is the preferred second benchmark if circular sequence succeeds.
+
+> **Task 002 outcome:** circular sequences turned out too easy to decide the
+> generator question: 19–21 SLOC of support, no lemmas. This benchmark is
+> now the deciding experiment. It should start with the free-index stack
+> against `SPARK.Containers.Functional.Sets`, and must answer whether
+> uniqueness/membership/cardinality refinement needs substantial *generic*
+> lemmas. The GO/PIVOT thresholds are fixed in advance in
+> `examples/ring_buffer/REFACTOR_METRICS.md` §12.
 
 Representations:
 

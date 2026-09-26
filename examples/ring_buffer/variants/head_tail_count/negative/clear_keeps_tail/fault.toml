@@ -1,0 +1,18 @@
+id = "B6"
+name = "clear_keeps_tail"
+description = """
+Clear resets Head and Count but leaves Tail where it was. The model is still
+empty (it is derived from Head and Count), so the public contract holds; only
+the representation relation catches the inconsistent state."""
+
+[[edit]]
+file = "ring_buffer.adb"
+find = """      B.Head  := Storage_Index'First;
+      B.Tail  := Storage_Index'First;
+      B.Count := 0;"""
+replace = """      B.Head  := Storage_Index'First;
+      B.Count := 0;"""
+
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Ring_Buffer.Clear"
