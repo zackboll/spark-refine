@@ -237,11 +237,26 @@ def check_srd003(report: dict) -> list[str]:
 # Driver: fresh GNATprove runs through the benchmark scripts, then the CLI
 # --------------------------------------------------------------------------
 
-def _run(cmd: list[str], cwd: Path) -> None:
+def _show_logs(obj_dirs: list[Path]) -> None:
+    """On failure, print the tail of each GNATprove log the benchmark
+    script wrote (obj/<variant>/gnatprove.log), so CI shows the cause."""
+    for d in obj_dirs:
+        log = d / "gnatprove.log"
+        if not log.is_file():
+            print(f"   (no {log.relative_to(REPO)})", flush=True)
+            continue
+        lines = log.read_text("utf-8", errors="replace").splitlines()
+        print(f"   --- tail of {log.relative_to(REPO)} ---", flush=True)
+        for line in lines[-40:]:
+            print(f"   | {line}", flush=True)
+
+
+def _run(cmd: list[str], cwd: Path, obj_dirs: list[Path]) -> None:
     print(f"$ (cd {cwd.relative_to(REPO)} && "
           f"python3 {' '.join(cmd[1:])})", flush=True)
     proc = subprocess.run(cmd, cwd=cwd)
     if proc.returncode != 0:
+        _show_logs(obj_dirs)
         raise E2EError(f"{' '.join(cmd[1:])}: exit {proc.returncode}")
 
 
@@ -250,13 +265,18 @@ def _fresh(out_dir: Path, since: float) -> None:
     scripts delete obj/<variant>/ first; checked anyway) and contain the
     SARIF, .spark and .ali files the analyzer reads."""
     sarif = out_dir / "gnatprove.sarif"
+    problem = None
     if not sarif.is_file():
-        raise E2EError(f"{sarif}: missing (GNATprove did not run?)")
-    if sarif.stat().st_mtime < since:
-        raise E2EError(f"{sarif}: stale (older than this E2E run)")
-    for ext in ("spark", "ali"):
-        if not any(out_dir.glob(f"*.{ext}")):
-            raise E2EError(f"{out_dir}: no .{ext} files produced")
+        problem = f"{sarif}: missing (GNATprove did not run?)"
+    elif sarif.stat().st_mtime < since:
+        problem = f"{sarif}: stale (older than this E2E run)"
+    else:
+        for ext in ("spark", "ali"):
+            if not any(out_dir.glob(f"*.{ext}")):
+                problem = f"{out_dir}: no .{ext} files produced"
+    if problem:
+        _show_logs([out_dir.parent])
+        raise E2EError(problem)
 
 
 def _cli(args: list[str], name: str) -> dict:
@@ -277,10 +297,10 @@ def e2e_srd001() -> dict:
     since = time.time() - 1
     # the benchmark's own negative gate: materialises B3, runs GNATprove
     # and exits 0 only if the fault is detected where expected
+    out = ex / "obj" / "negative_htc_head_advances_wrong" / "gnatprove"
     _run([sys.executable, "scripts/check_proof_results.py", "negative",
           "--variant", "head_tail_count", "--only", "head_advances_wrong"],
-         ex)
-    out = ex / "obj" / "negative_htc_head_advances_wrong" / "gnatprove"
+         ex, [out.parent])
     _fresh(out, since)
     return _cli(["analyze", str(out), "--name", "fresh_ring_b3"], "srd001")
 
@@ -290,9 +310,9 @@ def e2e_srd002() -> dict:
     since = time.time() - 1
     # the Task 001 ablation script (measurement: exits 0 whatever the
     # proof outcome); first_length is its default variant
-    _run([sys.executable, "scripts/ablate_proof_support.py", "--only",
-          "no_is_full_post"], ex)
     out = ex / "obj" / "ablation_no_is_full_post" / "gnatprove"
+    _run([sys.executable, "scripts/ablate_proof_support.py", "--only",
+          "no_is_full_post"], ex, [out.parent])
     _fresh(out, since)
     return _cli(["analyze", str(out), "--name", "fresh_no_is_full_post"],
                 "srd002")
@@ -302,11 +322,12 @@ def e2e_srd003() -> dict:
     ex = EXAMPLES / "fixed_pool"
     since = time.time() - 1
     # the Task 004 prover matrix: one --prover=<p> run per prover
+    outs = {p: ex / "obj" / f"prover_library_backed_{p}" / "gnatprove"
+            for p in ("cvc5", "z3", "altergo")}
     _run([sys.executable, "scripts/prover_matrix.py", "--variant",
-          "library_backed"], ex)
+          "library_backed"], ex, [o.parent for o in outs.values()])
     runs = []
-    for prover in ("cvc5", "z3", "altergo"):
-        out = ex / "obj" / f"prover_library_backed_{prover}" / "gnatprove"
+    for prover, out in outs.items():
         _fresh(out, since)
         runs += ["--run", f"{prover}={out}"]
     return _cli(["compare-provers", *runs], "srd003")

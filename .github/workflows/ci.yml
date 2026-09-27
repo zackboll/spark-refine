@@ -43,12 +43,19 @@ jobs:
         with:
           version: '2.1.1'
           toolchain: '--disable-assistant'
-      - name: Resolve pinned toolchain (ring buffer, fixed pool)
+      # same resolution as the proof jobs, once per crate used below
+      - name: Resolve pinned toolchain (ring buffer)
+        working-directory: examples/ring_buffer
         run: |
-          (cd examples/ring_buffer && alr -n update)
-          (cd examples/fixed_pool && alr -n update \
-             && alr -n exec -- gnat --version | head -1 \
-             && alr -n exec -- gnatprove --version)
+          alr -n update
+          alr -n exec -- gnat --version | head -1
+          alr -n exec -- gnatprove --version
+      - name: Resolve pinned toolchain (fixed pool)
+        working-directory: examples/fixed_pool
+        run: |
+          alr -n update
+          alr -n exec -- gnat --version | head -1
+          alr -n exec -- gnatprove --version
       - name: "E2E-A: SRD001 on fresh ring buffer B3 output"
         run: python3 diagnostics/scripts/e2e_fresh.py srd001
       - name: "E2E-B: SRD002 on fresh ring buffer no_is_full_post output (.ali)"
@@ -62,6 +69,9 @@ jobs:
           name: diagnostics-e2e-reports
           path: |
             diagnostics/obj/e2e/*.json
+            examples/ring_buffer/obj/negative_htc_head_advances_wrong/gnatprove.log
+            examples/ring_buffer/obj/ablation_no_is_full_post/gnatprove.log
+            examples/fixed_pool/obj/prover_library_backed_*/gnatprove.log
             examples/ring_buffer/obj/negative_htc_head_advances_wrong/gnatprove/gnatprove.sarif
             examples/ring_buffer/obj/ablation_no_is_full_post/gnatprove/gnatprove.sarif
             examples/fixed_pool/obj/prover_library_backed_*/gnatprove/gnatprove.sarif
