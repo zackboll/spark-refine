@@ -33,6 +33,13 @@ REQUIRED = [
     "diagnostics/spark_refine_diagnostics/__main__.py",
     "diagnostics/tests/expectations.toml",
     "diagnostics/tests/fixtures/manifest.toml",
+    "docs/tasks/006-explain-cli-productization.md",
+    "docs/AGENT_INTEGRATION.md",
+    "docs/history/ORIGINAL_README.md",
+    "diagnostics/pyproject.toml",
+    "diagnostics/LICENSE",
+    "diagnostics/spark_refine_diagnostics/discovery.py",
+    "diagnostics/scripts/packaging_smoke.py",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

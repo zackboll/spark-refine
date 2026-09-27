@@ -1,5 +1,5 @@
 import sys
 
-from .cli import main
+from .cli import MODULE_PROG, main
 
-sys.exit(main())
+sys.exit(main(prog=MODULE_PROG))

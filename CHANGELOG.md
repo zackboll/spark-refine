@@ -42,8 +42,39 @@
   `docs/tasks/005-proof-diagnostics-mvp.md`. `.ali` files with a version
   header other than `GNAT Lib v16` are rejected (`unsupported_version`;
   SRD002 skipped).
+- Task 006: the diagnostics are installable as the `spark-refine` console
+  command (`python3 -m pip install ./diagnostics`; `pyproject.toml`,
+  setuptools build-time only, no runtime dependencies; fixtures, tests
+  and scripts are excluded from the wheel). It adds:
+  - `spark-refine explain [PATH]`, the preferred name for single-run
+    analysis. Without `PATH` it discovers exactly one GNATprove result
+    set (`gnatprove.sarif` + `*.spark`) under the current directory.
+    Zero or several candidates give exit 2, and several are listed in
+    sorted order; the tool never guesses. `analyze` stays as a
+    compatibility alias, and `python3 -m spark_refine_diagnostics` still
+    works;
+  - additive JSON fields (`format_version` stays 1): per-diagnostic and
+    per-rule `category` / `action`, a derived top-level `summary`, and
+    `analysis.input` for discovered result sets. `rules --format json`
+    and `--version` are also new;
+  - `docs/AGENT_INTEGRATION.md`, which documents the agent loop and the
+    trust boundary;
+  - `scripts/packaging_smoke.py` and CI job `diagnostics-packaging`,
+    which build, inspect and install the wheel and run the installed
+    CLI outside the repository.
+
+  No new rule. SRD001–SRD003 behaviour is unchanged.
 
 ### Changed
+
+- Task 006: the root README was rewritten around the evidence-backed
+  project: reusable proof patterns plus proof-aware diagnostics. The
+  original generator-centred README is preserved as
+  `docs/history/ORIGINAL_README.md`. The root `alire.toml` description
+  now reads "Reusable proof patterns and proof-aware diagnostics for
+  SPARK". The Ada bootstrap `spark_refine` help now calls it legacy,
+  points to the Python `spark-refine explain`, and marks
+  `validate`/`generate`/`check` as historical, deprioritized research.
 
 - Root `alire.toml`: dropped the placeholder `maintainers` entry and the
   over-long `formal-verification` tag, which Alire 2.1.1 rejects. Without

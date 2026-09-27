@@ -12,7 +12,7 @@ Two kinds of coverage are reported separately:
 
 | Layer | What | Size | Toolchain | CI |
 |---|---|---|---|---|
-| **Fixture-based regression** (primary; every number below) | committed, sanitized GNATprove 16.1.0 output | 49 runs, 110 tests | none | `structural` job |
+| **Fixture-based regression** (primary; every number below) | committed, sanitized GNATprove 16.1.0 output | 49 runs, 110 tests (137 since Task 006; diagnostic expectations unchanged) | none | `structural` job |
 | **Fresh end-to-end integration** (smoke test) | GNATprove run now, output analysed unsanitized by the CLI | 3 cases | pinned Alire 2.1.1 / GNATprove 16.1.0 | `diagnostics-e2e` job |
 
 The fresh gate is described at the end of this document. It does not

@@ -1,5 +1,5 @@
 name = "spark_refine"
-description = "Proof-engineering automation for SPARK refinement models"
+description = "Reusable proof patterns and proof-aware diagnostics for SPARK"
 version = "0.0.0-dev"
 licenses = "Apache-2.0"
 authors = ["spark-refine contributors"]

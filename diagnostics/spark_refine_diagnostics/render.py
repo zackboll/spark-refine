@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 
 from .model import Diagnostic, ProofRun
+from .model import Confidence
 from .rules import RULES
 
 JSON_FORMAT_VERSION = 1
@@ -26,9 +27,11 @@ def wrap(text: str, indent: str, width: int = 76) -> list[str]:
 
 
 def diagnostic_to_text(d: Diagnostic) -> str:
+    info = RULES[d.code]
     out = [f"{d.code}: {d.title}",
            f"  severity: {d.severity.value}   confidence: "
            f"{d.confidence.value}",
+           f"  category: {info.category}   action: {info.action}",
            f"  entity:   {d.entity or '-'}"]
     if d.primary_location:
         out.append(f"  location: {d.primary_location}")
@@ -84,7 +87,13 @@ def _matching_text(m: dict) -> list[str]:
 
 def to_text(runs: list[ProofRun], diags: list[Diagnostic],
             notes: list[str], analysis: dict | None = None) -> str:
-    out = [run_header(r) for r in runs]
+    out = []
+    source = (analysis or {}).get("input")
+    if source and source.get("discovered"):
+        out.append(f"results: {source['path']} (auto-discovered; "
+                   "analyses the results on disk, which match the current "
+                   "sources only if GNATprove was just run)")
+    out += [run_header(r) for r in runs]
     for n in notes:
         out.append(f"note: {n}")
     if analysis and "srd003_matching" in analysis:
@@ -108,8 +117,11 @@ def diagnostic_to_dict(d: Diagnostic) -> dict:
     def loc(l):
         return None if l is None else {"file": l.file, "line": l.line,
                                        "column": l.column}
+    info = RULES[d.code]
     return {
         "code": d.code,
+        "category": info.category,
+        "action": info.action,
         "severity": d.severity.value,
         "confidence": d.confidence.value,
         "title": d.title,
@@ -138,7 +150,33 @@ def rules_to_dict() -> dict:
     return {c: {"title": r.title, "confidence": r.confidence_label,
                 **({"confidence_policy": r.confidence_policy}
                    if r.confidence_policy else {}),
-                "scope": r.scope} for c, r in RULES.items()}
+                "scope": r.scope,
+                "category": r.category,
+                "action": r.action,
+                "action_description": r.action_description}
+            for c, r in RULES.items()}
+
+
+def summary_to_dict(diags: list[Diagnostic]) -> dict:
+    """Deterministic counts derived only from `diags` (never maintained
+    separately). Every known code / confidence / category / action is
+    present, with 0 when absent, so consumers need no key checks."""
+    def count(keys, values) -> dict:
+        out = {k: 0 for k in keys}
+        for v in values:
+            out[v] = out.get(v, 0) + 1
+        return out
+    infos = [RULES[d.code] for d in diags]
+    return {
+        "diagnostic_count": len(diags),
+        "by_code": count(RULES, (d.code for d in diags)),
+        "by_confidence": count((c.value for c in Confidence),
+                               (d.confidence.value for d in diags)),
+        "by_category": count((r.category for r in RULES.values()),
+                             (i.category for i in infos)),
+        "by_action": count((r.action for r in RULES.values()),
+                           (i.action for i in infos)),
+    }
 
 
 def to_json(runs: list[ProofRun], diags: list[Diagnostic],
@@ -153,6 +191,7 @@ def to_json(runs: list[ProofRun], diags: list[Diagnostic],
                   "units": r.unit_names(), **r.summary()} for r in runs],
         "notes": notes,
         "analysis": analysis or {},
+        "summary": summary_to_dict(diags),
         "diagnostics": [diagnostic_to_dict(d) for d in diags],
     }
     return json.dumps(doc, indent=2) + "\n"

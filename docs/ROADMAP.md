@@ -52,6 +52,19 @@ This bootstrap repository is Phase 0.
 >
 > See `docs/tasks/005-proof-diagnostics-mvp.md` and
 > `diagnostics/DIAGNOSTICS_METRICS.md`.
+>
+> **Task 006** productized the diagnostics as the installable Python
+> command `spark-refine` (`pip install ./diagnostics`). It adds:
+>
+> * `spark-refine explain` with conservative result-set discovery;
+> * `analyze` kept as an alias;
+> * stable `category`/`action` fields and a derived `summary` in the JSON;
+> * `docs/AGENT_INTEGRATION.md`.
+>
+> It adds no rule and does not use Libadalang. The `spark_refine explain`
+> of Phase 7 below is therefore the Python `spark-refine explain` (with a
+> hyphen), not a command of the Ada bootstrap executable. See
+> `docs/tasks/006-explain-cli-productization.md`.
 
 ## Phase 1 — manual proof benchmark
 

@@ -22,6 +22,32 @@ jobs:
         working-directory: diagnostics
         run: python3 -m unittest discover -s tests -t tests -v
 
+  # Task 006: the installable `spark-refine` CLI. No Ada toolchain: builds
+  # the wheel from diagnostics/pyproject.toml, checks that it holds only
+  # the spark_refine_diagnostics package + metadata (no tests/fixtures),
+  # installs it into an isolated venv and runs the console script from a
+  # temporary directory OUTSIDE the repository on absolute fixture paths
+  # (rules, explain, analyze alias, compare-provers, discovery with one /
+  # zero / two result sets). Repeated for an editable install.
+  diagnostics-packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: "Wheel: build, inspect, install, run outside the repository"
+        run: python3 diagnostics/scripts/packaging_smoke.py
+      - name: "Editable install: run outside the repository"
+        run: python3 diagnostics/scripts/packaging_smoke.py --editable
+      - name: Oldest supported Python (3.11) runs the fixture suite
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Proof-diagnostics tests on Python 3.11
+        working-directory: diagnostics
+        run: python3 -m unittest discover -s tests -t tests
+
   # Task 005: small FRESH end-to-end diagnostics gate. Complements (does not
   # replace) the fixture-based suite above: runs the pinned toolchain now,
   # through the benchmarks' own unchanged scripts, on exactly three cases,

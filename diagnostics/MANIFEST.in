@@ -1,0 +1,9 @@
+# Source distribution contents (Task 006). The installed wheel is
+# restricted separately by pyproject.toml ([tool.setuptools] packages).
+# The fixture corpus, tests, scripts and build output stay in the
+# repository only.
+include README.md LICENSE pyproject.toml
+prune tests
+prune scripts
+prune obj
+global-exclude __pycache__ *.py[cod]

@@ -13,30 +13,98 @@ It does not:
 * use AI;
 * weaken any proof requirement.
 
-Like the benchmark scripts, it uses only the Python 3.11+ standard library.
+Like the benchmark scripts, it uses only the Python 3.11+ standard library
+at runtime.
+
+## Installation (Task 006)
+
+The package installs a console command, `spark-refine` (with a hyphen).
+Do not confuse it with the legacy Ada bootstrap executable `spark_refine`
+(with an underscore) at the repository root.
+
+```bash
+python3 -m pip install ./diagnostics       # from the repository root
+python3 -m pip install -e ./diagnostics    # editable, for development
+spark-refine --version
+spark-refine rules                          # works from any directory
+```
+
+* Packaging is `pyproject.toml` (setuptools, build-time only). There are
+  no runtime dependencies.
+* The wheel contains only the `spark_refine_diagnostics` package, README
+  and LICENSE. The fixture corpus (`tests/fixtures/`, about 5.5 MB),
+  `tests/`, `scripts/` and `obj/` are **not** packaged.
+* This is checked by `scripts/packaging_smoke.py` (CI job
+  `diagnostics-packaging`). The script builds and inspects the wheel,
+  installs it into an isolated venv, and runs the installed command from
+  a temporary directory outside the repository. It also runs for an
+  editable install.
+* Publishing to PyPI is out of scope for now.
+
+## Usage
+
+```bash
+gnatprove -P my_project.gpr
+spark-refine explain                        # discover the single result set
+spark-refine explain obj/proof/gnatprove    # or name it explicitly
+spark-refine explain obj/proof/gnatprove/gnatprove.sarif
+spark-refine explain --format json > spark-refine.json
+spark-refine explain PATH --format json --fail-on SRD001
+spark-refine compare-provers \
+    --run cvc5=obj/cvc5/gnatprove \
+    --run z3=obj/z3/gnatprove \
+    --run altergo=obj/altergo/gnatprove \
+    [--reference portfolio=obj/baseline/gnatprove]
+spark-refine rules [--format json]
+```
+
+The Task 005 invocations still work unchanged. `analyze` is a
+compatibility alias of `explain`, identical for an explicit `PATH`, and
+`PATH` stays required for it:
 
 ```bash
 cd diagnostics
-python3 -m spark_refine_diagnostics rules
 python3 -m spark_refine_diagnostics analyze ../examples/fixed_pool/obj/negative_p5_release_duplicate/gnatprove
-python3 -m spark_refine_diagnostics analyze PATH --format json --fail-on SRD001
-python3 -m spark_refine_diagnostics compare-provers \
-    --run cvc5=../examples/fixed_pool/obj/prover_cvc5/gnatprove \
-    --run z3=../examples/fixed_pool/obj/prover_z3/gnatprove \
-    --run altergo=../examples/fixed_pool/obj/prover_altergo/gnatprove \
-    --reference portfolio=../examples/fixed_pool/obj/baseline/gnatprove
+python3 -m spark_refine_diagnostics compare-provers --run ... --run ...
+python3 -m spark_refine_diagnostics rules
 python3 -m unittest discover -s tests -t tests -v   # no toolchain needed
 python3 scripts/e2e_fresh.py                        # pinned toolchain needed
+python3 scripts/packaging_smoke.py [--editable]     # build + install check
 ```
 
 `PATH` is either a GNATprove output directory (`obj/<variant>/gnatprove`
-or its parent) or a `gnatprove.sarif` file.
+or its parent) or a `gnatprove.sarif` file. An explicit `PATH` is
+authoritative, and no discovery is performed.
+
+**Discovery (`explain` without `PATH`).** A *result set* is a directory
+that directly contains `gnatprove.sarif` and at least one `*.spark` file.
+The current directory is searched recursively and deterministically:
+symbolic links are not followed, and hidden directories and Alire's
+`alire/` dependency cache are skipped.
+
+* **Exactly one result set:** it is analyzed. The text report starts with
+  `results: <path> (auto-discovered; ...)`, and the JSON has
+  `analysis.input = {"path": ..., "discovered": true}`.
+* **None:** exit 2 with `No GNATprove result set found. Run GNATprove
+  first or pass the result path explicitly.`
+* **Several:** exit 2, with every candidate listed in sorted order.
+
+The tool never picks the newest, largest or first-found result set.
+Discovery does not change `.ali` handling: only the `.ali` files next to
+the chosen SARIF are read, and SRD002 is skipped when they are missing or
+unsupported.
+
+**Freshness.** `spark-refine explain` analyzes the proof results you
+point it at. They correspond to the current sources only if GNATprove was
+just run.
 
 Exit status:
 
 * 0: diagnostics are informational;
 * 1: a `--fail-on` code was emitted;
-* 2: input error.
+* 2: input error, or no unique result set was discovered.
+
+AI agents and CI should read [`../docs/AGENT_INTEGRATION.md`](../docs/AGENT_INTEGRATION.md).
 
 ## Rules
 
@@ -289,7 +357,27 @@ fixtures. English message text never decides a status.
 ## JSON output
 
 `--format json` produces `format_version` 1. The `analysis` object and
-the SRD003 `match_quality` field are additive. Diagnostics are sorted by
+the SRD003 `match_quality` field are additive.
+
+Task 006 added more fields, also additive, so the version is unchanged:
+
+* per diagnostic, `category` and `action`;
+* per rule in the `rules` catalogue, `category`, `action` and
+  `action_description`;
+* a top-level `summary` with `diagnostic_count`, `by_code`,
+  `by_confidence`, `by_category` and `by_action`. It is computed from
+  `diagnostics`, every known key is present (0 if absent), and it has no
+  timestamps;
+* `analysis.input`, only when the result set was auto-discovered.
+
+| Code | `category` | `action` |
+|---|---|---|
+| SRD001 | `proof_context` | `fix_invariant_then_reprove` |
+| SRD002 | `abstraction_boundary` | `validate_client_goal_then_review_public_contracts` |
+| SRD003 | `prover_portfolio` | `preserve_portfolio_or_strengthen_proof` |
+
+Actions are workflow-level and never prescribe a source edit (see
+`docs/AGENT_INTEGRATION.md`). Diagnostics are sorted by
 `(code, entity, location)`, and the output has no timestamps. An SRD002
 diagnostic, abridged:
 
@@ -356,10 +444,13 @@ spark_refine_diagnostics/
   rules.py          stable rule catalogue
   srd001.py, srd002.py, srd003.py
   analyzer.py       entry points
-  render.py         text / JSON output (deterministic)
+  render.py         text / JSON output (deterministic; summary)
+  discovery.py      conservative result-set discovery for `explain`
   cli.py, __main__.py
+pyproject.toml, MANIFEST.in   packaging (console script spark-refine)
 scripts/capture_fixtures.py   reproduces the fixture corpus
 scripts/e2e_fresh.py          fresh end-to-end gate (pinned toolchain)
+scripts/packaging_smoke.py    build/inspect/install; run outside the repo
 tests/                        unittest suite, fixtures/, expectations.toml
 tests/fixture_sources/        fixture-only Ada client units (not benchmarks)
 DIAGNOSTICS_METRICS.md        measured results per rule
@@ -367,15 +458,33 @@ DIAGNOSTICS_METRICS.md        measured results per rule
 
 ## Test coverage: fixtures and fresh end-to-end runs
 
-There are two complementary layers.
+There are three complementary layers.
 
-**Fixture-based regression coverage (primary).** `tests/` holds 110
+**Fixture-based regression coverage (primary).** `tests/` holds 137
 unit tests over the committed corpus of 49 sanitized, real GNATprove
-16.1.0 runs (`tests/fixtures/README.md`). It is deterministic, needs no
-toolchain and checks every fixture's expected diagnostics, the SRD001
-ground truth, parser parity with both benchmark gates, ALI degradation and
-SRD003 matching in detail. No test depends on `obj/`. CI: job
-`structural`, step *Proof-diagnostics tests (SRD001-SRD003)*.
+16.1.0 runs (`tests/fixtures/README.md`). Of these:
+
+* 110 are the Task 005 tests. They are unchanged, and so are their
+  expected diagnostics.
+* 27 were added in Task 006:
+  * `test_explain.py` covers discovery, `explain`/`analyze` equivalence
+    on all 49 fixtures, `category`/`action`/`summary`, and ALI
+    conservatism under discovery;
+  * `test_packaging.py` covers the packaging configuration, stdlib-only
+    runtime imports and the wheel allow-list.
+
+The suite is deterministic and needs no toolchain. It checks every
+fixture's expected diagnostics, the SRD001 ground truth, parser parity
+with both benchmark gates, ALI degradation and SRD003 matching in
+detail. No test depends on `obj/`. CI: job `structural`, step
+*Proof-diagnostics tests (SRD001-SRD003)*.
+
+**Installed-package coverage (Task 006).**
+`scripts/packaging_smoke.py` builds the wheel, inspects its contents,
+installs it into an isolated venv and runs the installed `spark-refine`
+command from a temporary directory outside the repository, on absolute
+fixture paths. It repeats this for an editable install. CI: job
+`diagnostics-packaging`, no Ada toolchain.
 
 **Fresh end-to-end GNATprove integration coverage (smoke test).**
 `scripts/e2e_fresh.py` runs the pinned toolchain (Alire 2.1.1, FSF
