@@ -1,0 +1,17 @@
+name = "spark_refine_proof_patterns"
+description = "Task 004: reusable SPARK prefix-set proof-pattern library"
+version = "0.0.0-dev"
+licenses = "Apache-2.0"
+authors = ["spark-refine contributors"]
+project-files = ["validation/prefix_sets_validation.gpr"]
+tags = ["spark", "proof", "library"]
+
+# Same compiler / prover generation as the benchmarks (Tasks 001-003).
+[[depends-on]]
+gnat_native = "=16.1.0"
+gnatprove = "=16.1.0"
+sparklib = "=16.1.0"
+gprbuild = "=26.0.1"
+
+[gpr-set-externals]
+SPARKLIB_MODE = "full"

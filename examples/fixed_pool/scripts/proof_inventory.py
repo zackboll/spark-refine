@@ -9,6 +9,12 @@ generic fraction G, and structural counts.
 
   python3 scripts/proof_inventory.py          # human-readable
   python3 scripts/proof_inventory.py --json   # machine-readable
+  python3 scripts/proof_inventory.py --variant library_backed
+      Task 004: classifies variants/library_backed/ with
+      proof_inventory_library_backed.toml; its mechanical total is the
+      residual per-instance support R. Also reports the reusable library
+      size L (proof_patterns/src) and the generic actual count A.
+  python3 scripts/proof_inventory.py --all    # both variants (CI)
 
 Exit status is nonzero if any range drifts, overlaps, covers blank/comment
 text, uses an unknown category, lacks a required field, or if the
@@ -25,8 +31,21 @@ import tomllib
 from pathlib import Path
 
 EXAMPLE = Path(__file__).resolve().parents[1]
-INVENTORY = EXAMPLE / "proof_inventory.toml"
-SOURCES = ("src/fixed_pool.ads", "src/fixed_pool.adb")
+REPO = EXAMPLE.parents[1]
+VARIANTS = {
+    # Task 003 manual baseline (unchanged)
+    "baseline": {"inventory": EXAMPLE / "proof_inventory.toml",
+                 "sources": ("src/fixed_pool.ads", "src/fixed_pool.adb")},
+    # Task 004 library-backed variant
+    "library_backed": {
+        "inventory": EXAMPLE / "proof_inventory_library_backed.toml",
+        "sources": ("variants/library_backed/fixed_pool.ads",
+                    "variants/library_backed/fixed_pool.adb")},
+}
+VARIANT_ALIASES = {"manual": "baseline"}
+LIBRARY_SOURCES = ("proof_patterns/src/spark_refine_prefix_sets.ads",
+                   "proof_patterns/src/spark_refine_prefix_sets.adb")
+VALIDATION_DIR = "proof_patterns/validation/src"
 CLIENT = ("proof/fixed_pool_client_proof.ads",
           "proof/fixed_pool_client_proof.adb")
 TESTS = ("tests/fixed_pool_runtime_tests.adb",)
@@ -35,7 +54,7 @@ MECH_CATEGORIES = (
     "model_construction", "representation_invariant", "membership_mapping",
     "cardinality_relation", "helper_lemma", "loop_invariant",
     "operation_refinement_contract", "proof_assertion", "proof_only_helper",
-    "proof_only_state_update", "other",
+    "proof_only_state_update", "library_configuration", "other",
 )
 MECH_REQUIRED = ("entity", "generic", "application_specific", "why",
                  "ablation")
@@ -96,7 +115,9 @@ def check_artifact(art, files, owner, errors) -> int:
     return loc
 
 
-def build() -> dict:
+def build(variant: str = "baseline") -> dict:
+    INVENTORY = VARIANTS[variant]["inventory"]
+    SOURCES = VARIANTS[variant]["sources"]
     inv = tomllib.loads(INVENTORY.read_text(encoding="utf-8"))
     files = {f: (EXAMPLE / f).read_text(encoding="utf-8").splitlines()
              for f in SOURCES}
@@ -156,13 +177,50 @@ def build() -> dict:
     }
     keep = ("name", "group", "category", "entity", "file", "lines", "loc",
             "generic", "application_specific", "ablation", "why")
-    return {"inventory": INVENTORY.name, "errors": errors, "totals": totals,
+    if variant == "library_backed":
+        totals["residual_mechanical_loc_R"] = mech_loc
+    return {"variant": variant, "inventory": INVENTORY.name,
+            "errors": errors, "totals": totals,
             "mechanical": mech, "structure": structure,
             "artifacts": [{k: a[k] for k in keep if k in a} for a in arts]}
 
 
+def library_metrics(errors: list[str]) -> dict:
+    """Size L of the reusable proof library and the number A of semantic
+    generic actuals a caller supplies. Every library line is proof-only
+    (all entities are Ghost), so library SLOC == library proof-only SLOC."""
+    spec, body = (REPO / f for f in LIBRARY_SOURCES)
+    texts = [strip_comments(p.read_text(encoding="utf-8"))
+             for p in (spec, body)]
+    head, sep, rest = texts[0].partition("package SPARK_Refine_Prefix_Sets")
+    if not sep:
+        errors.append("library spec: package header not found")
+    formals = re.findall(r"^\s*(type\s+\w+|with\s+package\s+\w+|"
+                         r"with\s+function\s+\w+)", head, re.M)
+    public_api = len(re.findall(r"^\s*(function|procedure|subtype)\s+\w+",
+                                rest, re.M))
+    val = sorted((REPO / VALIDATION_DIR).glob("*.ad[sb]"))
+    return {
+        "library_loc_L": sloc(spec) + sloc(body),
+        "library_spec_loc": sloc(spec),
+        "library_body_loc": sloc(body),
+        "library_proof_only_loc": sloc(spec) + sloc(body),
+        "library_generic_formal_part_loc": sum(
+            is_code(l) for l in head.splitlines()),
+        "generic_actuals_A": len(formals),
+        "generic_formals": [" ".join(f.split()) for f in formals],
+        "library_public_ghost_entities": public_api,
+        "library_helper_lemmas": count(r"procedure\s+Lemma_\w+", texts[1:]),
+        "library_loop_invariants": count(r"pragma\s+Loop_Invariant", texts),
+        "library_assertions": count(r"pragma\s+Assert\b", texts),
+        "validation_instances_loc": sum(sloc(p) for p in val),
+        "validation_instance_units": len(
+            [p for p in val if p.name.startswith("validate_")]),
+    }
+
+
 def report(data: dict) -> None:
-    print(f"== fixed_pool ({data['inventory']}) ==")
+    print(f"== fixed_pool {data['variant']} ({data['inventory']}) ==")
     print("SLOC = non-blank, non-comment source lines")
     for k, v in data["totals"].items():
         print(f"  {k:30} {v}")
@@ -172,20 +230,37 @@ def report(data: dict) -> None:
     print("structure:")
     for k, v in data["structure"].items():
         print(f"  {k:30} {v}")
+    if "library" in data:
+        print("reusable proof library (proof_patterns/src, not in R):")
+        for k, v in data["library"].items():
+            print(f"  {k:30} {v}")
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--variant", default="baseline",
+                    choices=tuple(VARIANTS) + tuple(VARIANT_ALIASES))
+    ap.add_argument("--all", action="store_true",
+                    help="check and report every variant")
     args = ap.parse_args()
-    data = build()
+    names = (tuple(VARIANTS) if args.all
+             else (VARIANT_ALIASES.get(args.variant, args.variant),))
+    failed = False
+    out = []
+    for name in names:
+        data = build(name)
+        if name == "library_backed":
+            data["library"] = library_metrics(data["errors"])
+        out.append(data)
+        if not args.json:
+            report(data)
+        for e in data["errors"]:
+            print(f"ERROR ({name}): {e}", file=sys.stderr)
+        failed |= bool(data["errors"])
     if args.json:
-        print(json.dumps(data, indent=2))
-    else:
-        report(data)
-    for e in data["errors"]:
-        print(f"ERROR: {e}", file=sys.stderr)
-    return 1 if data["errors"] else 0
+        print(json.dumps(out if args.all else out[0], indent=2))
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

@@ -1,4 +1,8 @@
 with "sparklib";
+--  Task 004: reusable proof-pattern library. Only the library_backed
+--  variant (variants/library_backed) instantiates it; the Task 003 manual
+--  baseline in src/ does not reference it.
+with "../../proof_patterns/spark_refine_proof_patterns.gpr";
 
 project Fixed_Pool is
 

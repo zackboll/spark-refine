@@ -1,0 +1,22 @@
+with "sparklib";
+
+--  Reusable, hand-written SPARK proof-pattern library (Task 004).
+--
+--  It holds generic Ghost packages only. GNATprove does not prove a generic
+--  on its own; each instantiation is proved in the client project that
+--  instantiates it (see validation/ for the representative instances that CI
+--  proves independently of any application).
+project SPARK_Refine_Proof_Patterns is
+
+   --  PROOF_PATTERNS_SRC exists only so that the measurement-only library
+   --  ablation (examples/fixed_pool/scripts/ablate_proof_support.py) can
+   --  point at a modified scratch copy. Gates always use the default.
+   for Source_Dirs use (external ("PROOF_PATTERNS_SRC", "src"));
+   for Object_Dir use "obj/" & external ("PROOF_PATTERNS_VARIANT", "default");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatwa", "-gnatW8", "-g");
+   end Compiler;
+
+end SPARK_Refine_Proof_Patterns;

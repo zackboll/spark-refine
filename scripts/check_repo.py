@@ -20,6 +20,13 @@ REQUIRED = [
     "examples/fixed_pool/BASELINE_METRICS.md",
     "examples/fixed_pool/proof_inventory.toml",
     "docs/tasks/003-fixed-pool-proof-baseline.md",
+    "docs/tasks/004-prefix-set-proof-library.md",
+    "examples/fixed_pool/LIBRARY_METRICS.md",
+    "examples/fixed_pool/proof_inventory_library_backed.toml",
+    "examples/fixed_pool/variants/library_backed/fixed_pool.ads",
+    "examples/fixed_pool/variants/library_backed/fixed_pool.adb",
+    "proof_patterns/src/spark_refine_prefix_sets.ads",
+    "proof_patterns/src/spark_refine_prefix_sets.adb",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

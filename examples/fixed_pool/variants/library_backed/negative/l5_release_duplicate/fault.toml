@@ -1,0 +1,16 @@
+id = "L5"
+name = "l5_release_duplicate"
+baseline_equivalent = "P5"
+description = """
+Library-backed equivalent of P5 (identical edit). Release pushes the
+current top-of-stack identity again (when non-empty) instead of Id, creating
+a duplicate entry in the active free prefix."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = "      P.Free_Stack (P.Top) := Id;"
+replace = "      P.Free_Stack (P.Top) := (if P.Top > 1 then P.Free_Stack (P.Top - 1) else Id);"
+
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Fixed_Pool.Release"

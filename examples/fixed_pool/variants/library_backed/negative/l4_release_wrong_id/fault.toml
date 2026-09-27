@@ -1,0 +1,19 @@
+id = "L4"
+name = "l4_release_wrong_id"
+baseline_equivalent = "P4"
+description = """
+Library-backed equivalent of P4 (identical edit). Release increments Top but
+pushes the successor of Id (wrapping at Max_Objects) instead of Id."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = "      P.Free_Stack (P.Top) := Id;"
+replace = "      P.Free_Stack (P.Top) := (if Id = Max_Objects then 1 else Id + 1);"
+
+[[expect]]
+rule = "VC_INVARIANT_CHECK"
+entity = "Fixed_Pool.Release"
+
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Release"

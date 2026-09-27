@@ -263,6 +263,52 @@ assertions; intermediate models; initialization invariants.
 Decision under the pre-registered rule: **REVIEW** (P = 36, G = 100 %,
 M = 5). Measurements: `examples/fixed_pool/BASELINE_METRICS.md`.
 
+#### Evidence from Task 004: the pattern as a reusable library
+
+The Task 003 support now lives in a hand-written generic,
+`proof_patterns/src/spark_refine_prefix_sets.ad[sb]` (`L = 98` SLOC, all
+Ghost). It is the first entry of the proof-pattern library.
+
+```text
+generic  Element_Type (<>), Index_Type range <>, Storage_Array,
+         with package Element_Sets is new Functional.Sets (Element_Type, "=", others => <>)
+Is_Unique (Storage, Count)            no identity twice in the active prefix
+In_Prefix (Storage, Count, E)
+Model     (Storage, Count) -> Set     Pre  Is_Unique
+                                      Post Length = Count
+                                           Contains (Model, E) = In_Prefix (...)
+                                           Count < Universe_Size or else every E in prefix
+Lemma_Can_Add (S, E)                  not Contains (S, E) => Length (S) < Universe_Size
+```
+
+**Per-instance residual: `R = 10` SLOC, `A = 4` actuals.**
+
+* **Adoption** needs one instantiation (in the private part, next to the
+  representation), `Type_Invariant => X.Is_Unique (...)` and a one-call
+  model adapter. That is all.
+* **Finite-universe consequence:** putting it into `Model`'s postcondition
+  removed the only lemma call an application needed.
+
+**Version-1 restrictions:**
+
+* the prefix starts at `Index_Type'First`;
+* the count is its length (`Index_Type'Base`);
+* the identity is discrete, and the set uses predefined `=`.
+
+**Ada restriction found:** the package cannot itself be `Ghost`. A ghost
+generic's formal package rejects a non-ghost public set instance as
+actual. Each entity is `Ghost` instead.
+
+**Proving:** GNATprove proves it per instance. CI proves the pool plus
+three validation instances (`proof_patterns/validation/`):
+
+* a 1-value universe with lower bound 7;
+* 200 values with a negative lower bound and a distinct 0-based index;
+* an enumeration in 5 slots.
+
+Decision: **PIVOT** (library + diagnostics). See
+`examples/fixed_pool/LIBRARY_METRICS.md`.
+
 ## Pattern 003 candidate: bitmap set/allocator
 
 ### Abstract meaning
