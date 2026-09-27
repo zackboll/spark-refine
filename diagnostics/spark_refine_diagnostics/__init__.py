@@ -1,5 +1,6 @@
 """spark_refine_diagnostics: deterministic GNATprove proof-engineering
-diagnostics (Task 005 MVP). No AI, no source mutation, no proof repair.
+diagnostics (Task 005 MVP; installable `spark-refine` CLI since Task 006).
+No AI, no source mutation, no proof repair.
 
 Public API:
 
@@ -14,6 +15,8 @@ Public API:
         -> Report (runs, diagnostics, notes, analysis metadata)
     RULES: stable rule catalogue (SRD001, SRD002, SRD003)
 """
+
+__version__ = "0.0.0.dev0"
 
 from .analyzer import (analyze_path, analyze_path_report, analyze_run,
                        analyze_run_report, compare_provers,

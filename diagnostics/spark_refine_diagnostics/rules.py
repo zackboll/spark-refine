@@ -21,6 +21,14 @@ class RuleInfo:
     scope: str
     summary: str
     confidence_policy: str = ""
+    # Task 006: stable, machine-readable classification for agents/CI.
+    # `category` is a coarse semantic class of the proof-engineering
+    # situation; `action` is a workflow-level next step. Neither ever
+    # prescribes a concrete source edit. Values are part of the JSON API
+    # (format_version 1) and documented in docs/AGENT_INTEGRATION.md.
+    category: str = ""
+    action: str = ""
+    action_description: str = ""
 
     @property
     def confidence_label(self) -> str:
@@ -55,7 +63,13 @@ RULES: dict[str, RuleInfo] = {r.code: r for r in (
         "on the invariant that GNATprove assumes after checking it. High "
         "confidence refers to the structural masking risk only: it never "
         "claims that a postcondition depends on the invariant, that it is "
-        "false, or that GNATprove proved the wrong theorem."),
+        "false, or that GNATprove proved the wrong theorem.",
+        category="proof_context",
+        action="fix_invariant_then_reprove",
+        action_description=(
+            "Do not trust the proved postconditions of this entity until "
+            "the failed invariant check is resolved; then rerun GNATprove "
+            "and re-read the postcondition results.")),
     RuleInfo(
         "SRD002",
         "Client-only proof gap; public abstraction may be insufficient",
@@ -69,7 +83,14 @@ RULES: dict[str, RuleInfo] = {r.code: r for r in (
         "information is unavailable.",
         confidence_policy=(
             "medium for VC_PRECONDITION, low for VC_ASSERT; lowest applies "
-            "when one diagnostic has both")),
+            "when one diagnostic has both"),
+        category="abstraction_boundary",
+        action="validate_client_goal_then_review_public_contracts",
+        action_description=(
+            "First confirm that the client property or precondition is "
+            "actually valid and that the client's own precondition is "
+            "strong enough; only then review whether the public contracts "
+            "expose enough abstraction information.")),
     RuleInfo(
         "SRD003", "proof depends on prover portfolio",
         Confidence.HIGH, "multiple runs",
@@ -77,8 +98,20 @@ RULES: dict[str, RuleInfo] = {r.code: r for r in (
         "in at least one other. Emitted only for confidently matched "
         "checks (match_quality exact or unique_entity); ambiguous "
         "identities are reported as analysis metadata instead. Robustness "
-        "information, not unsoundness."),
+        "information, not unsoundness.",
+        category="prover_portfolio",
+        action="preserve_portfolio_or_strengthen_proof",
+        action_description=(
+            "The proof is valid with the portfolio that proves it. Do not "
+            "rewrite it merely because one prover fails; preserve the "
+            "working prover portfolio unless single-prover portability is "
+            "a requirement, in which case strengthen the proof.")),
 )}
+
+CATEGORIES: tuple[str, ...] = tuple(dict.fromkeys(
+    r.category for r in RULES.values()))
+ACTIONS: tuple[str, ...] = tuple(dict.fromkeys(
+    r.action for r in RULES.values()))
 
 
 def related(role: str, c: Check, run: str | None = None) -> RelatedCheck:
