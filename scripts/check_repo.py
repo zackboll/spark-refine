@@ -42,6 +42,8 @@ REQUIRED = [
     "diagnostics/scripts/packaging_smoke.py",
     "docs/adr/0005-library-and-diagnostics-first.md",
     "docs/tasks/007-documentation-realignment.md",
+    "diagnostics/spark_refine_diagnostics/orchestration.py",
+    "docs/tasks/008-proof-run-orchestration.md",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

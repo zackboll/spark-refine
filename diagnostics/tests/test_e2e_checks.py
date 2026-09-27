@@ -86,5 +86,69 @@ class E2ECheckersRejectBadReports(unittest.TestCase):
         self.assertTrue(e2e.check_srd001(rep))
 
 
+def with_orchestration(name: str, command: list[str], exit_code: int,
+                       path: str, stale: list[str]) -> dict:
+    """A fixture report as `prove` would emit it (Task 008 E2E-D/E)."""
+    rep = analyze(name)
+    rep["analysis"]["orchestration"] = {
+        "command": command, "gnatprove_exit_code": exit_code,
+        "result_path": path, "result_selection": "fresh_discovery",
+        "fresh": True, "stale_result_sets_ignored": stale}
+    return rep
+
+
+def prove_positive_report(**changes) -> dict:
+    rep = with_orchestration(
+        "ring_positive", ["gnatprove", "-P", "ring_buffer.gpr", "-j0"], 0,
+        e2e.PROVE_BASELINE_PATH, [e2e.PROVE_DECOY, "obj/other/gnatprove"])
+    rep["analysis"]["orchestration"].update(changes)
+    return rep
+
+
+def prove_negative_report() -> dict:
+    return with_orchestration(
+        "ring_b3", ["gnatprove", "-P", "ring_buffer.gpr", "-j0",
+                    f"-XRING_BUFFER_SRC={e2e.PROVE_B3_SRC}",
+                    f"-XRING_BUFFER_VARIANT={e2e.PROVE_B3_VARIANT}"],
+        1, e2e.PROVE_B3_PATH, [e2e.PROVE_DECOY])
+
+
+class E2EProveCheckers(unittest.TestCase):
+    """E2E-D / E2E-E pass criteria on fixture-derived reports."""
+
+    def test_positive_accepts_known_good(self):
+        self.assertEqual(e2e.check_prove_positive(prove_positive_report()),
+                         [])
+
+    def test_negative_accepts_known_good(self):
+        self.assertEqual(e2e.check_prove_negative(prove_negative_report()),
+                         [])
+
+    def test_positive_rejects_wrong_selection(self):
+        for change in ({"result_path": e2e.PROVE_DECOY},
+                       {"result_selection": "explicit"},
+                       {"fresh": False},
+                       {"gnatprove_exit_code": 1},
+                       {"command": ["gnatprove", "-P", "other.gpr"]},
+                       {"stale_result_sets_ignored": []}):
+            with self.subTest(change=change):
+                self.assertTrue(e2e.check_prove_positive(
+                    prove_positive_report(**change)))
+
+    def test_positive_rejects_missing_orchestration(self):
+        self.assertTrue(e2e.check_prove_positive(analyze("ring_positive")))
+
+    def test_positive_rejects_unproved_run(self):
+        rep = with_orchestration(
+            "ring_n1", ["gnatprove", "-P", "ring_buffer.gpr", "-j0"], 0,
+            e2e.PROVE_BASELINE_PATH, [e2e.PROVE_DECOY])
+        self.assertTrue(e2e.check_prove_positive(rep))
+
+    def test_negative_rejects_zero_exit(self):
+        rep = prove_negative_report()
+        rep["analysis"]["orchestration"]["gnatprove_exit_code"] = 0
+        self.assertTrue(e2e.check_prove_negative(rep))
+
+
 if __name__ == "__main__":
     unittest.main()

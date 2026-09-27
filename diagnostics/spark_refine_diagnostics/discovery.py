@@ -55,15 +55,27 @@ def _skip(name: str) -> bool:
     return name.startswith(".") or name in SKIPPED_DIR_NAMES
 
 
-def find_result_sets(root: Path) -> list[Path]:
-    """All result-set directories under `root` (inclusive), as paths
-    relative to `root`, sorted by their POSIX form."""
+def _find(root: Path, valid_only: bool) -> list[Path]:
     found: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
         dirnames[:] = sorted(d for d in dirnames if not _skip(d))
-        if SARIF_NAME in filenames and is_result_set(Path(dirpath)):
+        if SARIF_NAME in filenames and (not valid_only or
+                                        is_result_set(Path(dirpath))):
             found.append(Path(dirpath).relative_to(root))
     return sorted(found, key=lambda p: p.as_posix())
+
+
+def find_result_sets(root: Path) -> list[Path]:
+    """All result-set directories under `root` (inclusive), as paths
+    relative to `root`, sorted by their POSIX form."""
+    return _find(root, valid_only=True)
+
+
+def find_sarif_dirs(root: Path) -> list[Path]:
+    """Every directory under `root` directly holding gnatprove.sarif
+    (result set or not), same walk and order as find_result_sets. Used by
+    `prove`'s conservative pre-run snapshot (orchestration.py)."""
+    return _find(root, valid_only=False)
 
 
 def discover(root: Path) -> Path:

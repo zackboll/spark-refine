@@ -26,18 +26,11 @@ Two pillars, with GNATprove as the proof authority:
 | Fixed-pool library experiment | 004 | `SPARK_Refine_Prefix_Sets`, `R = 10` (−72.2 %). **PIVOT** away from source generation |
 | Diagnostics MVP | 005 | SRD001–SRD003 over SARIF / `.spark` / `.ali` (SRD001/SRD002 per run, SRD003 across single-prover runs), 49 real-result fixtures, fresh E2E gate |
 | `explain` CLI productization | 006 | installed `spark-refine explain`, conservative discovery, `format_version` 1 JSON with `category`/`action`, `docs/AGENT_INTEGRATION.md` |
+| Documentation realignment | 007 | every current document describes the two-pillar product and its trust boundary; generator documents labelled historical/deferred |
+| Fresh proof-run orchestration | 008 | `spark-refine prove -P project.gpr`: runs GNATprove (argv, exact command shown), analyzes only the result set that run created or changed, preserves GNATprove's exit code; `analysis.orchestration` in JSON; real E2E-D/E |
 
 ## Near term
 
-* **Documentation and architecture realignment** (Task 007). Every
-  current document describes the two-pillar product and its trust
-  boundary. Generator documents are labelled historical/deferred.
-* **Proof-run orchestration (possible, not committed).** An optional
-  command that runs GNATprove and then explains, so that stale-result
-  mistakes become harder. It must show the exact GNATprove command and
-  never hide or alter its verdict. No such command exists today, and
-  none is named yet. Today users run `gnatprove` themselves, then
-  `spark-refine explain`.
 * **Semantic diagnostic enrichment.** Libadalang-based identification of
   the call/callee and contract conjunct behind SRD002, and mapping
   failures to source abstractions. This is the main known limitation of

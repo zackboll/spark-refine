@@ -38,6 +38,9 @@ Not trusted for correctness
 ---------------------------
 spark-refine proof-pattern libraries   (re-proved per instance by GNATprove)
 spark-refine diagnostics               (interpret results; never decide status)
+spark-refine prove orchestration       (runs GNATprove, shows the exact command,
+                                        relays its exit code; fresh-result
+                                        provenance only, no proof authority)
 AI agents consuming diagnostics
 future IDE integration
 (historical/deferred: spark-refine parser, source generator)
@@ -133,7 +136,8 @@ If advanced modes eventually permit user-trusted assumptions, the report must ma
 AI-generated proof changes are suggestions, not evidence.
 
 The operational form of this policy for agents consuming
-`spark-refine explain --format json` is `docs/AGENT_INTEGRATION.md`.
+`spark-refine prove --format json` or `spark-refine explain --format
+json` is `docs/AGENT_INTEGRATION.md`.
 
 An AI integration must classify edits:
 

@@ -12,8 +12,8 @@ Two kinds of coverage are reported separately:
 
 | Layer | What | Size | Toolchain | CI |
 |---|---|---|---|---|
-| **Fixture-based regression** (primary; every number below) | committed, sanitized GNATprove 16.1.0 output | 49 runs, 110 tests (137 since Task 006; diagnostic expectations unchanged) | none | `structural` job |
-| **Fresh end-to-end integration** (smoke test) | GNATprove run now, output analysed unsanitized by the CLI | 3 cases | pinned Alire 2.1.1 / GNATprove 16.1.0 | `diagnostics-e2e` job |
+| **Fixture-based regression** (primary; every number below) | committed, sanitized GNATprove 16.1.0 output | 49 runs, 110 tests (137 since Task 006, 188 since Task 008; diagnostic expectations unchanged) | none | `structural` job |
+| **Fresh end-to-end integration** (smoke test) | GNATprove run now, output analysed unsanitized by the CLI | 3 cases (+ 2 `prove` orchestration cases since Task 008) | pinned Alire 2.1.1 / GNATprove 16.1.0 | `diagnostics-e2e` job |
 
 The fresh gate is described at the end of this document. It does not
 reproduce the corpus and it produces no metric; it confirms that the
@@ -282,3 +282,21 @@ The total number of SRD003 findings (5 in the local fresh run, as in the
 fixture) is reported but not gated. Wall time: ≈ 30 s of GNATprove.
 The pass criteria are themselves unit-tested on the matching fixtures,
 with negative controls (`tests/test_e2e_checks.py`, 10 tests).
+
+### Task 008: `spark-refine prove` (orchestration, not a rule)
+
+In these two cases `spark-refine prove` launches GNATprove itself, with
+no `--results`. They produce no diagnostic metric. They confirm that the
+fresh result set is selected by construction, among stale ones.
+
+| Case | Fresh GNATprove run (by `prove`) | Required | Local result (pinned 16.1.0) |
+|---|---|---|---|
+| E2E-D prove | ring buffer A baseline, `-j0` | exit 0; `fresh_discovery` selects `obj/baseline/gnatprove`; stale decoy ignored; 0 unproved / justified / pragma Assume; no diagnostics | pass: 116/116 proved, 29 stale result sets ignored |
+| E2E-E prove | ring buffer B3 (`-XRING_BUFFER_SRC=…`, variant `e2e_prove_b3`) | GNATprove exit 1 preserved; fresh `obj/e2e_prove_b3/gnatprove` selected; the E2E-A SRD001 criteria | pass: exit 1, SRD001 on `Ring_Buffer.Pop`, 30 stale ignored |
+
+Their checkers are unit-tested in `tests/test_e2e_checks.py`
+(`E2EProveCheckers`, 6 tests). The orchestration logic itself (45 tests:
+command construction, freshness selection A–H, exit precedence, JSON
+cleanliness, stale safety) is covered by `tests/test_prove.py` with a
+fake GNATprove. The Task 008 changes left every fixture diagnostic
+expectation unchanged.

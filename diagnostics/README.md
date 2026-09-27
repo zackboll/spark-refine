@@ -7,7 +7,8 @@ only problems **already observed in this repository** (Tasks 001–004).
 
 It does not:
 
-* run GNATprove;
+* decide proof status. Only `spark-refine prove` runs GNATprove, and
+  only as orchestration (see below);
 * modify, repair or generate source;
 * synthesize invariants;
 * use AI;
@@ -44,7 +45,12 @@ spark-refine rules                          # works from any directory
 ## Usage
 
 ```bash
-gnatprove -P my_project.gpr
+spark-refine prove -P my_project.gpr        # preferred: run GNATprove + explain ITS result
+spark-refine prove -P my_project.gpr --format json -- --level=2 -j0
+spark-refine prove -P my_project.gpr --results obj/proof/gnatprove
+spark-refine prove -P my_project.gpr --dry-run   # show the command only
+
+gnatprove -P my_project.gpr                 # manual two-step workflow
 spark-refine explain                        # discover the single result set
 spark-refine explain obj/proof/gnatprove    # or name it explicitly
 spark-refine explain obj/proof/gnatprove/gnatprove.sarif
@@ -96,13 +102,67 @@ unsupported.
 
 **Freshness.** `spark-refine explain` analyzes the proof results you
 point it at. They correspond to the current sources only if GNATprove was
-just run.
+just run. `spark-refine prove` guarantees that the analyzed result was
+freshly changed by the GNATprove command it just launched.
 
-Exit status:
+Exit status of `explain` / `analyze` / `compare-provers`:
 
 * 0: diagnostics are informational;
 * 1: a `--fail-on` code was emitted;
 * 2: input error, or no unique result set was discovered.
+
+### `prove`: fresh GNATprove orchestration (Task 008)
+
+```text
+spark-refine prove -P PROJECT [--gnatprove PATH] [--results PATH] [--dry-run]
+                   [--name N] [--client-unit U ...] [--format text|json]
+                   [--fail-on CODE ...] [-- GNATPROVE_ARGS...]
+```
+
+* **Command.** The argv `[GNATPROVE, "-P", PROJECT, *GNATPROVE_ARGS]` is
+  executed with `shell=False`. Everything after the first `--` is passed
+  verbatim. `GNATPROVE` defaults to `gnatprove` on `PATH`. The command
+  is printed to stderr (`shlex.join`) *before* it runs. `--dry-run`
+  prints it and exits 0 without running anything or inspecting any
+  results. With `--format json`, the dry run prints a small plan
+  document.
+* **Output streams.** GNATprove's stdout and stderr are relayed to
+  spark-refine's **stderr**. stdout carries only the report, so
+  `--format json` output is always valid JSON or empty.
+* **Freshness.** Before GNATprove starts, the `gnatprove.sarif` of every
+  candidate under the current directory is stamped: device, inode, size,
+  mtime_ns, ctime_ns and sha256. Afterwards, only result sets that are
+  new or whose stamp changed are eligible. This works because GNATprove
+  16.1.0 rewrites `gnatprove.sarif` on every run, even an incremental
+  re-run, as observed in `docs/tasks/008-proof-run-orchestration.md`.
+  * exactly one fresh result set: analyzed (`selection: fresh_discovery`);
+  * none: refused, with no report, even if an old valid result set
+    exists;
+  * several: refused, with the candidates listed in sorted order.
+  * `--results PATH` is authoritative: that location must be a valid
+    result set **and** freshly written, otherwise the error is
+    "GNATprove did not produce fresh results at the requested
+    location." There is no fallback.
+* **Analysis.** The unchanged `analyze_path_report` (SRD001, SRD002)
+  runs in-process. The report gains `analysis.orchestration`: `command`,
+  `gnatprove_exit_code`, `result_path`, `result_selection`, `fresh`, and
+  `stale_result_sets_ignored` for fresh discovery. There are no
+  timestamps, and `format_version` stays 1. The text report starts with
+  `proof command:`, `GNATprove exit:`, `fresh results:` and `selection:`
+  lines.
+* **Exit status.** GNATprove's nonzero exit code, if it returned one;
+  the report is still emitted when a fresh result exists. Otherwise 1 if
+  `--fail-on` matched, otherwise 0. Exit 2 means an error before a usable
+  result: launch failure, or no unique fresh result while GNATprove
+  exited 0. If GNATprove failed *and* left no fresh result, its code is
+  returned and no report is fabricated. A signal kill of N is reported
+  as 128 + N, and the raw code is recorded.
+* **No new proof policy.** If GNATprove exits 0 with unproved checks, a
+  note reports it, and the exit code is *not* overridden.
+* **Scope.** One GNATprove run, so SRD001/SRD002 only; SRD003 needs
+  `compare-provers`. GNATprove runs in the current directory, and GPR
+  files are not parsed. For Alire, use
+  `alr exec -- spark-refine prove -P project.gpr`.
 
 AI agents and CI should read [`../docs/AGENT_INTEGRATION.md`](../docs/AGENT_INTEGRATION.md).
 
@@ -446,6 +506,8 @@ spark_refine_diagnostics/
   analyzer.py       entry points
   render.py         text / JSON output (deterministic; summary)
   discovery.py      conservative result-set discovery for `explain`
+  orchestration.py  `prove`: argv, SARIF snapshots, fresh selection,
+                    subprocess relay, exit policy, provenance metadata
   cli.py, __main__.py
 pyproject.toml, MANIFEST.in   packaging (console script spark-refine)
 scripts/capture_fixtures.py   reproduces the fixture corpus
@@ -460,9 +522,12 @@ DIAGNOSTICS_METRICS.md        measured results per rule
 
 There are three complementary layers.
 
-**Fixture-based regression coverage (primary).** `tests/` holds 137
-unit tests over the committed corpus of 49 sanitized, real GNATprove
-16.1.0 runs (`tests/fixtures/README.md`). Of these:
+**Fixture-based regression coverage (primary).** `tests/` holds 188
+unit tests. 137 of them run over the committed corpus of 49 sanitized,
+real GNATprove 16.1.0 runs (`tests/fixtures/README.md`). Task 008 adds
+51 orchestration tests: 45 in `test_prove.py`, which use a fake
+GNATprove script and no toolchain, and 6 E2E-D/E checker tests in
+`test_e2e_checks.py`. The 137 break down as follows:
 
 * 110 are the Task 005 tests. They are unchanged, and so are their
   expected diagnostics.
@@ -490,13 +555,16 @@ fixture paths. It repeats this for an editable install. CI: job
 `scripts/e2e_fresh.py` runs the pinned toolchain (Alire 2.1.1, FSF
 GNATprove 16.1.0, GNAT 16.1.0) *now*, through the benchmarks' own
 unchanged scripts, and runs the CLI (`--format json`) on the fresh,
-unsanitized SARIF / `.spark` / `.ali`. Exactly three cases:
+unsanitized SARIF / `.spark` / `.ali`. Three per-rule cases, plus two
+`spark-refine prove` cases (Task 008):
 
 | Case | Fresh run | Machine-checked |
 |---|---|---|
 | E2E-A SRD001 | ring buffer B, fault B3 `head_advances_wrong` (`check_proof_results.py negative --variant head_tail_count --only head_advances_wrong`) | one SRD001 on `Ring_Buffer.Pop`; confidence `high` unless a SARIF/.spark disagreement is recorded; an unproved `VC_INVARIANT_CHECK` and ≥ 1 proved `VC_POSTCONDITION` listed as *potentially affected* |
 | E2E-B SRD002 | ring buffer A, ablation `no_is_full_post` (`ablate_proof_support.py --only no_is_full_post`) | SRD002 on `Ring_Buffer_Client_Proof.Push_Push_Pop` (`VC_PRECONDITION` + `VC_ASSERT`) and `…Rotate` (`VC_PRECONDITION`); client unit `ring_buffer_client_proof`; implementation units `[ring_buffer]` with > 0 checks and 0 failures; `dependency_source = ali`, `ali_status = ok`, `ali_versions = ["GNAT Lib v16"]` |
 | E2E-C SRD003 | library-backed fixed pool, `--prover=cvc5` / `z3` / `altergo` (`prover_matrix.py --variant library_backed`), then `compare-provers` | the known SRD003 `VC_POSTCONDITION` `Fixed_Pool.Free_Prefix.Model` at `spark_refine_prefix_sets.ads:93`, `match_quality` `exact` or `unique_entity`, Z3 `unproved`, Alt-Ergo `proved`. The total SRD003 count is **not** gated |
+| E2E-D prove | ring buffer A baseline via `spark-refine prove -P ring_buffer.gpr --format json -- -j0` (no `--results`), after E2E-A/B and with a stale decoy result set placed | `analysis.orchestration`: command exact, `gnatprove_exit_code` 0, `fresh` true, `result_selection` `fresh_discovery`, `result_path` `obj/baseline/gnatprove`, decoy listed as ignored; 0 unproved / 0 justified / 0 pragma Assume; no diagnostics |
+| E2E-E prove | ring buffer B3 (materialized by the benchmark's `apply_fault`) via `prove ... -- -j0 -XRING_BUFFER_SRC=... -XRING_BUFFER_VARIANT=e2e_prove_b3` | GNATprove exit 1 preserved as `prove`'s exit; fresh `obj/e2e_prove_b3/gnatprove` selected; the E2E-A SRD001 criteria |
 
 Every case also requires GNATprove `FSF 16.1.0` and `.spark`-based unit
 attribution. Diagnostic prose is never checked. E2E-B is the only test

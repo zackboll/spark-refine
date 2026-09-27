@@ -4,6 +4,27 @@
 
 ### Added
 
+- Task 008: `spark-refine prove -P PROJECT [-- GNATPROVE_ARGS...]`, fresh
+  GNATprove orchestration (`diagnostics/spark_refine_diagnostics/orchestration.py`).
+  It runs GNATprove as an argv (`shell=False`) after printing the exact
+  command to stderr, and relays GNATprove's output to stderr so stdout
+  carries only the report. It analyzes only the one result set whose
+  `gnatprove.sarif` this run created or changed (stamp: dev, inode,
+  size, mtime_ns, ctime_ns, sha256). Stale result sets are ignored;
+  zero or several fresh result sets are refused. `--results PATH` must
+  be freshly written, with no fallback. GNATprove's nonzero exit code is
+  preserved even when diagnostics are produced; `--fail-on` applies only
+  when GNATprove exited 0. Also adds `--gnatprove PATH` and `--dry-run`
+  (with an optional JSON plan). `analysis.orchestration` is added to the
+  JSON, and `format_version` stays 1. The real GNATprove 16.1.0
+  repeated-run freshness behavior is recorded in
+  `docs/tasks/008-proof-run-orchestration.md`. Adds 51 tests (fake
+  GNATprove, no toolchain), fresh E2E-D/E-E in `diagnostics-e2e`, and
+  installed-package `prove` checks. `explain`/`analyze`/`compare-provers`
+  output on all 49 fixtures is byte-identical. SRD001–SRD003 are
+  unchanged. There are no new rules and no runtime dependencies. The
+  legacy Ada `spark_refine` now also redirects `prove`.
+
 - Initial project motivation and ecosystem gap analysis.
 - Architecture, trust model, MVP, benchmark, and roadmap documentation.
 - Proposed manifest and circular-sequence proof pattern.
