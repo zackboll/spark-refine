@@ -43,19 +43,24 @@ jobs:
         with:
           version: '2.1.1'
           toolchain: '--disable-assistant'
-      # same resolution as the proof jobs, once per crate used below
-      - name: Resolve pinned toolchain (ring buffer)
+      # Same resolution and build as the proof jobs, once per crate used
+      # below. The build is required: it creates SPARKlib's library
+      # directory, without which gnatprove cannot load sparklib.gpr on a
+      # fresh runner.
+      - name: Resolve pinned toolchain and build (ring buffer)
         working-directory: examples/ring_buffer
         run: |
           alr -n update
           alr -n exec -- gnat --version | head -1
           alr -n exec -- gnatprove --version
-      - name: Resolve pinned toolchain (fixed pool)
+          alr -n build
+      - name: Resolve pinned toolchain and build (fixed pool, library-backed)
         working-directory: examples/fixed_pool
         run: |
           alr -n update
           alr -n exec -- gnat --version | head -1
           alr -n exec -- gnatprove --version
+          alr -n build -- -XFIXED_POOL_SRC=variants/library_backed -XFIXED_POOL_VARIANT=library_backed
       - name: "E2E-A: SRD001 on fresh ring buffer B3 output"
         run: python3 diagnostics/scripts/e2e_fresh.py srd001
       - name: "E2E-B: SRD002 on fresh ring buffer no_is_full_post output (.ali)"
