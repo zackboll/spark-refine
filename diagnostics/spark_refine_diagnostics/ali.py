@@ -6,6 +6,13 @@ structured status. Only GNAT 16.1.0 ALI (header `V "GNAT Lib v16"`), as
 written by FSF GNATprove 16.1.0, has been observed; no compatibility with
 other compiler versions is claimed.
 
+The header value is checked against SUPPORTED_ALI_VERSIONS. "GNAT Lib v16"
+is accepted because it is the header the pinned GNAT 16.1.0 writes; this
+does not claim that every GNAT 16 release writes a compatible format. Any
+other value (e.g. "GNAT Lib v17", or an arbitrary string) yields status
+`unsupported_version` with the observed version, no dependencies are read,
+and SRD002 is skipped exactly as for any other unusable ALI file.
+
 Records read (one per line, record kind = first character):
 
     V "GNAT Lib v<N>"              version header (must be the first line)
@@ -33,17 +40,25 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 OBSERVED_ALI_VERSION = "GNAT Lib v16"
+# The only ALI format validated (written by the pinned GNAT 16.1.0).
+SUPPORTED_ALI_VERSIONS = frozenset({OBSERVED_ALI_VERSION})
+UNSUPPORTED_VERSION_DETAIL = (
+    "supported ALI version is "
+    + ", ".join(sorted(SUPPORTED_ALI_VERSIONS)))
 
 _VERSION = re.compile(r'^V "([^"]*)"')
 _UNIT_REF = re.compile(r"^([a-z0-9_.]+)%[sb]$", re.IGNORECASE)
 
 OK = "ok"
 UNAVAILABLE = "unavailable"
+UNSUPPORTED_VERSION = "unsupported_version"
 
 
 @dataclass(frozen=True)
 class AliFile:
-    """status: ok | empty | no_version | malformed | unreadable | missing"""
+    """status: ok | empty | no_version | unsupported_version | malformed |
+    unreadable | missing. `version` is the observed header value whenever
+    a header was found (also for unsupported_version)."""
 
     status: str
     deps: frozenset[str] = frozenset()
@@ -60,7 +75,10 @@ class AliDeps:
     status: str = UNAVAILABLE
     deps: dict[str, set[str]] = field(default_factory=dict)
     problems: list[str] = field(default_factory=list)
+    # header values of the ALI files that were read successfully
     versions: set[str] = field(default_factory=set)
+    # header values that were recognised but are not supported
+    unsupported_versions: set[str] = field(default_factory=set)
 
     @property
     def ok(self) -> bool:
@@ -77,6 +95,11 @@ def parse_ali_text(text: str) -> AliFile:
                        detail="first line is not a V \"GNAT Lib ...\" header "
                               "(truncated or not an ALI file)")
     version = m.group(1)
+    if version not in SUPPORTED_ALI_VERSIONS:
+        # Recognised header, unvalidated format: never read as dependency
+        # data (a different record layout could silently drop a `with`).
+        return AliFile(UNSUPPORTED_VERSION, version=version,
+                       detail=UNSUPPORTED_VERSION_DETAIL)
     deps: set[str] = set()
     units = 0
     for n, line in enumerate(lines[1:], start=2):
@@ -134,8 +157,15 @@ def load_ali_deps(directory: Path,
         path = present.get(unit, directory / f"{unit}.ali")
         ali = read_ali(path)
         if not ali.ok:
-            out.problems.append(f"{unit}.ali: {ali.status}"
-                                + (f" ({ali.detail})" if ali.detail else ""))
+            if ali.status == UNSUPPORTED_VERSION:
+                out.unsupported_versions.add(ali.version)
+                out.problems.append(f"{unit}.ali: {ali.status} "
+                                    f"(version {ali.version!r}; "
+                                    f"{ali.detail})")
+            else:
+                out.problems.append(
+                    f"{unit}.ali: {ali.status}"
+                    + (f" ({ali.detail})" if ali.detail else ""))
             continue
         out.versions.add(ali.version)
         out.deps[unit] = set(ali.deps)

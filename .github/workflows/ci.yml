@@ -22,6 +22,51 @@ jobs:
         working-directory: diagnostics
         run: python3 -m unittest discover -s tests -t tests -v
 
+  # Task 005: small FRESH end-to-end diagnostics gate. Complements (does not
+  # replace) the fixture-based suite above: runs the pinned toolchain now,
+  # through the benchmarks' own unchanged scripts, on exactly three cases,
+  # and analyses the fresh SARIF/.spark/.ali with the diagnostics CLI:
+  #   E2E-A  SRD001  ring buffer B3 head_advances_wrong
+  #   E2E-B  SRD002  ring buffer no_is_full_post (fresh .ali -> ali.py)
+  #   E2E-C  SRD003  library-backed fixed pool, cvc5 / z3 / altergo alone
+  # Pass criteria are structural (codes, entities, rules, confidence,
+  # dependency_source, match_quality); diagnostic prose is never checked.
+  # Independent of the proof jobs, which are unchanged.
+  diagnostics-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: alire-project/setup-alire@v6.0.0
+        with:
+          version: '2.1.1'
+          toolchain: '--disable-assistant'
+      - name: Resolve pinned toolchain (ring buffer, fixed pool)
+        run: |
+          (cd examples/ring_buffer && alr -n update)
+          (cd examples/fixed_pool && alr -n update \
+             && alr -n exec -- gnat --version | head -1 \
+             && alr -n exec -- gnatprove --version)
+      - name: "E2E-A: SRD001 on fresh ring buffer B3 output"
+        run: python3 diagnostics/scripts/e2e_fresh.py srd001
+      - name: "E2E-B: SRD002 on fresh ring buffer no_is_full_post output (.ali)"
+        run: python3 diagnostics/scripts/e2e_fresh.py srd002
+      - name: "E2E-C: SRD003 on fresh single-prover fixed-pool runs"
+        run: python3 diagnostics/scripts/e2e_fresh.py srd003
+      - name: Upload fresh diagnostics reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics-e2e-reports
+          path: |
+            diagnostics/obj/e2e/*.json
+            examples/ring_buffer/obj/negative_htc_head_advances_wrong/gnatprove/gnatprove.sarif
+            examples/ring_buffer/obj/ablation_no_is_full_post/gnatprove/gnatprove.sarif
+            examples/fixed_pool/obj/prover_library_backed_*/gnatprove/gnatprove.sarif
+          if-no-files-found: warn
+
   # Ring-buffer proof benchmarks, one toolchain setup for both
   # representations:
   #   A  Task 001  Content + First + Length        (src/)

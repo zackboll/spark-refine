@@ -8,6 +8,18 @@ unit test, listed per section. Run the suite with:
 cd diagnostics && python3 -m unittest discover -s tests -t tests -v
 ```
 
+Two kinds of coverage are reported separately:
+
+| Layer | What | Size | Toolchain | CI |
+|---|---|---|---|---|
+| **Fixture-based regression** (primary; every number below) | committed, sanitized GNATprove 16.1.0 output | 49 runs, 110 tests | none | `structural` job |
+| **Fresh end-to-end integration** (smoke test) | GNATprove run now, output analysed unsanitized by the CLI | 3 cases | pinned Alire 2.1.1 / GNATprove 16.1.0 | `diagnostics-e2e` job |
+
+The fresh gate is described at the end of this document. It does not
+reproduce the corpus and it produces no metric; it confirms that the
+analyzer still gives the known answer on real, current compiler and
+prover output for one representative case per rule.
+
 Terminology used throughout:
 
 * A **positive** is the pattern a rule promises to detect. It is **not**
@@ -160,16 +172,30 @@ blocks it, with a note.
 
 SRD002 is skipped when dependency information is unavailable: the `.ali`
 file is missing, empty, truncated, or malformed; it has no version header
-or no unit record; or an analysed unit has no `.ali`. The report then
+or no unit record; its version header is not the validated
+`GNAT Lib v16` (status `unsupported_version`, e.g. `GNAT Lib v17` or an
+arbitrary string); or an analysed unit has no `.ali`. The report then
 says:
 
 ```text
 SRD002 not evaluated: client dependency information unavailable (...)
 ```
 
-SRD001 still runs, and the CLI exits 0. On the committed corpus this
+SRD001 still runs, SRD003 is unaffected, and the CLI exits 0. For an
+unsupported version, `analysis.rules.SRD002.ali_unsupported_versions`
+lists the observed header(s) and the reason includes
+`supported ALI version is GNAT Lib v16`. On the committed corpus this
 happens 0 times, because every fixture has GNAT 16.1.0 `.ali` files.
-Degradation is tested in `test_srd002.Srd002AliDegradation` and
+
+| ALI input | Result | Test |
+|---|---|---|
+| `V "GNAT Lib v16"` | `ok` | `test_parsing.AliTests.test_supported_version_v16` |
+| `V "GNAT Lib v17"` | `unsupported_version`, no dependencies read | `test_unsupported_version_v17` |
+| `V "something else"`, `""`, `GNAT Lib v16.1`, `gnat lib v16`, `GNAT Lib v15` | `unsupported_version` | `test_unsupported_arbitrary_version` |
+| one unsupported file in a directory | whole set `unavailable` | `test_unsupported_version_makes_directory_unavailable` |
+| v17 / arbitrary on an SRD002-positive and an SRD001-positive fixture | SRD002 skipped, SRD001 still reported, CLI exit 0 with `--fail-on SRD002` | `test_srd002.Srd002AliDegradation.test_unsupported_ali_version` |
+
+Other degradation is tested in `test_srd002.Srd002AliDegradation` and
 `test_parsing.AliTests`.
 
 Tests: `test_srd002.py`.
@@ -238,3 +264,21 @@ justified checks as the `load_results()` of **both** historical gates
 allowed warnings, other warnings, `pragma Assume` and `.spark`-unproved
 counts. Message text never decides a status (`test_loader.py`,
 `test_parsing.py`).
+
+## Fresh end-to-end GNATprove integration (not fixture-based)
+
+`scripts/e2e_fresh.py`, CI job `diagnostics-e2e`. Three cases, each run
+fresh with the pinned toolchain through the benchmarks' own scripts and
+analysed, unsanitized, by the CLI (`--format json`). Only structural JSON
+fields are checked; prose never is.
+
+| Case | Fresh GNATprove run | Required | Local result (pinned 16.1.0) |
+|---|---|---|---|
+| E2E-A SRD001 | ring buffer B3 `head_advances_wrong` | SRD001 on `Ring_Buffer.Pop`, confidence `high` (unless a recorded SARIF/.spark disagreement), ≥ 1 proved `VC_POSTCONDITION` *potentially affected* | pass: `high`, invariant `ring_buffer.ads:41:14` unproved, 1 proved postcondition affected, no consistency notes |
+| E2E-B SRD002 | ring buffer `no_is_full_post` | SRD002 on `…Push_Push_Pop` (`VC_PRECONDITION`, `VC_ASSERT`) and `…Rotate` (`VC_PRECONDITION`); implementation `[ring_buffer]` green; `dependency_source = ali`; ALI `GNAT Lib v16` | pass: both SRD002 (low / medium), `ring_buffer` 92 checks 0 failures, `dependency_source = ali`, `ali_status = ok` |
+| E2E-C SRD003 | library-backed pool, `--prover=` cvc5, z3, altergo | the known `VC_POSTCONDITION` `Fixed_Pool.Free_Prefix.Model` (`spark_refine_prefix_sets.ads:93`), `match_quality` `exact` or `unique_entity`, Z3 `unproved`, Alt-Ergo `proved` | pass: `unique_entity`, cvc5 ✗ / z3 ✗ / altergo ✓ |
+
+The total number of SRD003 findings (5 in the local fresh run, as in the
+fixture) is reported but not gated. Wall time: ≈ 30 s of GNATprove.
+The pass criteria are themselves unit-tested on the matching fixtures,
+with negative controls (`tests/test_e2e_checks.py`, 10 tests).

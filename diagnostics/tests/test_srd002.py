@@ -274,6 +274,52 @@ class Srd002AliDegradation(unittest.TestCase):
                 self.assertEqual(rep.runs[0].summary(),
                                  support.run_of(name).summary())
 
+    @staticmethod
+    def _set_version(d: Path, version: str) -> None:
+        for p in d.glob("*.ali"):
+            text = p.read_text("utf-8")
+            p.write_text(text.replace('V "GNAT Lib v16"',
+                                      f'V "{version}"', 1), "utf-8")
+
+    def test_unsupported_ali_version(self):
+        """A recognised but unsupported ALI version (v17, or anything but
+        the validated GNAT Lib v16) is not read: SRD002 is skipped, SRD001
+        still runs on the same output, and the CLI exits 0."""
+        import io
+        from contextlib import redirect_stdout
+        from spark_refine_diagnostics.cli import main
+        for version in ("GNAT Lib v17", "something else"):
+            with self.subTest(version=version), \
+                    tempfile.TemporaryDirectory() as tmp:
+                # SRD002 positive: would fire with a supported ALI version
+                d = _copy_fixture("pool_spec_no_count_posts", tmp)
+                self._set_version(d, version)
+                rep = analyze_path_report(d)
+                self.assertEqual(support.by_code(rep.diagnostics, "SRD002"),
+                                 [])
+                meta = rep.analysis["rules"]["SRD002"]
+                self.assertFalse(meta["evaluated"])
+                self.assertEqual(meta["ali_status"], "unavailable")
+                self.assertEqual(meta["ali_versions"], [])
+                self.assertEqual(meta["ali_unsupported_versions"],
+                                 [version])
+                self.assertIn("unsupported_version", meta["reason"])
+                self.assertIn("supported ALI version is GNAT Lib v16",
+                              meta["reason"])
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    rc = main(["analyze", str(d), "--fail-on", "SRD002"])
+                self.assertEqual(rc, 0)
+                self.assertIn("SRD002 not evaluated", buf.getvalue())
+                # SRD001 positive: still reported with the same bad ALI
+                p5 = _copy_fixture("pool_p5", tmp + "/p5")
+                self._set_version(p5, version)
+                rep = analyze_path_report(p5)
+                self.assertEqual([(x.code, x.entity)
+                                  for x in rep.diagnostics],
+                                 [("SRD001", "Fixed_Pool.Release")])
+                self.assertTrue(rep.analysis["rules"]["SRD001"]["evaluated"])
+
     def test_srd001_still_works_without_ali(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = _copy_fixture("pool_p5", tmp)

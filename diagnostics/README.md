@@ -26,6 +26,7 @@ python3 -m spark_refine_diagnostics compare-provers \
     --run altergo=../examples/fixed_pool/obj/prover_altergo/gnatprove \
     --reference portfolio=../examples/fixed_pool/obj/baseline/gnatprove
 python3 -m unittest discover -s tests -t tests -v   # no toolchain needed
+python3 scripts/e2e_fresh.py                        # pinned toolchain needed
 ```
 
 `PATH` is either a GNATprove output directory (`obj/<variant>/gnatprove`
@@ -170,16 +171,24 @@ that reports it. Generic-instance VCs sit in the generic's source file
 
 **ALI adapter (`ali.py`).** ALI is compiler-internal and version-sensitive.
 Only GNAT 16.1.0 ALI (`V "GNAT Lib v16"`) has been observed, and no other
-compiler version is claimed. The adapter is the only reader of `.ali`
-files, and it **never raises**:
+compiler version is claimed. The adapter accepts exactly the header
+`GNAT Lib v16`, because that is what the pinned GNAT 16.1.0 writes; this
+is not a claim about other GNAT 16 releases. The adapter is the only
+reader of `.ali` files, and it **never raises**:
 
 | Input | Result |
 |---|---|
-| valid GNAT 16.1.0 ALI | `ok`, dependencies from `W`/`Z` records |
+| valid GNAT 16.1.0 ALI (`V "GNAT Lib v16"`) | `ok`, dependencies from `W`/`Z` records |
+| any other version header (`V "GNAT Lib v17"`, `V "something else"`, …) | `unsupported_version`, with the observed `version` and `detail = "supported ALI version is GNAT Lib v16"`; no record is read |
 | unknown record kinds | ignored (harmless) |
 | missing file / empty file | `missing` / `empty` |
 | no `V "..."` header (truncated head, not an ALI) | `no_version` |
 | truncated or malformed `W`/`Z` record, no `U` record | `malformed` |
+
+An unsupported version is reported in the problem list
+(`<unit>.ali: unsupported_version (version 'GNAT Lib v17'; supported ALI
+version is GNAT Lib v16)`) and in
+`analysis.rules.SRD002.ali_unsupported_versions`.
 
 If any analysed unit lacks a valid `.ali`:
 
@@ -350,13 +359,43 @@ spark_refine_diagnostics/
   render.py         text / JSON output (deterministic)
   cli.py, __main__.py
 scripts/capture_fixtures.py   reproduces the fixture corpus
+scripts/e2e_fresh.py          fresh end-to-end gate (pinned toolchain)
 tests/                        unittest suite, fixtures/, expectations.toml
 tests/fixture_sources/        fixture-only Ada client units (not benchmarks)
 DIAGNOSTICS_METRICS.md        measured results per rule
 ```
 
-The fixtures are sanitized copies of real, pinned GNATprove 16.1.0 runs
-(`tests/fixtures/README.md`). No test depends on `obj/`.
+## Test coverage: fixtures and fresh end-to-end runs
+
+There are two complementary layers.
+
+**Fixture-based regression coverage (primary).** `tests/` holds 110
+unit tests over the committed corpus of 49 sanitized, real GNATprove
+16.1.0 runs (`tests/fixtures/README.md`). It is deterministic, needs no
+toolchain and checks every fixture's expected diagnostics, the SRD001
+ground truth, parser parity with both benchmark gates, ALI degradation and
+SRD003 matching in detail. No test depends on `obj/`. CI: job
+`structural`, step *Proof-diagnostics tests (SRD001-SRD003)*.
+
+**Fresh end-to-end GNATprove integration coverage (smoke test).**
+`scripts/e2e_fresh.py` runs the pinned toolchain (Alire 2.1.1, FSF
+GNATprove 16.1.0, GNAT 16.1.0) *now*, through the benchmarks' own
+unchanged scripts, and runs the CLI (`--format json`) on the fresh,
+unsanitized SARIF / `.spark` / `.ali`. Exactly three cases:
+
+| Case | Fresh run | Machine-checked |
+|---|---|---|
+| E2E-A SRD001 | ring buffer B, fault B3 `head_advances_wrong` (`check_proof_results.py negative --variant head_tail_count --only head_advances_wrong`) | one SRD001 on `Ring_Buffer.Pop`; confidence `high` unless a SARIF/.spark disagreement is recorded; an unproved `VC_INVARIANT_CHECK` and ≥ 1 proved `VC_POSTCONDITION` listed as *potentially affected* |
+| E2E-B SRD002 | ring buffer A, ablation `no_is_full_post` (`ablate_proof_support.py --only no_is_full_post`) | SRD002 on `Ring_Buffer_Client_Proof.Push_Push_Pop` (`VC_PRECONDITION` + `VC_ASSERT`) and `…Rotate` (`VC_PRECONDITION`); client unit `ring_buffer_client_proof`; implementation units `[ring_buffer]` with > 0 checks and 0 failures; `dependency_source = ali`, `ali_status = ok`, `ali_versions = ["GNAT Lib v16"]` |
+| E2E-C SRD003 | library-backed fixed pool, `--prover=cvc5` / `z3` / `altergo` (`prover_matrix.py --variant library_backed`), then `compare-provers` | the known SRD003 `VC_POSTCONDITION` `Fixed_Pool.Free_Prefix.Model` at `spark_refine_prefix_sets.ads:93`, `match_quality` `exact` or `unique_entity`, Z3 `unproved`, Alt-Ergo `proved`. The total SRD003 count is **not** gated |
+
+Every case also requires GNATprove `FSF 16.1.0` and `.spark`-based unit
+attribution. Diagnostic prose is never checked. E2E-B is the only test
+that exercises *fresh compiler-written* `.ali` → `ali.py` → transitive
+dependency graph → SRD002. The checkers themselves are unit-tested on the
+matching fixtures, including negative controls (`tests/test_e2e_checks.py`).
+CI: job `diagnostics-e2e` (≈ 30 s of GNATprove). Reports are written to
+`obj/e2e/` (git-ignored) and uploaded as an artifact.
 
 ## Limitations
 
@@ -369,6 +408,7 @@ The fixtures are sanitized copies of real, pinned GNATprove 16.1.0 runs
   cannot be matched by a unique machine-readable identity are left
   unpaired and reported as metadata.
 * Only GNATprove FSF 16.1.0 output and GNAT 16.1.0 ALI have been
-  observed.
+  observed. Any ALI version header other than `GNAT Lib v16` is rejected
+  (`unsupported_version`) and SRD002 is skipped.
 * Without `.spark` files, units are attributed from the entity's first
   name component, and the report says so.

@@ -36,9 +36,12 @@
 
   It ships 49 sanitized real GNATprove 16.1.0 fixtures, including a
   false-client-assertion control, with provenance and ablation-based
-  ground truth. It also adds 95 unit tests run in CI,
-  `diagnostics/DIAGNOSTICS_METRICS.md` and
-  `docs/tasks/005-proof-diagnostics-mvp.md`.
+  ground truth. It also adds 110 fixture-based unit tests run in CI,
+  a small fresh end-to-end GNATprove gate (one case per rule, CI job
+  `diagnostics-e2e`), `diagnostics/DIAGNOSTICS_METRICS.md` and
+  `docs/tasks/005-proof-diagnostics-mvp.md`. `.ali` files with a version
+  header other than `GNAT Lib v16` are rejected (`unsupported_version`;
+  SRD002 skipped).
 
 ### Changed
 

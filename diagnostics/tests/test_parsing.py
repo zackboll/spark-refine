@@ -12,6 +12,8 @@ from pathlib import Path
 
 import support
 from spark_refine_diagnostics.ali import (OBSERVED_ALI_VERSION,
+                                         SUPPORTED_ALI_VERSIONS,
+                                         UNSUPPORTED_VERSION,
                                          load_ali_deps, parse_ali_text,
                                          read_ali)
 from spark_refine_diagnostics.model import Status
@@ -135,6 +137,46 @@ class AliTests(unittest.TestCase):
         self.assertTrue(ali.ok)
         self.assertEqual(ali.version, OBSERVED_ALI_VERSION)
         self.assertIn("fixed_pool", ali.deps)
+
+    def test_supported_version_v16(self):
+        ali = parse_ali_text(VALID_ALI)
+        self.assertEqual(ali.status, "ok")
+        self.assertIn("GNAT Lib v16", SUPPORTED_ALI_VERSIONS)
+        self.assertEqual(SUPPORTED_ALI_VERSIONS, {"GNAT Lib v16"})
+
+    def test_unsupported_version_v17(self):
+        text = VALID_ALI.replace("GNAT Lib v16", "GNAT Lib v17", 1)
+        ali = parse_ali_text(text)
+        self.assertEqual(ali.status, UNSUPPORTED_VERSION)
+        self.assertFalse(ali.ok)
+        self.assertEqual(ali.version, "GNAT Lib v17")
+        self.assertEqual(ali.detail, "supported ALI version is GNAT Lib v16")
+        # the otherwise well-formed W/Z records are NOT read
+        self.assertEqual(ali.deps, frozenset())
+
+    def test_unsupported_arbitrary_version(self):
+        for version in ("something else", "", "GNAT Lib v16.1",
+                        "gnat lib v16", "GNAT Lib v15"):
+            with self.subTest(version=version):
+                ali = parse_ali_text(
+                    VALID_ALI.replace("GNAT Lib v16", version, 1))
+                self.assertEqual(ali.status, UNSUPPORTED_VERSION)
+                self.assertEqual(ali.version, version)
+                self.assertEqual(ali.deps, frozenset())
+
+    def test_unsupported_version_makes_directory_unavailable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            (d / "client.ali").write_text(VALID_ALI, "utf-8")
+            (d / "pkg.ali").write_text(
+                "V \"GNAT Lib v17\"\nU pkg%s  pkg.ads  1\n", "utf-8")
+            deps = load_ali_deps(d, ["client", "pkg"])
+        self.assertFalse(deps.ok)
+        self.assertEqual(deps.versions, {"GNAT Lib v16"})
+        self.assertEqual(deps.unsupported_versions, {"GNAT Lib v17"})
+        self.assertEqual(deps.problems, [
+            "pkg.ali: unsupported_version (version 'GNAT Lib v17'; "
+            "supported ALI version is GNAT Lib v16)"])
 
     def test_missing_file(self):
         self.assertEqual(read_ali(Path("/nonexistent/x.ali")).status,

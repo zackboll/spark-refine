@@ -48,6 +48,9 @@ def analyze_run_report(run: ProofRun, ali: AliDeps | None = None,
     if ali is not None:
         srd002_meta["ali_status"] = ali.status
         srd002_meta["ali_versions"] = sorted(ali.versions)
+        if ali.unsupported_versions:
+            srd002_meta["ali_unsupported_versions"] = sorted(
+                ali.unsupported_versions)
     if graph.source == "none":
         srd002_meta["reason"] = graph.reason
         notes.append(f"{SRD002_SKIPPED} ({graph.reason})")

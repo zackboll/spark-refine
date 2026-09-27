@@ -41,7 +41,13 @@ here.
   and sanitized. Provenance is in `tests/fixtures/manifest.toml` and in
   each `fixture.json`, which records the GNAT/GNATprove versions, the
   `.ali` producer, the prover configuration and the source commit.
-* 95 unit tests. They need no toolchain and run in CI.
+* **Fixture-based regression coverage:** 110 unit tests over the 49
+  fixtures. They need no toolchain and run in CI (job `structural`).
+  This is the primary, detailed regression suite.
+* **Fresh end-to-end GNATprove integration coverage:** 3 cases
+  (`diagnostics/scripts/e2e_fresh.py`, CI job `diagnostics-e2e`) that run
+  the pinned toolchain now and analyse the unsanitized output. See
+  [Fresh end-to-end gate](#fresh-end-to-end-gate).
 * Measured results: `diagnostics/DIAGNOSTICS_METRICS.md`.
 
 ### Corrective review
@@ -58,6 +64,21 @@ pass fixed four things:
 
 The corpus previously counted 48 fixtures, although the docs claimed 49.
 The false-client fixture brings it to 49.
+
+### Second corrective pass: integration hardening
+
+* **ALI version check.** `ali.py` recognised the `V "..."` header
+  syntactically but accepted any value. It now accepts only
+  `GNAT Lib v16` (the header written by the pinned GNAT 16.1.0; no claim
+  about other GNAT 16 releases). Any other value yields
+  `unsupported_version` with the observed version and
+  `detail = "supported ALI version is GNAT Lib v16"`; no record is read,
+  SRD002 is skipped, SRD001 still runs, SRD003 is unaffected and
+  `analyze` exits 0. Five tests added (v16 supported, v17, arbitrary
+  versions, directory status, end-to-end skip on SRD001/SRD002 fixtures).
+* **Fresh end-to-end gate.** The fixture corpus is unchanged (49 runs).
+  A small gate now also runs GNATprove fresh on one case per rule; its
+  checkers are unit-tested on the matching fixtures (10 tests).
 
 ## SRD001: failed invariant may mask downstream postconditions
 
@@ -158,7 +179,9 @@ client. Any unproved or justified check there blocks SRD002.
 
 **ALI degradation.** `.ali` is read only by `ali.py`, which is observed
 only for GNAT 16.1.0 and never raises. If the `.ali` data is missing,
-empty, truncated or malformed, SRD002 is **skipped** with the note
+empty, truncated or malformed, or its version header is anything other
+than `GNAT Lib v16` (`unsupported_version`, e.g. `GNAT Lib v17`), SRD002
+is **skipped** with the note
 `SRD002 not evaluated: client dependency information unavailable`. In
 that case:
 
@@ -194,6 +217,23 @@ reported 4×, with identical outcomes). Other properties:
 * every SRD003 carries `match_quality` (`exact` or `unique_entity`);
 * shuffling the SARIF results yields byte-identical output.
 
+## Fresh end-to-end gate
+
+The fixture suite checks the analyzer on *recorded* output. The fresh
+gate checks it on output the pinned toolchain produces *now* (Alire
+2.1.1, FSF GNATprove 16.1.0, GNAT 16.1.0), unsanitized, through the
+benchmarks' own unchanged scripts and the real CLI. It is deliberately
+small: one representative case per rule, not the corpus.
+
+| Case | Fresh run | Gate (structural JSON fields only) |
+|---|---|---|
+| E2E-A SRD001 | ring buffer B3 `head_advances_wrong` | SRD001 on `Ring_Buffer.Pop`; `high` unless a real SARIF/.spark disagreement is recorded; ≥ 1 proved postcondition *potentially affected* |
+| E2E-B SRD002 | ring buffer `no_is_full_post` | SRD002 on `Ring_Buffer_Client_Proof.Push_Push_Pop` / `.Rotate` with `VC_PRECONDITION` / `VC_ASSERT`; implementation closure `[ring_buffer]` green; `dependency_source = ali` (fresh GNAT `.ali` → `ali.py` → transitive graph → SRD002) |
+| E2E-C SRD003 | library-backed pool, cvc5 / z3 / altergo alone | the known `Fixed_Pool.Free_Prefix.Model` postcondition (`spark_refine_prefix_sets.ads:93`), `match_quality` `exact`/`unique_entity`, Z3 ✗, Alt-Ergo ✓; total count not gated |
+
+All three pass locally (≈ 30 s of GNATprove). CI runs them in a separate
+job, `diagnostics-e2e`, so the existing proof jobs are untouched.
+
 ## Limitations (deliberate)
 
 * SRD001 has no proof-dependency graph, because GNATprove output does not
@@ -206,7 +246,9 @@ reported 4×, with identical outcomes). Other properties:
   suggested them, but source mutation is out of scope, so ablation
   evidence is test metadata only.
 * Only FSF GNATprove 16.1.0 output and GNAT 16.1.0 `.ali` files have been
-  observed.
+  observed; other ALI version headers are rejected.
+* The fresh gate covers one case per rule. The detailed evidence remains
+  the fixture corpus.
 
 Out of scope and not done:
 
@@ -220,6 +262,7 @@ Out of scope and not done:
 * changes to the root Ada CLI.
 
 No proof requirement, benchmark source, fault fixture, gate script or CI
-proof job was changed. The false-client control's Ada unit lives under
-`diagnostics/tests/fixture_sources/`. It is staged into the git-ignored
-`obj/` only while its fixture is captured.
+proof job was changed; the fresh gate is a new, separate CI job that only
+invokes the existing benchmark scripts. The false-client control's Ada
+unit lives under `diagnostics/tests/fixture_sources/`. It is staged into
+the git-ignored `obj/` only while its fixture is captured.
