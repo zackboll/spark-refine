@@ -95,11 +95,16 @@ declaration, the callee's explicit `Pre` and its top-level `and` /
 does **not** provide: which conjunct failed. GNATprove 16.1.0 output
 carries no such mapping (measured, `docs/tasks/009-libadalang-srd002-enrichment.md`).
 
-Provenance: a source file is used only if its GNAT checksum and mtime
-equal a `D` record of the result set's `.ali` files, i.e. only if it is
-exactly the source GNATprove analysed. Otherwise the check is
-`unavailable`. Every failure degrades, and the base report and exit status
-are unchanged.
+Provenance: a source file is used only if it matches GNAT's `.ali` source
+identity metadata, i.e. its GNAT checksum and second-resolution mtime equal
+a `D` record of the result set. Otherwise the check is `unavailable`. This
+is **not** byte identity. The checksum ignores layout and comments, so a
+layout/comment-only change made within the same timestamp second cannot be
+distinguished from the proof-time source by the available GNATprove 16.1.0
+artifacts. Every report says so in `analysis.semantic.provenance`
+(`basis: "gnat_ali_checksum_and_timestamp"`, `layout_exact: false`,
+`byte_exact: false`). Every failure degrades, and the base report and exit
+status are unchanged.
 
 Still open: mapping failures to source abstractions (model, invariant,
 adapter, library instance), and separating authoritative specification

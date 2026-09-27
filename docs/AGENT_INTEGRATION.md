@@ -227,6 +227,13 @@ range), the callee's explicit `Pre` and its top-level conjuncts. For a
 
 * Use it only when `resolution == "exact"`. `ambiguous`, `unresolved` and
   `unavailable` carry a `reason` and no callee. Never fall back to guessing.
+* `exact` means one call was found at the reported location and
+  resolved. It does **not** mean the current source is byte-identical to
+  the proved source. Sources are matched with GNAT's `.ali` checksum and a
+  one-second timestamp (`analysis.semantic.provenance.layout_exact ==
+  false`), and a same-second layout/comment edit cannot be detected. If
+  you edited sources since the proof, re-run GNATprove (`spark-refine
+  prove`) before relying on locations.
 * `precondition.failed_conjunct` is always `null`
   (`attribution: "not_provided_by_gnatprove"`). GNATprove 16.1.0 does not
   say which conjunct failed. Do not pick one, and do not parse the English

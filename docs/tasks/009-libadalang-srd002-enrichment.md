@@ -92,9 +92,11 @@ is the expression and the enclosing subprogram, with no callee and no Pre.
 ## 4. Source/result provenance
 
 The ablation fixtures are proved from materialised copies under
-`obj/ablation_src/<case>/`. A source file is used only if its **GNAT source
-checksum AND modification time** equal a `D` record in the analysed result
-set's `.ali` files. Those records are GNAT's own list of analysed sources:
+`obj/ablation_src/<case>/`. A source file is used only if it **matches
+GNAT's `.ali` source identity metadata**: its GNAT source checksum AND its
+modification time, at the one-second resolution GNAT records, equal a `D`
+record in the analysed result set's `.ali` files. Those records are GNAT's
+own list of analysed sources:
 `D ring_buffer.ads 20260927180831 baec7707`. The checksum is recomputed in
 `gnat_checksum.py` from Libadalang's token stream, following GNAT's
 documented algorithm (`sinput.ads`, "Checksum Handling", `scng.adb`):
@@ -104,14 +106,43 @@ underscores dropped from decimal literals, and `[ ] { }` not accumulated.
 Validated against GNAT: **28/28** source dependencies of the
 `no_is_full_post` result set (client, spec, SPARKlib, GNAT runtime), and
 all 19 committed snapshot sources. The checksum ignores layout, so the
-mtime match is also required before a line/column is trusted.
+mtime match is also required.
+
+**Limitation: this is not byte identity.** The GNAT checksum ignores
+layout and comments, and the `D` timestamp has one-second resolution. A
+layout/comment-only change made within the same timestamp second therefore
+cannot be distinguished from the proof-time source by the available
+GNATprove 16.1.0 artifacts. `.spark` records no stronger content digest.
+spark-refine does not work around this: there is no raw-content hash GNAT
+did not record, no sub-second mtime comparison and no text heuristic. The
+limitation is reported machine-readably in every `--semantic` report:
+
+```json
+"analysis": {"semantic": {"provenance": {
+  "basis": "gnat_ali_checksum_and_timestamp",
+  "checksum": "gnat_source_checksum",
+  "timestamp_resolution": "seconds",
+  "layout_exact": false,
+  "byte_exact": false}}}
+```
+
+This block is constant (deterministic, no current-run values). It is
+present whether or not enrichment was evaluated, and it describes source
+identity strength. That is independent of per-check `resolution`.
+`resolution: "exact"` means *exactly one call/assertion was found at the
+GNATprove-reported location and name resolution succeeded*. It does **not**
+mean the proof-time source bytes were proven identical to the current
+source. Stronger provenance, e.g. raw source hashes captured by
+`spark-refine prove` at proof time, is possible future work and not part
+of Task 009.
 
 Measured failure modes (tests):
 
 | situation | result |
 |---|---|
 | positive `ring_buffer.ads` used for an ablation result (no `-X`) | callee `unavailable`: checksum differs |
-| same tokens, one line inserted | `unavailable`: timestamp differs |
+| same tokens, one line inserted, mtime in a later second | `unavailable`: timestamp differs |
+| same tokens, one comment line inserted, mtime in the **same** second as the D record | **accepted** (documented limitation; test `test_same_second_layout_change_is_undetectable`). Checks shift by one line: 9:7 becomes `unresolved`, and 10:7 resolves `exact` to `Push (Q, A)`, the proof-time call of line 9. This shows that `exact` is lookup quality, not source identity |
 | Task 005 fixtures (sanitized .ali without D records) | `evaluated: false`, provenance unavailable |
 
 ## 5. Pre-registered failed-conjunct experiment — NOT ATTRIBUTABLE
@@ -193,6 +224,9 @@ parenthesised inner `and` kept whole.
       "failed_conjunct": null, "attribution": "not_provided_by_gnatprove"}}]}}]
 ```
 
+`analysis.semantic` also always carries the constant `provenance` block of
+§4 (`layout_exact: false`, `byte_exact: false`).
+
 `SPAN` = `{file, start_line, start_column, end_line, end_column}`. `file` is
 relative to the project directory, or the base name outside it (SPARKlib).
 Non-exact entries carry `resolution` + `reason`. If enrichment is not
@@ -241,8 +275,10 @@ timestamps and no Libadalang object representations.
 ## 10. Tests
 
 Existing diagnostics suite: 188 tests at Task 008 (189 with the new
-Libadalang-isolation packaging test). New `test_semantic.py`: 38 tests (26
-run without Libadalang, 12 need it). Total 227; with Libadalang, 0 skipped. E2E-F (fresh
+Libadalang-isolation packaging test). New `test_semantic.py`: 45 tests (32
+run without Libadalang, 13 need it; the provenance corrective added the
+same-second layout test, the provenance-contract tests and the E2E
+overclaim check). Total 234; with Libadalang, 0 skipped. E2E-F (fresh
 `no_is_full_post` ablation + `explain --semantic`): PASS locally.
 
 ## 11. Recommendation for Task 010

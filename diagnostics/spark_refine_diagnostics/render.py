@@ -108,8 +108,12 @@ def semantic_meta_text(m: dict) -> str:
         return (f"semantic enrichment: not evaluated "
                 f"({m.get('reason', '-')})")
     counts = ", ".join(f"{k}={v}" for k, v in m["resolutions"].items())
-    return (f"semantic enrichment: {m['backend']} {m['version']}, "
+    line = (f"semantic enrichment: {m['backend']} {m['version']}, "
             f"project {m['project']}; checks: {counts}")
+    if m.get("provenance", {}).get("layout_exact") is False:
+        line += ("\n  source match: GNAT checksum + second-resolution .ali "
+                 "timestamp (not byte-exact)")
+    return line
 
 
 def run_header(run: ProofRun) -> str:

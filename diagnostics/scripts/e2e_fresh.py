@@ -529,6 +529,13 @@ def check_semantic(report: dict) -> list[str]:
     _require(meta.get("evaluated") is True and
              meta.get("backend") == "libadalang",
              f"semantic not evaluated: {meta.get('reason')!r}", problems)
+    prov = meta.get("provenance") or {}
+    _require(prov.get("basis") == "gnat_ali_checksum_and_timestamp" and
+             prov.get("timestamp_resolution") == "seconds" and
+             prov.get("layout_exact") is False and
+             prov.get("byte_exact") is False,
+             f"semantic provenance overclaims or is missing: {prov!r}",
+             problems)
     checks = {}
     for d in report.get("diagnostics", []):
         if d.get("code") != "SRD002":

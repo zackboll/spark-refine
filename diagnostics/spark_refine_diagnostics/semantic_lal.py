@@ -11,7 +11,9 @@ and the Task 009 experiment): a VC_PRECONDITION is reported at the start
 of the called name or, for a selected name `P.Op (...)`, at the `.` before
 the selector. A check resolves to a call only if EXACTLY ONE call in the
 unit is anchored at the check's line:column; zero -> unresolved, more ->
-ambiguous. Nothing is guessed from identifier text.
+ambiguous. Nothing is guessed from identifier text. `exact` is about this
+lookup and name resolution only; it is not a claim that the current
+source bytes equal the proof-time source (see provenance_problem).
 
 Public methods return plain dicts (no Libadalang objects) and never raise
 for a semantic problem: problems become structured `resolution` states.
@@ -100,10 +102,12 @@ class LalBackend:
                 "end_line": r.end.line, "end_column": r.end.column}
 
     def provenance_problem(self, path: str) -> str | None:
-        """None iff `path` is the source GNATprove analysed, per the result
-        set's .ali D records: GNAT checksum AND timestamp both equal. (The
-        checksum ignores layout, so the timestamp is required too before
-        any line/column is trusted.)"""
+        """None iff `path` matches GNAT's .ali source identity metadata:
+        some D record of the result set has the same GNAT checksum AND the
+        same second-resolution timestamp. (The checksum ignores layout, so
+        the timestamp is required too.) This is NOT byte identity: a
+        layout/comment-only edit within the same timestamp second passes;
+        the GNATprove 16.1.0 artifacts record nothing stronger."""
         if path in self._prov:
             return self._prov[path]
         name = os.path.basename(path)
@@ -122,12 +126,12 @@ class LalBackend:
             if ck is None:
                 problem = f"{name}: GNAT checksum not computable"
             elif ck not in {c for _, c in records}:
-                problem = (f"{name}: source differs from the source "
-                           "GNATprove analysed (checksum)")
+                problem = (f"{name}: GNAT checksum does not match the "
+                           "result set's .ali D record")
             elif (mtime_stamp(path), ck) not in records:
-                problem = (f"{name}: same checksum but a different "
-                           "timestamp than the analysed source (layout "
-                           "may differ)")
+                problem = (f"{name}: GNAT checksum matches but the "
+                           "second-resolution timestamp does not match the "
+                           "result set's .ali D record (layout may differ)")
         self._prov[path] = problem
         return problem
 

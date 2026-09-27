@@ -43,8 +43,11 @@ spark-refine prove orchestration       (runs GNATprove, shows the exact command,
                                         provenance only, no proof authority)
 spark-refine --semantic / Libadalang   (optional, descriptive source context
                                         for SRD002: call, callee, explicit Pre;
-                                        used only if the source matches the
-                                        result's .ali D records; ambiguity or
+                                        used only if the source matches GNAT's
+                                        .ali checksum + 1 s timestamp, which
+                                        is NOT byte identity (same-second
+                                        layout edits undetectable; reported
+                                        as layout_exact=false); ambiguity or
                                         mismatch degrades, never guesses)
 AI agents consuming diagnostics
 future IDE integration

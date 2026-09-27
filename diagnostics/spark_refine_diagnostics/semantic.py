@@ -9,10 +9,23 @@ explanation or recommendation. Any failure (backend missing, project not
 loadable, source/result mismatch, ambiguous location, ...) is recorded as
 a structured state; the base report and the CLI exit status are unchanged.
 
-Provenance (hard requirement): a source file is used only if its GNAT
-checksum AND modification time equal a `D` record of the analysed result
-set's .ali files, i.e. it is the file GNATprove analysed. Otherwise the
-check's enrichment is `unavailable`.
+Provenance gate (hard requirement): a source file is used only if it
+matches GNAT's .ali source identity metadata, i.e. its GNAT source
+checksum AND its modification time (at the one-second resolution GNAT
+records) equal a `D` record of the analysed result set's .ali files.
+Otherwise the check's enrichment is `unavailable`.
+
+Limitation (stated, not worked around): the GNAT checksum ignores layout
+and comments and the D timestamp has one-second resolution, so a
+layout/comment-only change made within the same timestamp second cannot
+be distinguished from the proof-time source by the available GNATprove
+16.1.0 artifacts (.spark records no stronger content digest). The gate is
+therefore NOT a proof of byte-identical source; `analysis.semantic.
+provenance` says so machine-readably (PROVENANCE, `layout_exact: false`).
+
+`resolution: "exact"` is a statement about semantic lookup only: exactly
+one call/assertion was found at the GNATprove-reported location and name
+resolution succeeded. It does not strengthen the provenance above.
 
 Failed-conjunct attribution: GNATprove 16.1.0 reports one precondition
 check per call; its SARIF and .spark output carry no structural mapping
@@ -33,6 +46,16 @@ from .model import Diagnostic, Report
 BACKEND = "libadalang"
 ATTRIBUTION = "not_provided_by_gnatprove"
 RESOLUTIONS = ("exact", "ambiguous", "unresolved", "unavailable")
+
+# What the source/result provenance gate establishes. Constant, so the
+# output stays deterministic; describes the gate, not the current run.
+PROVENANCE = {
+    "basis": "gnat_ali_checksum_and_timestamp",
+    "checksum": "gnat_source_checksum",   # ignores layout and comments
+    "timestamp_resolution": "seconds",
+    "layout_exact": False,   # same-second layout/comment edits undetectable
+    "byte_exact": False,     # no proof-time content digest is available
+}
 
 
 @dataclass
@@ -55,7 +78,7 @@ def enrich_report(report: Report, result_dir: Path,
                   request: SemanticRequest, factory=None) -> Report:
     """Add analysis.semantic and per-SRD002 `semantic` blocks in place."""
     meta: dict = {"requested": True, "evaluated": False,
-                  "backend": BACKEND}
+                  "backend": BACKEND, "provenance": dict(PROVENANCE)}
     if request.project is not None:
         meta["project"] = Path(request.project).as_posix()
     if request.scenario:

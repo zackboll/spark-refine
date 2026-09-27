@@ -146,8 +146,9 @@ class AliSources:
     checksum = GNAT source checksum, see gnat_checksum.py).
 
     records: basename -> {(timestamp, checksum), ...} over all .ali files.
-    Used only to prove that semantic enrichment analyses the source
-    GNATprove analysed. Never used by SRD001-SRD003."""
+    Used only by the semantic enrichment's provenance gate (source must
+    match this GNAT source identity metadata; checksum + second-resolution
+    timestamp, not byte identity). Never used by SRD001-SRD003."""
 
     records: dict[str, set[tuple[str, str]]] = field(default_factory=dict)
     problems: list[str] = field(default_factory=list)

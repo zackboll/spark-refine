@@ -487,6 +487,11 @@ class WithLibadalang(unittest.TestCase):
         self.assertEqual(m["resolutions"], {"exact": 4, "ambiguous": 0,
                                             "unresolved": 0,
                                             "unavailable": 0})
+        self.assertEqual(m["provenance"], {
+            "basis": "gnat_ali_checksum_and_timestamp",
+            "checksum": "gnat_source_checksum",
+            "timestamp_resolution": "seconds",
+            "layout_exact": False, "byte_exact": False})
 
     def test_ring_no_is_full_post(self):
         c = self.checks("ring_no_is_full_post")
@@ -638,15 +643,76 @@ class WithLibadalang(unittest.TestCase):
         self.assertIn("checksum", c[9]["reason"])
         self.assertEqual(c[16]["resolution"], "exact")  # client unchanged
 
-    def test_layout_change_is_refused(self):
-        def touch(d):
-            p = d / "src" / "ring_buffer_client_proof.adb"
-            p.write_text("\n" + p.read_text())   # same checksum
-        rep = self.enrich_copy("ring_no_is_full_post", touch)
+    CLIENT = "src/ring_buffer_client_proof.adb"
+
+    def _layout_edit(self, d: Path, offset: float) -> Path:
+        """Insert one comment line at the top of the client body (GNAT
+        checksum unchanged: comments and layout are not accumulated) and
+        set its mtime to the recorded D timestamp + `offset` seconds."""
+        meta = json.loads((d / "snapshot.json").read_text())
+        stamp = meta["sources"][self.CLIENT]["d_timestamp"]
+        t = datetime.strptime(stamp, "%Y%m%d%H%M%S").replace(
+            tzinfo=timezone.utc).timestamp() + offset
+        p = d / self.CLIENT
+        p.write_text("--  layout-only edit\n" + p.read_text())
+        os.utime(p, (t, t))
+        return p
+
+    def test_layout_change_in_later_second_is_refused(self):
+        """The normal case: a layout edit made in a later second changes
+        the D-comparable timestamp, so the gate refuses the file."""
+        rep = self.enrich_copy("ring_no_is_full_post",
+                               lambda d: self._layout_edit(d, 5.0))
         for d in rep.diagnostics:
             for x in d.semantic["checks"]:
                 self.assertEqual(x["resolution"], "unavailable")
                 self.assertIn("timestamp", x["reason"])
+
+    def test_same_second_layout_change_is_undetectable(self):
+        """The documented LIMITATION, not a solved case. A layout/comment
+        edit whose mtime falls in the SAME second as the .ali D record is
+        indistinguishable from the proof-time source by GNAT's metadata
+        (checksum ignores layout; timestamp has 1 s resolution), so the
+        gate accepts it. The report must say the match is not
+        layout-exact, and `exact` resolution then describes the CURRENT
+        source, not the proof-time one."""
+        from spark_refine_diagnostics.ali import load_ali_sources
+        from spark_refine_diagnostics.semantic_lal import (mtime_stamp,
+                                                           open_backend)
+        with tempfile.TemporaryDirectory() as t:
+            d = materialize("ring_no_is_full_post", Path(t))
+            meta = json.loads((d / "snapshot.json").read_text())
+            rec = meta["sources"][self.CLIENT]
+            p = self._layout_edit(d, 0.7)
+            # the bytes did change ...
+            self.assertNotEqual(hashlib.sha256(p.read_bytes()).hexdigest(),
+                                rec["sha256"])
+            records = load_ali_sources(d / "results").records
+            be = open_backend(str(d / meta["project"]), {}, records)
+            # ... but both recorded identity values still match
+            self.assertEqual(mtime_stamp(str(p)), rec["d_timestamp"])
+            self.assertIn((rec["d_timestamp"], rec["gnat_checksum"]),
+                          records[p.name])
+            self.assertIsNone(be.provenance_problem(str(p.resolve())))
+            rep = analyze_path_report(d / "results")
+            enrich_report(rep, d / "results",
+                          SemanticRequest(str(d / meta["project"])))
+        m = rep.analysis["semantic"]
+        self.assertTrue(m["evaluated"])
+        self.assertEqual(m["provenance"]["basis"],
+                         "gnat_ali_checksum_and_timestamp")
+        self.assertEqual(m["provenance"]["timestamp_resolution"], "seconds")
+        self.assertIs(m["provenance"]["layout_exact"], False)
+        self.assertIs(m["provenance"]["byte_exact"], False)
+        # Additional evidence (not the core assertion): locations shifted
+        # by one line. 9:7 now hits a blank line; 10:7 now hits the call
+        # that was on line 9 at proof time and resolves `exact` to it.
+        # `exact` = one call found + resolved, NOT source identity.
+        c = {(x["location"]["line"], x["location"]["column"]): x
+             for dg in rep.diagnostics for x in dg.semantic["checks"]}
+        self.assertEqual(c[(9, 7)]["resolution"], "unresolved")
+        self.assertEqual(c[(10, 7)]["resolution"], "exact")
+        self.assertEqual(c[(10, 7)]["call"]["text"], "Push (Q, A)")
 
     def test_parse_error_is_unavailable(self):
         def breakit(d):
@@ -730,5 +796,89 @@ class E2ECheckSemantic(unittest.TestCase):
             "name"] = "Ring_Buffer.Pop"
         self.assertTrue(self.e2e.check_semantic(doc))
 
+    def test_rejects_provenance_overclaim(self):
+        doc = self.good()
+        doc["analysis"]["semantic"]["provenance"]["layout_exact"] = True
+        self.assertTrue(self.e2e.check_semantic(doc))
+        doc = self.good()
+        del doc["analysis"]["semantic"]["provenance"]
+        self.assertTrue(self.e2e.check_semantic(doc))
+
     def test_default_gate_excludes_semantic(self):
         self.assertIn("semantic", self.e2e.CASES)
+
+
+class ProvenanceContract(unittest.TestCase):
+    """Task 009 corrective: analysis.semantic.provenance states what the
+    source/result gate can establish, machine-readably and deterministically,
+    independent of backend availability and of resolution quality."""
+
+    EXPECTED = {"basis": "gnat_ali_checksum_and_timestamp",
+                "checksum": "gnat_source_checksum",
+                "timestamp_resolution": "seconds",
+                "layout_exact": False, "byte_exact": False}
+
+    def meta(self, request, factory=None, name="ring_no_is_full_post"):
+        rep = enrich_report(base_report(name), SEM / name / "results",
+                            request, factory=factory)
+        return rep, as_json(rep)["analysis"]["semantic"]
+
+    def test_present_when_evaluated_and_when_not(self):
+        _, ok = self.meta(SemanticRequest("x.gpr"),
+                          fake_factory(FakeBackend()))
+        _, no_project = self.meta(SemanticRequest(None))
+        with _block_libadalang():
+            _, no_lal = self.meta(SemanticRequest("x.gpr"))
+        for m in (ok, no_project, no_lal):
+            self.assertEqual(m["provenance"], self.EXPECTED)
+        self.assertTrue(ok["evaluated"])
+        self.assertFalse(no_project["evaluated"])
+
+    def test_no_run_specific_values(self):
+        """No timestamps/hashes of the current run: byte-identical JSON
+        across runs, and the block holds only the constant keys."""
+        a = self.meta(SemanticRequest("x.gpr"), fake_factory(FakeBackend()))
+        b = self.meta(SemanticRequest("x.gpr"), fake_factory(FakeBackend()))
+        self.assertEqual(to_json(a[0].runs, a[0].diagnostics, a[0].notes,
+                                 a[0].analysis),
+                         to_json(b[0].runs, b[0].diagnostics, b[0].notes,
+                                 b[0].analysis))
+        self.assertEqual(set(a[1]["provenance"]), set(self.EXPECTED))
+
+    def test_exact_resolution_does_not_upgrade_provenance(self):
+        """All checks `exact`, yet the gate still reports layout_exact /
+        byte_exact false: resolution quality and source-identity strength
+        are separate fields."""
+        rep, m = self.meta(SemanticRequest("x.gpr"),
+                           fake_factory(FakeBackend()),
+                           name="pool_spec_no_count_posts")
+        res = {c["resolution"] for d in rep.diagnostics
+               for c in d.semantic["checks"]
+               if c["rule"] == "VC_PRECONDITION"}
+        self.assertEqual(res, {"exact"})
+        self.assertIs(m["provenance"]["layout_exact"], False)
+        self.assertIs(m["provenance"]["byte_exact"], False)
+        for d in rep.diagnostics:
+            for c in d.semantic["checks"]:
+                self.assertNotIn("provenance", c)
+
+    def test_text_states_limitation(self):
+        rep, _ = self.meta(SemanticRequest("x.gpr"),
+                           fake_factory(FakeBackend()))
+        txt = to_text(rep.runs, rep.diagnostics, rep.notes, rep.analysis)
+        self.assertIn("GNAT checksum + second-resolution .ali timestamp "
+                      "(not byte-exact)", txt)
+
+    def test_no_stronger_provenance_is_invented(self):
+        """The gate compares only what GNAT recorded: no content hashing,
+        no sub-second mtime, no persisted state in the semantic modules."""
+        for mod in ("semantic.py", "semantic_lal.py"):
+            src = (PKG / mod).read_text("utf-8")
+            tree = ast.parse(src)
+            names = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name)}
+            attrs = {n.attr for n in ast.walk(tree)
+                     if isinstance(n, ast.Attribute)}
+            with self.subTest(module=mod):
+                self.assertNotIn("hashlib", names)
+                self.assertFalse({"st_mtime_ns", "write_text",
+                                  "write_bytes"} & attrs)

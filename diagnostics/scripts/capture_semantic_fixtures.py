@@ -18,10 +18,11 @@ collect  needs an importable libadalang. For each case it copies the result
          set (sanitized like tests/fixtures, but .ali files also keep their
          D source records) to tests/semantic_fixtures/<name>/results/ and
          the SMALLEST source corpus the semantic tests need to
-         tests/semantic_fixtures/<name>/src/. Every copied source must be
-         the exact file GNATprove analysed: its GNAT checksum AND mtime
-         must equal a D record of the result set (else: abort). Its sha256
-         and D timestamp go to snapshot.json.
+         tests/semantic_fixtures/<name>/src/. Every copied source must
+         match GNAT's .ali source identity metadata: its GNAT checksum AND
+         second-resolution mtime must equal a D record of the result set
+         (else: abort). Its sha256 (of the file as copied, NOT a proof-time
+         digest) and D timestamp go to snapshot.json.
 
 Git does not preserve mtimes, so the tests re-check each snapshot's sha256
 and only then restore the recorded D timestamp (tests/test_semantic.py).
@@ -114,7 +115,7 @@ def _verified(path: Path, records: dict) -> dict:
     """The D record `path` matches exactly (checksum and timestamp)."""
     ck, ts = _tokens_checksum(path), mtime_stamp(str(path))
     if (ts, ck) not in records.get(path.name, set()):
-        raise SystemExit(f"{path}: not the source GNATprove analysed "
+        raise SystemExit(f"{path}: does not match the .ali D records "
                          f"(checksum {ck}, mtime {ts}, .ali: "
                          f"{sorted(records.get(path.name, []))})")
     return {"d_timestamp": ts, "gnat_checksum": ck,

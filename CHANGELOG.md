@@ -14,8 +14,12 @@
   conjuncts. A `VC_ASSERT` adds the asserted expression only. The
   pre-registered experiment shows GNATprove 16.1.0 output is NOT
   ATTRIBUTABLE to a Pre conjunct, so `failed_conjunct` is always `null`.
-  Source/result provenance: sources must match the result set's `.ali`
-  `D` records (GNAT checksum, `gnat_checksum.py`, + mtime). New modules
+  Source/result provenance gate: sources must match the result set's
+  `.ali` `D` records (GNAT checksum, `gnat_checksum.py`, + second-resolution
+  mtime). This is GNAT's source identity metadata, not byte identity:
+  same-second layout/comment edits are undetectable. Reported as
+  `analysis.semantic.provenance` (`layout_exact: false`, `byte_exact:
+  false`). New modules
   `semantic.py` and `semantic_lal.py` (the only Libadalang import, lazy).
   `analysis.semantic` and `diagnostics[].semantic` are added only with
   `--semantic`, and `format_version` stays 1. Without the flag, output is
@@ -24,7 +28,7 @@
   `diagnostics/scripts/setup_libadalang.sh` builds a pinned, relocatable
   bundle (libadalang 26.0.0, 166 MB). Adds the new CI job
   `diagnostics-semantic` and E2E-F, 6 semantic snapshot cases (432 KB),
-  and 39 tests. SRD001–SRD003 are unchanged. There is no new rule.
+  and 46 tests. SRD001–SRD003 are unchanged. There is no new rule.
 
 - Task 008: `spark-refine prove -P PROJECT [-- GNATPROVE_ARGS...]`, fresh
   GNATprove orchestration (`diagnostics/spark_refine_diagnostics/orchestration.py`).

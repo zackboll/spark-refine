@@ -340,7 +340,12 @@ asserted expression. `failed_conjunct` is always `null` (`attribution:
 "not_provided_by_gnatprove"`). It still does not say which public contract
 is insufficient. The trigger, confidence and text of SRD002 are identical
 with or without it. Sources are used only if they match the result set's
-`.ali` `D` records (GNAT checksum + mtime). Any failure only sets
+`.ali` `D` records (GNAT checksum + second-resolution mtime). That is GNAT's
+source identity metadata, not byte identity: a layout/comment-only edit
+within the same second is undetectable, and `analysis.semantic.provenance`
+reports `layout_exact: false`. `resolution: "exact"` means one call was
+found at the reported location and resolved. It is not a source-identity
+claim. Any failure only sets
 `analysis.semantic.evaluated = false` or a per-check `unavailable`. See
 `docs/tasks/009-libadalang-srd002-enrichment.md`.
 

@@ -1,7 +1,9 @@
 """GNAT source checksum (the value GNAT records in .ali `D` lines).
 
-Task 009 uses it to prove SOURCE/RESULT PROVENANCE: the source Libadalang
-analyses must be the source GNATprove analysed. GNAT writes, for every
+Task 009 uses it for its SOURCE/RESULT PROVENANCE GATE: the source
+Libadalang analyses must match GNAT's .ali source identity metadata (this
+checksum plus the second-resolution D timestamp). That is not byte
+identity; see semantic.py. GNAT writes, for every
 source a unit depends on, a line
 
     D <file> <YYYYMMDDHHMMSS mtime, UTC> <8-hex checksum> ...
@@ -24,9 +26,10 @@ sinput.ads ("Checksum Handling") and implemented in scng.adb:
   * the Ada 2022 bracket characters [ ] and the braces { } are not
     accumulated.
 
-It is insensitive to layout and comments, so it alone cannot prove that
-line/column positions are unchanged; the adapter also compares the D
-timestamp with the file's modification time (semantic_lal.py).
+It is insensitive to layout and comments, so it alone says nothing about
+line/column positions; the adapter also compares the D timestamp with the
+file's modification time (semantic_lal.py). Both together still cannot
+detect a layout/comment-only edit made within the same timestamp second.
 
 This module is pure Python and only consumes a token stream; the tokens
 come from Libadalang (semantic_lal.py). It never parses Ada itself.
