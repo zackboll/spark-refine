@@ -1,0 +1,32 @@
+{
+"entities": {"1": {"name": "Ring_Buffer_Client_Proof.Push_Push_Pop"}, "10": {"name": "Ring_Buffer.Sequences.\"=\""}, "11": {"name": "Ring_Buffer.Sequences.Aggr_Append"}, "12": {"name": "Ring_Buffer.Sequences.Empty_Sequence"}, "13": {"name": "Ring_Buffer.Peek"}, "14": {"name": "Ring_Buffer.Sequences.Add"}, "15": {"name": "Ring_Buffer.Sequences.Remove"}, "16": {"name": "Ring_Buffer.Sequences.Get"}, "2": {"name": "Ring_Buffer_Client_Proof.Rotate"}, "3": {"name": "Ring_Buffer_Client_Proof"}, "4": {"name": "Ring_Buffer.Initialize"}, "5": {"name": "Ring_Buffer.Is_Empty"}, "6": {"name": "Ring_Buffer.Is_Full"}, "7": {"name": "Ring_Buffer.Model"}, "8": {"name": "Ring_Buffer.Pop"}, "9": {"name": "Ring_Buffer.Push"}},
+"flow": [
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 4, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 45, "entity": 1, "file": "ring_buffer_client_proof.ads", "line": 15, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 1, "file": "ring_buffer_client_proof.ads", "line": 17, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 20, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 13, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 20, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 26, "rule": "GLOBAL_WRONG", "severity": "info"}
+],
+"pragma_assume": [],
+"proof": [
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 7, "rule": "VC_ASSERT", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 47, "max_time": 0.0199110005050898}}},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 9, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 53, "max_time": 0.0290690008550882}}},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 10, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 94, "max_time": 0.0295829996466637}}},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 11, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 147, "max_time": 0.0385640002787113}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 13, "rule": "VC_ASSERT", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 521, "max_time": 0.0477109998464584}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 14, "rule": "VC_ASSERT", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 27, "max_time": 0.0183789990842342}}},
+{"col": 34, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 15, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 49, "max_time": 0.0198570005595684}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 15, "rule": "VC_ASSERT", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 903, "max_time": 0.0586879998445511}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 16, "rule": "VC_ASSERT", "severity": "info", "stats": {"altergo": {"count": 2, "max_steps": 269, "max_time": 0.0322219990193844}}},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 22, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 27, "max_time": 0.0119230002164841}}},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 23, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 26, "max_time": 0.0177359990775585}}},
+{"col": 22, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 24, "rule": "VC_ASSERT", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 44, "max_time": 0.0199929997324944}}},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 25, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 253, "max_time": 0.0236680004745722}}},
+{"col": 45, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 24, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 2, "max_steps": 207, "max_time": 0.023157000541687}}},
+{"col": 45, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 25, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 2, "max_steps": 206, "max_time": 0.019751999527216}}},
+{"col": 30, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 24, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 33, "max_time": 0.0124709997326136}}},
+{"col": 19, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 23, "rule": "VC_POSTCONDITION", "severity": "info", "stats": {"altergo": {"count": 1, "max_steps": 988, "max_time": 0.0559250004589558}}}
+],
+"stop_reason": "STOP_REASON_NONE"
+}

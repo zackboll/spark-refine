@@ -1,0 +1,37 @@
+{
+"entities": {"1": {"name": "Fixed_Pool_Client_Proof.Two_Allocations_Then_Release"}, "10": {"name": "Fixed_Pool.Free_Model"}, "11": {"name": "Fixed_Pool.Id_Sets.\"=\""}, "12": {"name": "Fixed_Pool.Initialize"}, "2": {"name": "Fixed_Pool_Client_Proof.Release_Then_Allocate"}, "3": {"name": "Fixed_Pool_Client_Proof.Round_Trip"}, "4": {"name": "Fixed_Pool_Client_Proof"}, "5": {"name": "Fixed_Pool.Allocate"}, "6": {"name": "Fixed_Pool.Free_Count"}, "7": {"name": "Fixed_Pool.Is_Allocated"}, "8": {"name": "Fixed_Pool.Is_Free"}, "9": {"name": "Fixed_Pool.Release"}},
+"flow": [
+{"col": 44, "entity": 1, "file": "fixed_pool_client_proof.ads", "line": 14, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 47, "entity": 1, "file": "fixed_pool_client_proof.ads", "line": 14, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 7, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 4, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 1, "file": "fixed_pool_client_proof.ads", "line": 15, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 7, "entity": 2, "file": "fixed_pool_client_proof.adb", "line": 31, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 2, "file": "fixed_pool_client_proof.ads", "line": 30, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 7, "entity": 3, "file": "fixed_pool_client_proof.adb", "line": 24, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 3, "file": "fixed_pool_client_proof.ads", "line": 22, "rule": "GLOBAL_WRONG", "severity": "info"}
+],
+"pragma_assume": [],
+"proof": [
+{"col": 7, "entity": 2, "file": "fixed_pool_client_proof.adb", "line": 33, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0102279996499419}}},
+{"col": 22, "entity": 2, "file": "fixed_pool_client_proof.adb", "line": 34, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0258859992027283}}},
+{"col": 7, "entity": 2, "file": "fixed_pool_client_proof.adb", "line": 35, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0131829995661974}}},
+{"col": 22, "entity": 2, "file": "fixed_pool_client_proof.adb", "line": 36, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.02021099999547}}},
+{"col": 19, "entity": 2, "file": "fixed_pool_client_proof.ads", "line": 32, "rule": "VC_POSTCONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0136329997330904}}},
+{"col": 7, "entity": 3, "file": "fixed_pool_client_proof.adb", "line": 26, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 9.99999997475243e-07}}},
+{"col": 7, "entity": 3, "file": "fixed_pool_client_proof.adb", "line": 27, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0147829996421933}}},
+{"col": 19, "entity": 3, "file": "fixed_pool_client_proof.ads", "line": 24, "rule": "VC_POSTCONDITION", "severity": "info", "stats": {"Z3": {"count": 2, "max_steps": 1, "max_time": 0.0236419998109341}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 7, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00855300016701221}}},
+{"col": 7, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 9, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00410499982535839}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 10, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0042820000089705}}},
+{"col": 7, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 12, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00839400012046099}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 13, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0132240001112223}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 14, "rule": "VC_ASSERT", "severity": "info", "stats": {"CVC5": {"count": 1, "max_steps": 1, "max_time": 0.0309170000255108}, "Z3": {"count": 1, "max_steps": 1, "max_time": 0.0121609997004271}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 15, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 9.99999997475243e-07}}},
+{"col": 7, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 17, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00400700001046062}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 18, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0276219993829727}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 19, "rule": "VC_ASSERT", "severity": "info", "stats": {"CVC5": {"count": 1, "max_steps": 1, "max_time": 0.0412090010941029}}},
+{"col": 22, "entity": 1, "file": "fixed_pool_client_proof.adb", "line": 20, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00401399983093143}}},
+{"col": 19, "entity": 1, "file": "fixed_pool_client_proof.ads", "line": 16, "rule": "VC_POSTCONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00341299991123378}}}
+],
+"stop_reason": "STOP_REASON_NONE"
+}

@@ -1,0 +1,26 @@
+{
+  "edits": [
+    "ablation:head_tail_count:control_push_ignores_tail_no_invariant"
+  ],
+  "example": "ring_buffer",
+  "name": "ring_b_mask_baseline",
+  "obj": "ablation_htc_srd_mask_baseline",
+  "producer": "case",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "ring_buffer",
+    "case": "ablation:head_tail_count:control_push_ignores_tail_no_invariant",
+    "command_line": "gnatprove -P ring_buffer.gpr -j0 -XRING_BUFFER_SRC=obj/ablation_src/htc_srd_mask_baseline -XRING_BUFFER_VARIANT=ablation_htc_srd_mask_baseline",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "project Prove switches: --level=2 portfolio (cvc5, z3, altergo)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "head_tail_count"
+  },
+  "source": "examples/ring_buffer/obj/ablation_htc_srd_mask_baseline/gnatprove",
+  "variant": "head_tail_count"
+}

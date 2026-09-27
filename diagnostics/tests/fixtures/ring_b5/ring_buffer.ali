@@ -1,0 +1,20 @@
+V "GNAT Lib v16"
+U ring_buffer%b		ring_buffer.adb		be592474 OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+Z spark.containers.functional.base%s  spark-containers-functional-base.adb  spark-containers-functional-base.ali  ED
+Z spark.containers.functional.holder%s  spark-containers-functional-holder.adb  spark-containers-functional-holder.ali  ED
+Z spark.containers.functional.vectors%s  spark-containers-functional-vectors.adb  spark-containers-functional-vectors.ali  ED
+Z spark.containers.parameter_checks%s  spark-containers-parameter_checks.adb  spark-containers-parameter_checks.ali  ED
+U ring_buffer%s		ring_buffer.ads		ad52fec1 OO PK
+W ada%s			ada.ads			ada.ali
+Z ada.finalization%s	a-finali.ads		a-finali.ali
+Z ada.unchecked_deallocation%s  a-uncdea.ads	a-uncdea.ali
+W spark%s		spark.ads		spark.ali
+Z spark.big_integers%s	spark-big_integers.ads	spark-big_integers.ali
+W spark.containers%s	spark-containers.ads	spark-containers.ali
+W spark.containers.functional%s  spark-containers-functional.ads  spark-containers-functional.ali
+Z spark.containers.functional.base%s  spark-containers-functional-base.adb  spark-containers-functional-base.ali
+Z spark.containers.functional.holder%s  spark-containers-functional-holder.adb  spark-containers-functional-holder.ali
+W spark.containers.functional.vectors%s  spark-containers-functional-vectors.adb  spark-containers-functional-vectors.ali
+Z spark.containers.parameter_checks%s  spark-containers-parameter_checks.adb  spark-containers-parameter_checks.ali
+Z spark.containers.types%s  spark-containers-types.ads  spark-containers-types.ali

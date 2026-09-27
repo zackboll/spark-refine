@@ -1,0 +1,22 @@
+{
+  "example": "ring_buffer",
+  "name": "ring_no_is_empty_post",
+  "obj": "ablation_no_is_empty_post",
+  "producer": "benchmark",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "ring_buffer",
+    "case": "ablation_no_is_empty_post",
+    "command_line": "gnatprove -P ring_buffer.gpr -j0 -XRING_BUFFER_SRC=obj/ablation_src/no_is_empty_post -XRING_BUFFER_VARIANT=ablation_no_is_empty_post",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "project Prove switches: --level=2 portfolio (cvc5, z3, altergo)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "first_length"
+  },
+  "source": "examples/ring_buffer/obj/ablation_no_is_empty_post/gnatprove"
+}

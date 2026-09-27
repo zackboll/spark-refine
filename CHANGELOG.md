@@ -21,6 +21,27 @@
   API, client proof and runtime tests; public-API equivalence, inventory
   (`R`, `L`, `A`), negative (L1-L6) and library-validation gates; a new CI
   job; `LIBRARY_METRICS.md`. Pre-registered decision: PIVOT (R = 10).
+- Task 005: deterministic GNATprove diagnostics MVP (`diagnostics/`,
+  `python3 -m spark_refine_diagnostics`). It reads SARIF and `.spark`
+  with the benchmark gates' classification (parity-tested), plus `.ali`
+  through a narrow, non-raising GNAT 16.1.0 adapter. It has three stable
+  rules:
+  - SRD001: invariant masking risk;
+  - SRD002: client-only proof gap; the public abstraction may be
+    insufficient (medium confidence for preconditions, low for
+    assertions; skipped when dependency information is unavailable);
+  - SRD003: prover-portfolio dependency, only for checks matched
+    `exact` or `unique_entity`, never by source order; ambiguous
+    identities are reported as metadata.
+
+  It ships 49 sanitized real GNATprove 16.1.0 fixtures, including a
+  false-client-assertion control, with provenance and ablation-based
+  ground truth. It also adds 110 fixture-based unit tests run in CI,
+  a small fresh end-to-end GNATprove gate (one case per rule, CI job
+  `diagnostics-e2e`), `diagnostics/DIAGNOSTICS_METRICS.md` and
+  `docs/tasks/005-proof-diagnostics-mvp.md`. `.ali` files with a version
+  header other than `GNAT Lib v16` are rejected (`unsupported_version`;
+  SRD002 skipped).
 
 ### Changed
 

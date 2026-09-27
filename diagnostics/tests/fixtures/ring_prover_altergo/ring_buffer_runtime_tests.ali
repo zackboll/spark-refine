@@ -1,0 +1,8 @@
+V "GNAT Lib v16"
+U ring_buffer_runtime_tests%b  ring_buffer_runtime_tests.adb  81c7ce5c OO SU
+W ada%s			ada.ads			ada.ali
+W ada.command_line%s	a-comlin.adb		a-comlin.ali
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+W ring_buffer%s		ring_buffer.adb		ring_buffer.ali
+Z system%s		system.ads		system.ali

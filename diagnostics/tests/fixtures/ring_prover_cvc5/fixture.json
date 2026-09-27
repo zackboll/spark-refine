@@ -1,0 +1,27 @@
+{
+  "edits": [],
+  "example": "ring_buffer",
+  "name": "ring_prover_cvc5",
+  "obj": "ablation_srd_prover_cvc5",
+  "producer": "case",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "ring_buffer",
+    "case": "ablation_srd_prover_cvc5",
+    "command_line": "gnatprove -P ring_buffer.gpr -j0 -XRING_BUFFER_SRC=obj/ablation_src/srd_prover_cvc5 -XRING_BUFFER_VARIANT=ablation_srd_prover_cvc5 --prover=cvc5",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "--prover=cvc5 (single prover)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "first_length"
+  },
+  "source": "examples/ring_buffer/obj/ablation_srd_prover_cvc5/gnatprove",
+  "switches": [
+    "--prover=cvc5"
+  ],
+  "variant": "first_length"
+}

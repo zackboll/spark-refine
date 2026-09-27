@@ -1,0 +1,5 @@
+V "GNAT Lib v16"
+U ring_buffer_client_proof%b  ring_buffer_client_proof.adb  03dc5732 OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+U ring_buffer_client_proof%s  ring_buffer_client_proof.ads  97925f74 OO PK
+W ring_buffer%s		ring_buffer.adb		ring_buffer.ali

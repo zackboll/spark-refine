@@ -1,0 +1,249 @@
+# Hand-written expectations for every fixture in fixtures/manifest.toml.
+#
+# diagnostics  exact multiset of "CODE:entity" the analyzer must emit for
+#              `analyze` on this fixture (SRD003 is tested in
+#              test_srd003.py because it needs several runs)
+#
+# [<fixture>.ground_truth]   SRD001 evaluation metadata (never read by the
+#                            analyzer). Two separate questions:
+#   masking_risk                   does the fixture have an unproved
+#                                  invariant + a proved postcondition of
+#                                  the same entity (what SRD001 promises)?
+#   secondary_failure_confirmed    is a proved postcondition of that entity
+#                                  actually false?
+#   basis   "differential": re-proved with the invariant removed
+#               (`mask` fixture), a VC_POSTCONDITION of the entity is
+#               unproved there and NOT unproved in the no-fault run with the
+#               invariant removed (`mask_baseline`). Compared per
+#               (rule, entity): failed and proved checks of one contract
+#               are reported at different columns.
+#           "equivalence": the fault's source edits are byte-identical to
+#               those of `equivalent_to`, which is differentially confirmed,
+#               and the entity has the same contract; the differential is
+#               not usable because `mask_baseline` already fails that
+#               postcondition without any fault.
+#           "differential-negative": the mask run shows no postcondition
+#               failure of the entity beyond the mask baseline.
+#   masked  [rule, entity] pairs whose masking is confirmed
+
+# ---- ring buffer B (Task 002) ----------------------------------------------
+[ring_b1]
+diagnostics = ["SRD001:Ring_Buffer.Push"]
+[ring_b1.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = false
+basis = "differential-negative"
+mask = "ring_b1_mask"
+mask_baseline = "ring_b_mask_baseline"
+masked = []
+
+[ring_b2]
+diagnostics = ["SRD001:Ring_Buffer.Push"]
+[ring_b2.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = false
+basis = "differential-negative"
+mask = "ring_b2_mask"
+mask_baseline = "ring_b_mask_baseline"
+masked = []
+
+[ring_b3]
+diagnostics = ["SRD001:Ring_Buffer.Pop"]
+[ring_b3.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = true
+basis = "differential"
+mask = "ring_b3_mask"
+mask_baseline = "ring_b_mask_baseline"
+masked = [["VC_POSTCONDITION", "Ring_Buffer.Pop"]]
+
+[ring_b4]
+diagnostics = ["SRD001:Ring_Buffer.Push"]
+[ring_b4.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = true
+basis = "differential"
+mask = "ring_b4_mask"
+mask_baseline = "ring_b_mask_baseline"
+masked = [["VC_POSTCONDITION", "Ring_Buffer.Push"]]
+
+[ring_b5]
+# functional fault, invariant intact: ordinary postcondition failure
+diagnostics = []
+
+[ring_b6]
+diagnostics = ["SRD001:Ring_Buffer.Clear"]
+[ring_b6.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = false
+basis = "differential-negative"
+mask = "ring_b6_mask"
+mask_baseline = "ring_b_mask_baseline"
+masked = []
+
+[ring_b_mask_baseline]
+diagnostics = []
+[ring_b1_mask]
+diagnostics = []
+[ring_b2_mask]
+diagnostics = []
+[ring_b3_mask]
+diagnostics = []
+[ring_b4_mask]
+diagnostics = []
+[ring_b6_mask]
+diagnostics = []
+
+# ---- fixed pool, manual (Task 003) -----------------------------------------
+[pool_p1]
+diagnostics = ["SRD001:Fixed_Pool.Initialize"]
+[pool_p1.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = true
+basis = "differential"
+mask = "pool_p1_mask"
+mask_baseline = "pool_p_mask_baseline"
+masked = [["VC_POSTCONDITION", "Fixed_Pool.Initialize"]]
+
+[pool_p2]
+diagnostics = []
+
+[pool_p4]
+# the Release postcondition is already reported unproved: nothing is
+# proved that could be masked, so no SRD001 (task section 10 control)
+diagnostics = []
+[pool_p4.ground_truth]
+masking_risk = false
+secondary_failure_confirmed = false
+basis = "differential"
+mask = "pool_p4_mask"
+mask_baseline = "pool_p_mask_baseline"
+masked = []
+
+[pool_p5]
+diagnostics = ["SRD001:Fixed_Pool.Release"]
+[pool_p5.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = true
+basis = "differential"
+mask = "pool_p5_mask"
+mask_baseline = "pool_p_mask_baseline"
+masked = [["VC_POSTCONDITION", "Fixed_Pool.Release"]]
+
+[pool_p_mask_baseline]
+diagnostics = []
+[pool_p1_mask]
+diagnostics = []
+[pool_p4_mask]
+diagnostics = []
+[pool_p5_mask]
+diagnostics = []
+
+# ---- fixed pool, library-backed (Task 004) ---------------------------------
+[pool_l1]
+diagnostics = ["SRD001:Fixed_Pool.Initialize"]
+[pool_l1.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = true
+basis = "differential"
+mask = "pool_l1_mask"
+mask_baseline = "pool_l_mask_baseline"
+masked = [["VC_POSTCONDITION", "Fixed_Pool.Initialize"]]
+
+[pool_l4]
+diagnostics = []
+[pool_l4.ground_truth]
+masking_risk = false
+secondary_failure_confirmed = false
+basis = "differential"
+mask = "pool_l4_mask"
+mask_baseline = "pool_l_mask_baseline"
+masked = []
+
+[pool_l5]
+diagnostics = ["SRD001:Fixed_Pool.Release"]
+[pool_l5.ground_truth]
+masking_risk = true
+secondary_failure_confirmed = true
+basis = "equivalence"
+equivalent_to = "pool_p5"
+mask = "pool_l5_mask"
+mask_baseline = "pool_l_mask_baseline"
+masked = [["VC_POSTCONDITION", "Fixed_Pool.Release"]]
+
+[pool_l_mask_baseline]
+diagnostics = []
+[pool_l1_mask]
+diagnostics = []
+[pool_l4_mask]
+diagnostics = []
+[pool_l5_mask]
+diagnostics = []
+
+# ---- SRD002: abstraction gap (Task 001 / 003 ablations) --------------------
+[ring_no_public_model_bound]
+diagnostics = ["SRD002:Ring_Buffer_Client_Proof.Rotate"]
+[ring_no_is_empty_post]
+diagnostics = ["SRD002:Ring_Buffer_Client_Proof.Push_Push_Pop",
+               "SRD002:Ring_Buffer_Client_Proof.Rotate"]
+[ring_no_is_full_post]
+diagnostics = ["SRD002:Ring_Buffer_Client_Proof.Push_Push_Pop",
+               "SRD002:Ring_Buffer_Client_Proof.Rotate"]
+[pool_spec_no_count_posts]
+# Round_Trip fails only its own VC_POSTCONDITION (not a qualifying rule),
+# so it is reported only as context where it shares an entity
+diagnostics = ["SRD002:Fixed_Pool_Client_Proof.Release_Then_Allocate",
+               "SRD002:Fixed_Pool_Client_Proof.Two_Allocations_Then_Release"]
+
+# ---- SRD002: false client assertion (client-only gap, no contract defect) --
+[pool_false_client_assert]
+# the pool is fully proved; the client's assertion is simply false. SRD002
+# fires (client-only proof gap, LOW confidence: VC_ASSERT) and that is not a
+# false positive under SRD002's definition
+diagnostics = ["SRD002:Fixed_Pool_False_Client.Initialize_Then_Claim_Empty"]
+
+# ---- SRD002 negative controls ----------------------------------------------
+[ring_n1]
+diagnostics = []
+[ring_n2]
+diagnostics = []
+[ring_ctl_post_and_client]
+# client fails too, but so does an implementation postcondition
+diagnostics = []
+[ring_ctl_range_and_client]
+# client fails too, but so does a range check in production code
+diagnostics = []
+[ring_ctl_invariant_and_client]
+# client fails too, but so does the representation invariant; SRD001 is
+# still reported for the implementation entity
+diagnostics = ["SRD001:Ring_Buffer.Push"]
+
+# ---- positive proofs -------------------------------------------------------
+[ring_positive]
+diagnostics = []
+[pool_positive]
+diagnostics = []
+[pool_lib_positive]
+diagnostics = []
+
+# ---- single-prover runs (analyzed individually) ----------------------------
+[pool_prover_cvc5]
+# CVC5 alone fails the Release invariant while proving its postcondition:
+# a structurally real masking risk in that run (no fault in the code)
+diagnostics = ["SRD001:Fixed_Pool.Release"]
+[pool_prover_z3]
+diagnostics = []
+[pool_prover_altergo]
+diagnostics = []
+[pool_lib_prover_cvc5]
+diagnostics = ["SRD001:Fixed_Pool.Release"]
+[pool_lib_prover_z3]
+diagnostics = []
+[pool_lib_prover_altergo]
+diagnostics = []
+[ring_prover_cvc5]
+diagnostics = []
+[ring_prover_z3]
+diagnostics = []
+[ring_prover_altergo]
+diagnostics = []

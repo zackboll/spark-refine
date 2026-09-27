@@ -1,0 +1,8 @@
+V "GNAT Lib v16"
+U fixed_pool_runtime_tests%b  fixed_pool_runtime_tests.adb  e8f2070b OO SU
+W ada%s			ada.ads			ada.ali
+W ada.command_line%s	a-comlin.adb		a-comlin.ali
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+W fixed_pool%s		fixed_pool.adb		fixed_pool.ali
+Z system%s		system.ads		system.ali

@@ -1,0 +1,285 @@
+# Provenance of every diagnostics fixture. Consumed by
+# diagnostics/scripts/capture_fixtures.py (produce/collect) and by the
+# tests (the fixture set must equal this list).
+#
+#   example   examples/<example>
+#   obj       examples/<example>/obj/<obj>/gnatprove holds the raw output
+#   producer  "benchmark": made by the benchmark's own scripts (negative
+#                          gates, ablation scripts, prover_matrix.py); the
+#                          exact commands are in README.md
+#             "gate":      positive gate of `variant`
+#             "case":      run by capture_fixtures.py through the example's
+#                          ablation run_case, applying `edits` in order;
+#                          each edit is "fault:<dir with fault.toml>" or
+#                          "ablation:<variant>:<case>"
+#   switches  extra gnatprove switches (case only)
+#   extra_sources  fixture-only Ada units (dirs relative to diagnostics/)
+#                  staged next to src/ under obj/ (case only, fixed_pool)
+#
+# Ring buffer B ground truth uses the repository's control case
+# control_push_ignores_tail_no_invariant (no invariant, Push computes its
+# slot from Head/Count instead of reading Tail; 116/116 proved without a
+# fault). Removing the invariant alone breaks the Push postcondition even
+# without a fault (ablation no_type_invariant), which would make every Push
+# fault look "confirmed". With the control, B3/B4 confirm and B1/B2/B6 do
+# not.
+
+# ---- SRD001: ring buffer representation B (Task 002) ----------------------
+[ring_b1]
+example = "ring_buffer"
+obj = "negative_htc_tail_not_advanced"
+producer = "benchmark"
+[ring_b2]
+example = "ring_buffer"
+obj = "negative_htc_tail_advances_twice"
+producer = "benchmark"
+[ring_b3]
+example = "ring_buffer"
+obj = "negative_htc_head_advances_wrong"
+producer = "benchmark"
+[ring_b4]
+example = "ring_buffer"
+obj = "negative_htc_count_not_incremented"
+producer = "benchmark"
+[ring_b5]
+example = "ring_buffer"
+obj = "negative_htc_push_writes_head"
+producer = "benchmark"
+[ring_b6]
+example = "ring_buffer"
+obj = "negative_htc_clear_keeps_tail"
+producer = "benchmark"
+[ring_b_mask_baseline]
+example = "ring_buffer"
+obj = "ablation_htc_srd_mask_baseline"
+producer = "case"
+variant = "head_tail_count"
+edits = ["ablation:head_tail_count:control_push_ignores_tail_no_invariant"]
+[ring_b1_mask]
+example = "ring_buffer"
+obj = "ablation_htc_srd_mask_b1"
+producer = "case"
+variant = "head_tail_count"
+edits = ["fault:variants/head_tail_count/negative/tail_not_advanced",
+         "ablation:head_tail_count:control_push_ignores_tail_no_invariant"]
+[ring_b2_mask]
+example = "ring_buffer"
+obj = "ablation_htc_srd_mask_b2"
+producer = "case"
+variant = "head_tail_count"
+edits = ["fault:variants/head_tail_count/negative/tail_advances_twice",
+         "ablation:head_tail_count:control_push_ignores_tail_no_invariant"]
+[ring_b3_mask]
+example = "ring_buffer"
+obj = "ablation_htc_srd_mask_b3"
+producer = "case"
+variant = "head_tail_count"
+edits = ["fault:variants/head_tail_count/negative/head_advances_wrong",
+         "ablation:head_tail_count:control_push_ignores_tail_no_invariant"]
+[ring_b4_mask]
+example = "ring_buffer"
+obj = "ablation_htc_srd_mask_b4"
+producer = "case"
+variant = "head_tail_count"
+edits = ["fault:variants/head_tail_count/negative/count_not_incremented",
+         "ablation:head_tail_count:control_push_ignores_tail_no_invariant"]
+[ring_b6_mask]
+example = "ring_buffer"
+obj = "ablation_htc_srd_mask_b6"
+producer = "case"
+variant = "head_tail_count"
+edits = ["fault:variants/head_tail_count/negative/clear_keeps_tail",
+         "ablation:head_tail_count:control_push_ignores_tail_no_invariant"]
+
+# ---- SRD001: fixed pool, manual (Task 003) ---------------------------------
+[pool_p1]
+example = "fixed_pool"
+obj = "negative_p1_duplicate_initial"
+producer = "benchmark"
+[pool_p2]
+example = "fixed_pool"
+obj = "negative_p2_allocate_keeps_top"
+producer = "benchmark"
+[pool_p4]
+example = "fixed_pool"
+obj = "negative_p4_release_wrong_id"
+producer = "benchmark"
+[pool_p5]
+example = "fixed_pool"
+obj = "negative_p5_release_duplicate"
+producer = "benchmark"
+[pool_p_mask_baseline]
+example = "fixed_pool"
+obj = "ablation_no_uniqueness_invariant"
+producer = "benchmark"
+[pool_p1_mask]
+example = "fixed_pool"
+obj = "ablation_mask_p1_duplicate_initial"
+producer = "benchmark"
+[pool_p4_mask]
+example = "fixed_pool"
+obj = "ablation_mask_p4_release_wrong_id"
+producer = "benchmark"
+[pool_p5_mask]
+example = "fixed_pool"
+obj = "ablation_mask_p5_release_duplicate"
+producer = "benchmark"
+
+# ---- SRD001: fixed pool, library-backed (Task 004) -------------------------
+[pool_l1]
+example = "fixed_pool"
+obj = "negative_lib_l1_duplicate_initial"
+producer = "benchmark"
+[pool_l4]
+example = "fixed_pool"
+obj = "negative_lib_l4_release_wrong_id"
+producer = "benchmark"
+[pool_l5]
+example = "fixed_pool"
+obj = "negative_lib_l5_release_duplicate"
+producer = "benchmark"
+[pool_l_mask_baseline]
+example = "fixed_pool"
+obj = "ablation_lib_residual_no_invariant"
+producer = "benchmark"
+[pool_l1_mask]
+example = "fixed_pool"
+obj = "ablation_lib_mask_l1_duplicate_initial"
+producer = "benchmark"
+[pool_l4_mask]
+example = "fixed_pool"
+obj = "ablation_lib_mask_l4_release_wrong_id"
+producer = "benchmark"
+[pool_l5_mask]
+example = "fixed_pool"
+obj = "ablation_lib_mask_l5_release_duplicate"
+producer = "benchmark"
+
+# ---- SRD002: abstraction gap (Task 001 / Task 003 ablations) ---------------
+[ring_no_public_model_bound]
+example = "ring_buffer"
+obj = "ablation_no_public_model_bound"
+producer = "benchmark"
+[ring_no_is_empty_post]
+example = "ring_buffer"
+obj = "ablation_no_is_empty_post"
+producer = "benchmark"
+[ring_no_is_full_post]
+example = "ring_buffer"
+obj = "ablation_no_is_full_post"
+producer = "benchmark"
+[pool_spec_no_count_posts]
+example = "fixed_pool"
+obj = "ablation_spec_no_count_posts"
+producer = "benchmark"
+
+# ---- SRD002: false client assertion control (Task 005 corrective) ----------
+# The unchanged, fully proved Task 003 pool plus one extra client unit
+# (tests/fixture_sources/fixed_pool_false_client) whose assertion is simply
+# false (Initialize; pragma Assert (Free_Count (P) = 0)). No public contract
+# is insufficient here: SRD002 must fire as a client-only proof gap at LOW
+# confidence and must not claim a contract deficiency.
+[pool_false_client_assert]
+example = "fixed_pool"
+obj = "ablation_false_client_assert"
+producer = "case"
+variant = "baseline"
+edits = []
+extra_sources = ["tests/fixture_sources/fixed_pool_false_client"]
+
+# ---- SRD002 negative controls ----------------------------------------------
+# implementation-local failures alone (Task 001 faults N1, N2)
+[ring_n1]
+example = "ring_buffer"
+obj = "negative_wrong_append_slot"
+producer = "benchmark"
+[ring_n2]
+example = "ring_buffer"
+obj = "negative_wraparound_off_by_one"
+producer = "benchmark"
+# the same kinds of implementation failure plus a real client failure
+[ring_ctl_post_and_client]
+example = "ring_buffer"
+obj = "ablation_srd_ctl_post_and_client"
+producer = "case"
+variant = "first_length"
+edits = ["ablation:first_length:no_is_full_post",
+         "fault:negative/wrong_append_slot"]
+[ring_ctl_range_and_client]
+example = "ring_buffer"
+obj = "ablation_srd_ctl_range_and_client"
+producer = "case"
+variant = "first_length"
+edits = ["ablation:first_length:no_is_full_post",
+         "fault:negative/wraparound_off_by_one"]
+[ring_ctl_invariant_and_client]
+example = "ring_buffer"
+obj = "ablation_htc_srd_ctl_invariant_and_client"
+producer = "case"
+variant = "head_tail_count"
+edits = ["ablation:head_tail_count:no_is_full_post",
+         "fault:variants/head_tail_count/negative/tail_not_advanced"]
+
+# ---- positive proofs (no diagnostic expected) ------------------------------
+[ring_positive]
+example = "ring_buffer"
+obj = "baseline"
+producer = "gate"
+variant = "first_length"
+[pool_positive]
+example = "fixed_pool"
+obj = "baseline"
+producer = "gate"
+variant = "baseline"
+[pool_lib_positive]
+example = "fixed_pool"
+obj = "library_backed"
+producer = "benchmark"
+
+# ---- SRD003: single-prover runs (Task 003/004 prover matrices) -------------
+[pool_prover_cvc5]
+example = "fixed_pool"
+obj = "prover_cvc5"
+producer = "benchmark"
+[pool_prover_z3]
+example = "fixed_pool"
+obj = "prover_z3"
+producer = "benchmark"
+[pool_prover_altergo]
+example = "fixed_pool"
+obj = "prover_altergo"
+producer = "benchmark"
+[pool_lib_prover_cvc5]
+example = "fixed_pool"
+obj = "prover_library_backed_cvc5"
+producer = "benchmark"
+[pool_lib_prover_z3]
+example = "fixed_pool"
+obj = "prover_library_backed_z3"
+producer = "benchmark"
+[pool_lib_prover_altergo]
+example = "fixed_pool"
+obj = "prover_library_backed_altergo"
+producer = "benchmark"
+# SRD003 negative control: ring buffer A with each prover alone
+[ring_prover_cvc5]
+example = "ring_buffer"
+obj = "ablation_srd_prover_cvc5"
+producer = "case"
+variant = "first_length"
+edits = []
+switches = ["--prover=cvc5"]
+[ring_prover_z3]
+example = "ring_buffer"
+obj = "ablation_srd_prover_z3"
+producer = "case"
+variant = "first_length"
+edits = []
+switches = ["--prover=z3"]
+[ring_prover_altergo]
+example = "ring_buffer"
+obj = "ablation_srd_prover_altergo"
+producer = "case"
+variant = "first_length"
+edits = []
+switches = ["--prover=altergo"]

@@ -1,0 +1,23 @@
+{
+  "example": "ring_buffer",
+  "name": "ring_positive",
+  "obj": "baseline",
+  "producer": "gate",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "ring_buffer",
+    "case": "baseline",
+    "command_line": "gnatprove -P ring_buffer.gpr -j0 -XRING_BUFFER_SRC=src -XRING_BUFFER_VARIANT=baseline",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "project Prove switches: --level=2 portfolio (cvc5, z3, altergo)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "first_length"
+  },
+  "source": "examples/ring_buffer/obj/baseline/gnatprove",
+  "variant": "first_length"
+}
