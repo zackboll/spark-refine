@@ -2,6 +2,7 @@
 
   spark-refine explain [PATH] [--client-unit U ...] [--format text|json]
                               [--fail-on SRD00x ...]
+                              [--semantic -P PROJECT [-X NAME=VALUE ...]]
   spark-refine analyze PATH   (compatibility alias of explain; PATH
                                required)
   spark-refine compare-provers --run NAME=PATH --run ...
@@ -10,7 +11,14 @@
   spark-refine prove -P PROJECT [--gnatprove PATH] [--results PATH]
                      [--dry-run] [--client-unit U ...]
                      [--format text|json] [--fail-on SRD00x ...]
+                     [--semantic [-X NAME=VALUE ...]]
                      [-- GNATPROVE_ARGS...]
+
+--semantic (Task 009, experimental) adds Libadalang source context to
+SRD002 (call, callee, explicit Pre). It needs an importable libadalang
+and -P; -X values are for Libadalang's project loading only (not passed to
+GNATprove). Unavailable enrichment never changes the report or the exit
+status. Without --semantic, -P/-X on explain/analyze have no effect.
 
 `python3 -m spark_refine_diagnostics ...` accepts the same commands.
 
@@ -55,7 +63,7 @@ from pathlib import Path
 from . import __version__
 from .analyzer import analyze_path_report, compare_provers_report
 from .discovery import DiscoveryError, discover
-from .loader import load_run
+from .loader import load_run, resolve_input
 from .orchestration import (DEFAULT_GNATPROVE, Freshness, FreshnessError,
                             LaunchError, build_command, display_command,
                             exit_status, metadata, normalize_returncode,
@@ -77,6 +85,23 @@ def _named(spec: str) -> tuple[str, Path]:
     return name, Path(path)
 
 
+def _scenario(spec: str) -> tuple[str, str]:
+    name, sep, value = spec.partition("=")
+    if not sep or not name:
+        raise argparse.ArgumentTypeError(
+            f"expected NAME=VALUE, got {spec!r}")
+    return name, value
+
+
+def _semantic(report, result_dir: Path, args) -> None:
+    """Task 009 --semantic: additive, never fatal (semantic.py)."""
+    if not getattr(args, "semantic", False):
+        return
+    from .semantic import SemanticRequest, enrich_report
+    enrich_report(report, result_dir,
+                  SemanticRequest(args.project, dict(args.scenario)))
+
+
 def _single_run_args(s: argparse.ArgumentParser, optional_path: bool
                      ) -> None:
     if optional_path:
@@ -91,6 +116,9 @@ def _single_run_args(s: argparse.ArgumentParser, optional_path: bool
     s.add_argument("--client-unit", action="append", default=[],
                    help="treat this unit as a client of all other analysed "
                         "units (overrides .ali dependency discovery)")
+    s.add_argument("-P", "--project", default=None,
+                   help="GPR project of the analysed run (used only with "
+                        "--semantic; never guessed)")
 
 
 def _parser(prog: str = PROG) -> argparse.ArgumentParser:
@@ -154,6 +182,17 @@ def _parser(prog: str = PROG) -> argparse.ArgumentParser:
     pr.add_argument("--client-unit", action="append", default=[],
                     help="as for explain")
 
+    for s in (e, a, pr):
+        s.add_argument("--semantic", action="store_true",
+                       help="experimental (Task 009): add Libadalang source "
+                            "semantics to SRD002 (called subprogram, its "
+                            "explicit Pre); needs -P PROJECT and an "
+                            "importable libadalang; failures never change "
+                            "the base report or exit status")
+        s.add_argument("-X", dest="scenario", action="append", default=[],
+                       type=_scenario, metavar="NAME=VALUE",
+                       help="GPR scenario variable for --semantic project "
+                            "loading (not passed to GNATprove)")
     for s in (e, a, c, pr):
         s.add_argument("--format", choices=("text", "json"),
                        default="text")
@@ -246,6 +285,7 @@ def prove(args, passthrough: list[str]) -> int:
             return code
         return 2
     report.analysis["orchestration"] = metadata(argv, raw, selection)
+    _semantic(report, resolve_input(selection.path)[1], args)
     if code == 0:
         note = _unproved_note(report)
         if note:
@@ -276,6 +316,7 @@ def main(argv: list[str] | None = None, prog: str = PROG) -> int:
             report = analyze_path_report(path, args.name, args.client_unit)
             if source is not None:
                 report.analysis["input"] = source
+            _semantic(report, resolve_input(path)[1], args)
         else:
             if len(args.run) < 2:
                 print("compare-provers needs at least two --run",

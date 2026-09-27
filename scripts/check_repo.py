@@ -44,6 +44,10 @@ REQUIRED = [
     "docs/tasks/007-documentation-realignment.md",
     "diagnostics/spark_refine_diagnostics/orchestration.py",
     "docs/tasks/008-proof-run-orchestration.md",
+    "diagnostics/spark_refine_diagnostics/semantic.py",
+    "diagnostics/spark_refine_diagnostics/semantic_lal.py",
+    "diagnostics/scripts/setup_libadalang.sh",
+    "docs/tasks/009-libadalang-srd002-enrichment.md",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

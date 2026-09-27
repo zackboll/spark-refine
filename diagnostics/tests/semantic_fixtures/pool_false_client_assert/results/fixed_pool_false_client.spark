@@ -1,0 +1,12 @@
+{
+"entities": {"1": {"name": "Fixed_Pool_False_Client.Initialize_Then_Claim_Empty"}, "2": {"name": "Fixed_Pool_False_Client"}},
+"flow": [
+{"col": 14, "entity": 1, "file": "fixed_pool_false_client.ads", "line": 16, "rule": "INEFFECTIVE", "severity": "warning"},
+{"col": 7, "entity": 1, "file": "fixed_pool_false_client.adb", "line": 4, "rule": "UNINITIALIZED", "severity": "info"}
+],
+"pragma_assume": [],
+"proof": [
+{"col": 22, "entity": 1, "file": "fixed_pool_false_client.adb", "line": 9, "rule": "VC_ASSERT", "severity": "medium"}
+],
+"stop_reason": "STOP_REASON_NONE"
+}

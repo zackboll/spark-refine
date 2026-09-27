@@ -1,0 +1,23 @@
+{
+"entities": {"1": {"name": "Ops.Paren_Or"}, "2": {"name": "Ops.Over"}, "3": {"name": "Ops.F"}, "4": {"name": "Ops.Op"}, "5": {"name": "Ops.Over"}, "6": {"name": "Ops.Nested_Calls"}, "7": {"name": "Ops.Op3"}, "8": {"name": "Ops.No_Pre"}, "9": {"name": "Ops"}},
+"flow": [
+{"col": 9, "entity": 1, "file": "ops.ads", "line": 25, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 2, "file": "ops.ads", "line": 34, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 13, "entity": 3, "file": "ops.ads", "line": 13, "rule": "SUBPROGRAM_TERMINATION", "severity": "info"},
+{"col": 9, "entity": 3, "file": "ops.ads", "line": 16, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 4, "file": "ops.ads", "line": 5, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 5, "file": "ops.ads", "line": 38, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 6, "file": "ops.ads", "line": 29, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 7, "file": "ops.ads", "line": 11, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 8, "file": "ops.ads", "line": 21, "rule": "GLOBAL_WRONG", "severity": "info"}
+],
+"pragma_assume": [],
+"proof": [
+{"col": 50, "entity": 3, "file": "ops.adb", "line": 7, "rule": "VC_OVERFLOW_CHECK", "severity": "info", "stats": {"Z3": {"count": 2, "max_steps": 1, "max_time": 0.00396799994632602}}},
+{"col": 32, "entity": 3, "file": "ops.ads", "line": 15, "rule": "VC_OVERFLOW_CHECK", "severity": "info", "stats": {"CVC5": {"count": 1, "max_steps": 1, "max_time": 0.0144539996981621}, "Z3": {"count": 1, "max_steps": 1, "max_time": 0.00391600001603365}}},
+{"col": 19, "entity": 3, "file": "ops.ads", "line": 15, "rule": "VC_POSTCONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00375599996186793}}},
+{"col": 47, "entity": 6, "file": "ops.ads", "line": 28, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"CVC5": {"count": 1, "max_steps": 1, "max_time": 0.0223529990762472}, "Z3": {"count": 1, "max_steps": 1, "max_time": 9.99999997475243e-07}}},
+{"col": 44, "entity": 6, "file": "ops.ads", "line": 28, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"CVC5": {"count": 1, "max_steps": 1, "max_time": 0.00872199982404709}, "Z3": {"count": 1, "max_steps": 1, "max_time": 0.0152310002595186}}}
+],
+"stop_reason": "STOP_REASON_NONE"
+}

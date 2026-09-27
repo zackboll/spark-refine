@@ -260,9 +260,12 @@ agent chooses the appropriate class of change
 
 ## 6. What does not exist yet
 
-* **No Libadalang integration.** Diagnostics work only from GNATprove
-  output. They cannot name a callee, resolve a contract conjunct, or
-  map a failure to a source abstraction.
+* **Libadalang only as optional, descriptive SRD002 context** (Task 009,
+  `--semantic`, `semantic.py` / `semantic_lal.py`). It can name the call,
+  callee and explicit `Pre` behind an SRD002 precondition failure, but it
+  cannot say which conjunct failed (GNATprove 16.1.0 output does not
+  record it). It does not map failures to source abstractions, and no rule
+  depends on it.
 * **No prover-matrix orchestration.** `prove` runs exactly one GNATprove
   invocation. SRD003 still requires separate single-prover runs plus
   `compare-provers`. `prove` also parses no GPR and has no

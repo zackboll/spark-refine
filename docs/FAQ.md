@@ -88,6 +88,16 @@ mechanically enforced today.
   unsoundness. Do not rewrite a valid proof merely because one solver
   fails.
 
+### Can spark-refine tell me which Pre conjunct failed?
+
+No. With the optional `--semantic` (Task 009, needs Libadalang) SRD002
+shows the call, the callee and its explicit `Pre` split into top-level
+conjuncts. GNATprove 16.1.0's SARIF and `.spark` output do not say which
+conjunct failed, so `failed_conjunct` is always `null`. The pre-registered
+experiment is in `docs/tasks/009-libadalang-srd002-enrichment.md`.
+spark-refine does not guess one from the message text or from variable
+names.
+
 ### Which toolchains are supported?
 
 It is validated on FSF GNAT / GNATprove / SPARKlib 16.1.0. `.ali`

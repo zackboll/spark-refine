@@ -1,0 +1,23 @@
+{
+  "name": "ring_no_is_empty_post",
+  "needs_sparklib": true,
+  "origin": "examples/ring_buffer scripts/ablate_proof_support.py --only no_is_empty_post",
+  "project": "semantic.gpr",
+  "sources": {
+    "src/ring_buffer.ads": {
+      "d_timestamp": "20260927011903",
+      "gnat_checksum": "8d8ca98b",
+      "sha256": "5aacbae37ab95529d149b0987824e0c12f9982a87565f1725e79cf083a35c6ce"
+    },
+    "src/ring_buffer_client_proof.adb": {
+      "d_timestamp": "20260926081800",
+      "gnat_checksum": "3197b6bc",
+      "sha256": "4ac9afc2bccd403f1283ef99e118b27ad0846fb458c2caeb16ef8826658283fc"
+    },
+    "src/ring_buffer_client_proof.ads": {
+      "d_timestamp": "20260926081800",
+      "gnat_checksum": "324be18e",
+      "sha256": "b6f14bbe7bc1f7fb154e0a2ac4f70b54265d586d623d28a16c1c7cefcde3469c"
+    }
+  }
+}

@@ -152,6 +152,22 @@ def installed_cli_checks(venv: Path, work: Path, editable: bool) -> None:
               f"package imported from the venv, not the repo ({where})")
 
     run([exe, "--version"], cwd=outside, env=env)
+    # Task 009: the core install has no libadalang; --semantic degrades,
+    # never fails, and leaves the base report intact
+    sem_fixture = DIAGNOSTICS / "tests" / "semantic_fixtures" / \
+        "ring_no_is_full_post" / "results"
+    no_lal = run([py, "-c", "import importlib.util as u; "
+                  "print(u.find_spec('libadalang') is None)"],
+                 cwd=outside, env=env).stdout.strip()
+    if no_lal == "True":
+        doc = json.loads(run([exe, "explain", sem_fixture, "--semantic",
+                              "-P", "x.gpr", "--format", "json"],
+                             cwd=outside, env=env).stdout)
+        sem = doc["analysis"]["semantic"]
+        check(sem["evaluated"] is False and "not importable" in
+              sem["reason"] and doc["summary"]["by_code"]["SRD002"] == 2,
+              "core install: --semantic without libadalang degrades "
+              "(exit 0, base SRD002 kept, evaluated=false)")
     out = run([exe, "rules"], cwd=outside, env=env).stdout
     check(all(c in out for c in ("SRD001", "SRD002", "SRD003")),
           "spark-refine rules lists SRD001-SRD003")

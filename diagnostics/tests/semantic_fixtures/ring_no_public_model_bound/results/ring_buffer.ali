@@ -1,0 +1,53 @@
+V "GNAT Lib v16"
+U ring_buffer%b		ring_buffer.adb		b8493e75 OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+Z spark.containers.functional.base%s  spark-containers-functional-base.adb  spark-containers-functional-base.ali  ED
+Z spark.containers.functional.holder%s  spark-containers-functional-holder.adb  spark-containers-functional-holder.ali  ED
+Z spark.containers.functional.vectors%s  spark-containers-functional-vectors.adb  spark-containers-functional-vectors.ali  ED
+Z spark.containers.parameter_checks%s  spark-containers-parameter_checks.adb  spark-containers-parameter_checks.ali  ED
+U ring_buffer%s		ring_buffer.ads		5716127d OO PK
+W ada%s			ada.ads			ada.ali
+Z ada.finalization%s	a-finali.ads		a-finali.ali
+Z ada.unchecked_deallocation%s  a-uncdea.ads	a-uncdea.ali
+W spark%s		spark.ads		spark.ali
+Z spark.big_integers%s	spark-big_integers.ads	spark-big_integers.ali
+W spark.containers%s	spark-containers.ads	spark-containers.ali
+W spark.containers.functional%s  spark-containers-functional.ads  spark-containers-functional.ali
+Z spark.containers.functional.base%s  spark-containers-functional-base.adb  spark-containers-functional-base.ali
+Z spark.containers.functional.holder%s  spark-containers-functional-holder.adb  spark-containers-functional-holder.ali
+W spark.containers.functional.vectors%s  spark-containers-functional-vectors.adb  spark-containers-functional-vectors.ali
+Z spark.containers.parameter_checks%s  spark-containers-parameter_checks.adb  spark-containers-parameter_checks.ali
+Z spark.containers.types%s  spark-containers-types.ads  spark-containers-types.ali
+D ada.ads		20260430083320 76789da1 ada%s
+D a-contai.ads		20260430083320 61e5e089 ada.containers%s
+D a-finali.ads		20260430083320 099c16e4 ada.finalization%s
+D a-numeri.ads		20260430083320 84bea7a3 ada.numerics%s
+D a-nubinu.ads		20260430083320 93f1f3d1 ada.numerics.big_numbers%s
+D a-nbnbin.ads		20260430083320 b754d391 ada.numerics.big_numbers.big_integers%s
+D a-nbnbin.adb		20260430083320 7a19f767 ada.numerics.big_numbers.big_integers%b
+D a-string.ads		20260430083320 90ac6797 ada.strings%s
+D a-sttebu.ads		20260430083320 f1ad67a2 ada.strings.text_buffers%s
+D a-stuten.ads		20260430083320 c6ced0ae ada.strings.utf_encoding%s
+D a-unccon.ads		20260430083320 0e9b276f ada.unchecked_conversion%s
+D a-uncdea.ads		20260430083320 c3a8ac65 ada.unchecked_deallocation%s
+D interfac.ads		20260430083320 9111f9c1 interfaces%s
+D ring_buffer.ads	20260927011855 a5d9befa ring_buffer%s
+D ring_buffer.adb	20260926082727 1d90808f ring_buffer%b
+D spark.ads		20260926075858 05bc62fb spark%s
+D spark-big_integers.ads  20260926075858 de2ace04 spark.big_integers%s
+D spark-containers.ads	20260926075858 b9eeaae6 spark.containers%s
+D spark-containers-functional.ads  20260926075858 3a6db2a9 spark.containers.functional%s
+D spark-containers-functional-base.ads  20260926075858 1d31f847 spark.containers.functional.base%s
+D spark-containers-functional-base.adb  20260926075858 fc46605d spark.containers.functional.base%b
+D spark-containers-functional-holder.ads  20260926075858 502cfd76 spark.containers.functional.holder%s
+D spark-containers-functional-holder.adb  20260926075858 bf2a3ba8 spark.containers.functional.holder%b
+D spark-containers-functional-vectors.ads  20260926075858 f2cfac87 spark.containers.functional.vectors%s
+D spark-containers-functional-vectors.adb  20260926075858 6ebc5a7b spark.containers.functional.vectors%b
+D spark-containers-parameter_checks.ads  20260926075858 8077323d spark.containers.parameter_checks%s
+D spark-containers-parameter_checks.adb  20260926075858 be351039 spark.containers.parameter_checks%b
+D spark-containers-types.ads  20260926075858 3efe423a spark.containers.types%s
+D system.ads		20260430083320 e2b7c99d system%s
+D s-finroo.ads		20260430083320 0a7c3ed4 system.finalization_root%s
+D s-genbig.ads		20260430083320 70a1f56a system.generic_bignums%s
+D s-shabig.ads		20260430083320 5417e075 system.shared_bignums%s
+D s-unstyp.ads		20260430083320 fa2a7f59 system.unsigned_types%s

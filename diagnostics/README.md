@@ -329,14 +329,20 @@ If any analysed unit lacks a valid `.ali`:
 
 `--client-unit U` supplies the dependency information explicitly instead.
 
-**Future refinement (not in this MVP).** A later version could use
-Libadalang to identify:
-
-* the failing call and its callee;
-* the precondition conjunct that failed;
-* the public query/model contract that is insufficient.
-
-The MVP tests whether the coarse diagnostic is already useful.
+**Optional semantic context (Task 009).** `--semantic -P PROJECT
+[-X NAME=VALUE ...]` adds a `semantic` block per SRD002 when Libadalang is
+importable (`scripts/setup_libadalang.sh`). For each client failure it
+gives a `resolution` (`exact` / `ambiguous` / `unresolved` /
+`unavailable`). For an `exact` `VC_PRECONDITION` it adds the call text and
+range, the callee (qualified name, declaration range) and its explicit
+`Pre` with top-level conjuncts. For a `VC_ASSERT`, it adds only the
+asserted expression. `failed_conjunct` is always `null` (`attribution:
+"not_provided_by_gnatprove"`). It still does not say which public contract
+is insufficient. The trigger, confidence and text of SRD002 are identical
+with or without it. Sources are used only if they match the result set's
+`.ali` `D` records (GNAT checksum + mtime). Any failure only sets
+`analysis.semantic.evaluated = false` or a per-check `unavailable`. See
+`docs/tasks/009-libadalang-srd002-enrichment.md`.
 
 ### SRD003: prover-portfolio dependency
 
@@ -563,6 +569,7 @@ unsanitized SARIF / `.spark` / `.ali`. Three per-rule cases, plus two
 | E2E-A SRD001 | ring buffer B, fault B3 `head_advances_wrong` (`check_proof_results.py negative --variant head_tail_count --only head_advances_wrong`) | one SRD001 on `Ring_Buffer.Pop`; confidence `high` unless a SARIF/.spark disagreement is recorded; an unproved `VC_INVARIANT_CHECK` and ≥ 1 proved `VC_POSTCONDITION` listed as *potentially affected* |
 | E2E-B SRD002 | ring buffer A, ablation `no_is_full_post` (`ablate_proof_support.py --only no_is_full_post`) | SRD002 on `Ring_Buffer_Client_Proof.Push_Push_Pop` (`VC_PRECONDITION` + `VC_ASSERT`) and `…Rotate` (`VC_PRECONDITION`); client unit `ring_buffer_client_proof`; implementation units `[ring_buffer]` with > 0 checks and 0 failures; `dependency_source = ali`, `ali_status = ok`, `ali_versions = ["GNAT Lib v16"]` |
 | E2E-C SRD003 | library-backed fixed pool, `--prover=cvc5` / `z3` / `altergo` (`prover_matrix.py --variant library_backed`), then `compare-provers` | the known SRD003 `VC_POSTCONDITION` `Fixed_Pool.Free_Prefix.Model` at `spark_refine_prefix_sets.ads:93`, `match_quality` `exact` or `unique_entity`, Z3 `unproved`, Alt-Ergo `proved`. The total SRD003 count is **not** gated |
+| E2E-F semantic (Task 009, opt-in: `e2e_fresh.py semantic`, CI job `diagnostics-semantic`) | ring buffer A, ablation `no_is_full_post`, then `explain --semantic -P ring_buffer.gpr -XRING_BUFFER_SRC=obj/ablation_src/no_is_full_post ...` under `alr exec`, with Libadalang | E2E-B criteria, plus `analysis.semantic.evaluated`, backend `libadalang`; the three Push failures (9:7, 10:7, 25:7) `exact`, call text, callee `Ring_Buffer.Push` declared at `obj/ablation_src/no_is_full_post/ring_buffer.ads:36`, Pre `not Is_Full (B)` at line 37, `failed_conjunct` null with `attribution` `not_provided_by_gnatprove`; the VC_ASSERT at 16:43 has assertion context and no callee/Pre |
 | E2E-D prove | ring buffer A baseline via `spark-refine prove -P ring_buffer.gpr --format json -- -j0` (no `--results`), after E2E-A/B and with a stale decoy result set placed | `analysis.orchestration`: command exact, `gnatprove_exit_code` 0, `fresh` true, `result_selection` `fresh_discovery`, `result_path` `obj/baseline/gnatprove`, decoy listed as ignored; 0 unproved / 0 justified / 0 pragma Assume; no diagnostics |
 | E2E-E prove | ring buffer B3 (materialized by the benchmark's `apply_fault`) via `prove ... -- -j0 -XRING_BUFFER_SRC=... -XRING_BUFFER_VARIANT=e2e_prove_b3` | GNATprove exit 1 preserved as `prove`'s exit; fresh `obj/e2e_prove_b3/gnatprove` selected; the E2E-A SRD001 criteria |
 

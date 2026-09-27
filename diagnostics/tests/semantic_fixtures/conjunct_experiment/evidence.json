@@ -1,0 +1,131 @@
+{
+  "12": {
+    "check_tree_goals": [
+      {},
+      {
+        "CVC5": "Unknown",
+        "Z3": "Unknown",
+        "altergo": "Unknown"
+      }
+    ],
+    "entry_keys": [
+      "check_col",
+      "check_file",
+      "check_line",
+      "check_tree",
+      "cntexmp",
+      "cntexmp_value",
+      "col",
+      "entity",
+      "file",
+      "how_proved",
+      "line",
+      "message",
+      "msg_id",
+      "rule",
+      "severity",
+      "unproved_status"
+    ],
+    "ground_truth": "Op: conjunct 0 (X > 0) unprovable, conjunct 1 holds",
+    "sarif_message": "precondition might fail"
+  },
+  "17": {
+    "check_tree_goals": [
+      {},
+      {
+        "CVC5": "Unknown",
+        "Z3": "Unknown",
+        "altergo": "Unknown"
+      }
+    ],
+    "entry_keys": [
+      "check_col",
+      "check_file",
+      "check_line",
+      "check_tree",
+      "cntexmp",
+      "cntexmp_value",
+      "col",
+      "entity",
+      "file",
+      "how_proved",
+      "line",
+      "message",
+      "msg_id",
+      "rule",
+      "severity",
+      "unproved_status"
+    ],
+    "ground_truth": "Op: both conjuncts unprovable",
+    "sarif_message": "precondition might fail"
+  },
+  "22": {
+    "check_tree_goals": [
+      {},
+      {
+        "CVC5": "Unknown",
+        "Z3": "Unknown",
+        "altergo": "Unknown"
+      },
+      {
+        "CVC5": "Valid",
+        "Z3": "Valid",
+        "altergo": "High failure (signaled)"
+      }
+    ],
+    "entry_keys": [
+      "check_col",
+      "check_file",
+      "check_line",
+      "check_tree",
+      "cntexmp",
+      "cntexmp_value",
+      "col",
+      "entity",
+      "file",
+      "how_proved",
+      "line",
+      "message",
+      "msg_id",
+      "rule",
+      "severity",
+      "unproved_status"
+    ],
+    "ground_truth": "Op3: conjunct 1 (Y > 0) unprovable, 0 and 2 hold",
+    "sarif_message": "precondition might fail"
+  },
+  "7": {
+    "check_tree_goals": [
+      {
+        "CVC5": "Unknown",
+        "Z3": "Unknown",
+        "altergo": "Unknown"
+      },
+      {
+        "CVC5": "Valid",
+        "Z3": "Valid",
+        "altergo": "High failure (signaled)"
+      }
+    ],
+    "entry_keys": [
+      "check_col",
+      "check_file",
+      "check_line",
+      "check_tree",
+      "cntexmp",
+      "cntexmp_value",
+      "col",
+      "entity",
+      "file",
+      "how_proved",
+      "line",
+      "message",
+      "msg_id",
+      "rule",
+      "severity",
+      "unproved_status"
+    ],
+    "ground_truth": "Op: conjunct 1 (Y > 0) unprovable, conjunct 0 holds",
+    "sarif_message": "precondition might fail"
+  }
+}

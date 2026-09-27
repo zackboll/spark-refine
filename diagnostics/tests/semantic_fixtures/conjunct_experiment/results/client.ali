@@ -1,0 +1,8 @@
+V "GNAT Lib v16"
+U client%b		client.adb		d554a4dc OO PK
+W ops%s			ops.adb			ops.ali
+U client%s		client.ads		c03247c5 OO PK
+D client.ads		20260927223451 c03247c5 client%s
+D client.adb		20260927223451 7916f5df client%b
+D ops.ads		20260927223600 6c7016c6 ops%s
+D system.ads		20260430083320 e2b7c99d system%s

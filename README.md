@@ -71,6 +71,15 @@ What `spark-refine prove` does (Task 008):
 
 For an Alire crate: `alr exec -- spark-refine prove -P my_project.gpr`.
 
+**Experimental, opt-in (Task 009):** add `--semantic` (with `-P`, plus
+`-X NAME=VALUE` scenario values where the project needs them) to
+`prove`/`explain` when Libadalang is installed
+(`diagnostics/scripts/setup_libadalang.sh`; it is not on PyPI). Each
+SRD002 precondition failure then shows the exact call, the resolved
+callee and its explicit public `Pre`. It never names a "failed conjunct"
+(GNATprove does not report one), and without Libadalang the report is
+unchanged. See `docs/INTEGRATION.md`.
+
 Manual two-step workflow (still fully supported):
 
 ```bash
@@ -249,7 +258,7 @@ docs/MVP.md                      current MVP: implemented / validated / future
 docs/ROADMAP.md                  evidence-gated roadmap
 docs/AGENT_INTEGRATION.md        safe agent loop over spark-refine JSON
 docs/TRUST_MODEL.md              soundness and trust boundary
-docs/INTEGRATION.md              GNATprove SARIF/.spark/.ali, SPARKlib, Libadalang (future), Alire
+docs/INTEGRATION.md              GNATprove SARIF/.spark/.ali, SPARKlib, Libadalang (optional), Alire
 docs/MOTIVATION.md, LANDSCAPE.md, RESEARCH.md, FAQ.md
 docs/BENCHMARKS.md, METRICS.md   validation experiments and metrics
 docs/PROOF_PATTERNS.md           pattern notes (circular sequence design + fixed pool)

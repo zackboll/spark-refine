@@ -1,0 +1,23 @@
+{
+  "name": "pool_spec_no_count_posts",
+  "needs_sparklib": true,
+  "origin": "examples/fixed_pool scripts/ablate_proof_support.py --only spec_no_count_posts",
+  "project": "semantic.gpr",
+  "sources": {
+    "src/fixed_pool.ads": {
+      "d_timestamp": "20260927011900",
+      "gnat_checksum": "81125bd8",
+      "sha256": "b78dd602e95060978a8293afff65a90529fff3588ae21db89fd9f69a6d83f79b"
+    },
+    "src/fixed_pool_client_proof.adb": {
+      "d_timestamp": "20260926210623",
+      "gnat_checksum": "237d48b4",
+      "sha256": "3ad212dbb307296b6fe295cdf23635186d3b8dbc51f9fc2cd20cce355de4824d"
+    },
+    "src/fixed_pool_client_proof.ads": {
+      "d_timestamp": "20260926210623",
+      "gnat_checksum": "0c289ca6",
+      "sha256": "2f5f73a8b0de7790af4ce367f2da91f8eebd31ba8e88191fb758c861e2ef5271"
+    }
+  }
+}

@@ -212,6 +212,10 @@ class Diagnostic:
     # SRD003 only: how the cross-run check identity was established
     # ("exact" or "unique_entity"; see srd003.py). Never "ambiguous".
     match_quality: str | None = None
+    # Task 009, only with --semantic: descriptive source context from the
+    # optional semantic backend (semantic.py). Never changes code, title,
+    # confidence or any other field; None = enrichment not requested.
+    semantic: dict | None = field(default=None, compare=False, hash=False)
 
     def sort_key(self) -> tuple:
         loc = self.primary_location or Location("")

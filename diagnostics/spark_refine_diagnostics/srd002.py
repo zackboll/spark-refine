@@ -47,7 +47,9 @@ guessed from file names.
 Other unproved checks of the client (e.g. its own postconditions) do not
 block the rule; they are listed as context. No Ada semantics are used: the
 failing call, the callee and any insufficient contract are NOT identified.
-Message text is shown, never required.
+Message text is shown, never required. (Task 009: the optional --semantic
+enrichment, semantic.py, may afterwards ADD source context to an emitted
+SRD002; it never influences this rule.)
 """
 
 from __future__ import annotations

@@ -48,6 +48,8 @@ def diagnostic_to_text(d: Diagnostic) -> str:
             out.append(f"    {r.location} {r.rule} [{r.status}]{run}")
             if r.message:
                 out += wrap(r.message, "        ")
+    if d.semantic is not None:
+        out += semantic_text(d.semantic)
     out.append("  evidence:")
     out += [f"    - {e}" for e in d.evidence]
     out.append("  explanation:")
@@ -55,6 +57,59 @@ def diagnostic_to_text(d: Diagnostic) -> str:
     out.append("  recommendation:")
     out += wrap(d.recommendation, "    ")
     return "\n".join(out)
+
+
+def _span(s: dict) -> str:
+    return f"{s['file']}:{s['start_line']}:{s['start_column']}"
+
+
+def _one_line(text: str) -> str:
+    return " ".join(text.split())
+
+
+def semantic_text(sem: dict) -> list[str]:
+    """Task 009: concise per-check semantic block (--semantic only)."""
+    out = [f"  semantic ({sem['backend']}):"]
+    for c in sem["checks"]:
+        loc = c["location"]
+        out.append(f"    {loc['file']}:{loc['line']}:{loc['column']} "
+                   f"{c['rule']}: {c['resolution']}")
+        if c["resolution"] != "exact":
+            out += wrap(f"reason: {c.get('reason', '-')}", "      ")
+            continue
+        if "call" in c:
+            pre = c["precondition"]
+            out.append(f"      call: {_one_line(c['call']['text'])}")
+            out.append(f"      callee: {c['callee']['name']} "
+                       f"({_span(c['callee']['declaration'])})")
+            if not pre["explicit"]:
+                out.append("      public Pre: none (no explicit Pre aspect)")
+            else:
+                out += wrap(f"public Pre: {_one_line(pre['text'])}",
+                            "      ")
+                if len(pre["conjuncts"]) > 1:
+                    for cj in pre["conjuncts"]:
+                        out += wrap(f"[{cj['index']}] "
+                                    f"{_one_line(cj['text'])}", "        ")
+                out.append("      failed conjunct: unknown (GNATprove "
+                           "result does not identify a specific conjunct)")
+        else:
+            a = c["assertion"]
+            out += wrap(f"assertion: {_one_line(a['text'])} "
+                        f"({_span(a['location'])})", "      ")
+            if c.get("enclosing_subprogram"):
+                out.append(f"      in: "
+                           f"{c['enclosing_subprogram']}")
+    return out
+
+
+def semantic_meta_text(m: dict) -> str:
+    if not m.get("evaluated"):
+        return (f"semantic enrichment: not evaluated "
+                f"({m.get('reason', '-')})")
+    counts = ", ".join(f"{k}={v}" for k, v in m["resolutions"].items())
+    return (f"semantic enrichment: {m['backend']} {m['version']}, "
+            f"project {m['project']}; checks: {counts}")
 
 
 def run_header(run: ProofRun) -> str:
@@ -117,6 +172,8 @@ def to_text(runs: list[ProofRun], diags: list[Diagnostic],
     out += [run_header(r) for r in runs]
     for n in notes:
         out.append(f"note: {n}")
+    if analysis and "semantic" in analysis:
+        out.append(semantic_meta_text(analysis["semantic"]))
     if analysis and "srd003_matching" in analysis:
         out += _matching_text(analysis["srd003_matching"])
     out.append("")
@@ -158,6 +215,7 @@ def diagnostic_to_dict(d: Diagnostic) -> dict:
         "recommendation": d.recommendation,
         "data": {k: _plain(v) for k, v in d.data},
         **({"match_quality": d.match_quality} if d.match_quality else {}),
+        **({"semantic": d.semantic} if d.semantic is not None else {}),
     }
 
 

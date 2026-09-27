@@ -1,0 +1,23 @@
+{
+  "name": "pool_false_client_assert",
+  "needs_sparklib": true,
+  "origin": "capture_fixtures.py produce pool_false_client_assert",
+  "project": "semantic.gpr",
+  "sources": {
+    "src/fixed_pool.ads": {
+      "d_timestamp": "20260926210641",
+      "gnat_checksum": "89ded73d",
+      "sha256": "9ca1de8e86dc25fe84b4757f91237d0c37ea5a26a1837b9678390f0636de9c9a"
+    },
+    "src/fixed_pool_false_client.adb": {
+      "d_timestamp": "20260927033021",
+      "gnat_checksum": "6db8827e",
+      "sha256": "f066e03206e3e693d2ddea5424e1d75a95f48edcd7ecff05b800f757defc7aad"
+    },
+    "src/fixed_pool_false_client.ads": {
+      "d_timestamp": "20260927033021",
+      "gnat_checksum": "58e74ecb",
+      "sha256": "ec5ec87b090c8b0c7af6f93c694357c5b5867f1b7b79f69be480b89a0f797072"
+    }
+  }
+}

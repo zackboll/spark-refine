@@ -28,13 +28,15 @@ Two pillars, with GNATprove as the proof authority:
 | `explain` CLI productization | 006 | installed `spark-refine explain`, conservative discovery, `format_version` 1 JSON with `category`/`action`, `docs/AGENT_INTEGRATION.md` |
 | Documentation realignment | 007 | every current document describes the two-pillar product and its trust boundary; generator documents labelled historical/deferred |
 | Fresh proof-run orchestration | 008 | `spark-refine prove -P project.gpr`: runs GNATprove (argv, exact command shown), analyzes only the result set that run created or changed, preserves GNATprove's exit code; `analysis.orchestration` in JSON; real E2E-D/E |
+| Semantic SRD002 enrichment (experimental) | 009 | opt-in `--semantic`: Libadalang resolves each SRD002 failure to its exact call, callee, declaration and explicit `Pre` (conjuncts decomposed); source/result provenance proven via `.ali` D records; failed-conjunct attribution measured **NOT ATTRIBUTABLE** from GNATprove 16.1.0 output, so never claimed; core package unchanged |
 
 ## Near term
 
-* **Semantic diagnostic enrichment.** Libadalang-based identification of
-  the call/callee and contract conjunct behind SRD002, and mapping
-  failures to source abstractions. This is the main known limitation of
-  the current diagnostics.
+* **Semantic enrichment follow-up.** Measure the `diagnostics-semantic`
+  CI job on hosted runners. Decide whether enrichment stays opt-in.
+  Conjunct attribution would need *new* proof evidence (e.g. a
+  pre-registered per-conjunct re-proof experiment), since existing
+  GNATprove output does not provide it (Task 009).
 
 ## Later
 

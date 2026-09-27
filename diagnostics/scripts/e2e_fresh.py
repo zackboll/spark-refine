@@ -35,8 +35,18 @@ rules, statuses, locations, confidence, data fields). English diagnostic
 prose is never checked. The total number of SRD003 findings is NOT gated
 (it is not intrinsically stable); only the known Z3-timeout check is.
 
+Task 009 adds (needs an importable libadalang, e.g. the bundle built by
+scripts/setup_libadalang.sh on PYTHONPATH; not part of the default set):
+
+  E2E-F  SRD002 + semantic: fresh no_is_full_post ablation, then
+                 `explain --semantic -P ring_buffer.gpr -X...` with the
+                 materialised ablated source; every Push precondition
+                 failure must resolve exactly to Ring_Buffer.Push with
+                 Pre `not Is_Full (B)`, failed_conjunct null
+
   python3 diagnostics/scripts/e2e_fresh.py [srd001] [srd002] [srd003]
                                            [prove] [prove_negative]
+                                           [semantic]
 
 No argument runs all five. Exit 0 only if every selected case passes.
 Writes diagnostics/obj/e2e/<case>.json (analyzer report) and
@@ -474,6 +484,90 @@ def e2e_prove_negative() -> dict:
                   "prove_negative", 1)
 
 
+SEMANTIC_ABLATION = "no_is_full_post"
+SEMANTIC_PUSH_CALLS = {(9, 7): "Push (Q, A)", (10, 7): "Push (Q, B)",
+                       (25, 7): "Push (Q, X)"}
+
+
+def e2e_semantic() -> dict:
+    """Task 009 E2E-F: fresh ablation run, then `explain --semantic` on the
+    fresh result WITH the materialised (ablated) source it was proved from,
+    selected through the same -X scenario values GNATprove used."""
+    ex = EXAMPLES / "ring_buffer"
+    since = time.time() - 1
+    out = ex / "obj" / f"ablation_{SEMANTIC_ABLATION}" / "gnatprove"
+    _run([sys.executable, "scripts/ablate_proof_support.py", "--only",
+          SEMANTIC_ABLATION], ex, [out.parent])
+    _fresh(out, since)
+    prefix = shlex.split(os.environ.get("GNATPROVE_EXEC", "alr -n exec --"))
+    cmd = [*prefix, sys.executable, "-m", "spark_refine_diagnostics",
+           "explain", str(out.relative_to(ex)), "--semantic",
+           "-P", "ring_buffer.gpr",
+           f"-XRING_BUFFER_SRC=obj/ablation_src/{SEMANTIC_ABLATION}",
+           f"-XRING_BUFFER_VARIANT=ablation_{SEMANTIC_ABLATION}",
+           "--format", "json"]
+    pp = os.pathsep.join(p for p in (str(DIAGNOSTICS),
+                                     os.environ.get("PYTHONPATH")) if p)
+    print(f"$ (cd {ex.relative_to(REPO)} && {shlex.join(cmd)})", flush=True)
+    proc = subprocess.run(cmd, cwd=ex, env=dict(os.environ, PYTHONPATH=pp),
+                          capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise E2EError(f"explain --semantic exit {proc.returncode}: "
+                       f"{proc.stderr}")
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "semantic.json").write_text(proc.stdout, encoding="utf-8")
+    return json.loads(proc.stdout)
+
+
+def check_semantic(report: dict) -> list[str]:
+    """E2E-B's SRD002 criteria, plus: Libadalang evaluated, every Push
+    precondition failure resolved exactly to Ring_Buffer.Push with its
+    explicit Pre recovered, failed conjunct not claimed, the VC_ASSERT
+    given assertion context only."""
+    problems = check_srd002(report)
+    meta = report.get("analysis", {}).get("semantic", {})
+    _require(meta.get("evaluated") is True and
+             meta.get("backend") == "libadalang",
+             f"semantic not evaluated: {meta.get('reason')!r}", problems)
+    checks = {}
+    for d in report.get("diagnostics", []):
+        if d.get("code") != "SRD002":
+            continue
+        sem = d.get("semantic")
+        _require(isinstance(sem, dict), f"{d.get('entity')}: no semantic "
+                 "block", problems)
+        for c in (sem or {}).get("checks", []):
+            loc = c.get("location", {})
+            checks[(loc.get("line"), loc.get("column"))] = c
+    for pos, text in SEMANTIC_PUSH_CALLS.items():
+        c = checks.get(pos)
+        if c is None:
+            problems.append(f"no semantic entry for {pos}")
+            continue
+        pre = c.get("precondition") or {}
+        decl = (c.get("callee") or {}).get("declaration") or {}
+        _require(c.get("resolution") == "exact", f"{pos}: resolution "
+                 f"{c.get('resolution')!r} ({c.get('reason')})", problems)
+        _require((c.get("call") or {}).get("text") == text,
+                 f"{pos}: call {c.get('call')!r}", problems)
+        _require((c.get("callee") or {}).get("name") == "Ring_Buffer.Push",
+                 f"{pos}: callee {c.get('callee')!r}", problems)
+        _require(decl.get("file") == f"obj/ablation_src/{SEMANTIC_ABLATION}"
+                 "/ring_buffer.ads" and decl.get("start_line") == 36,
+                 f"{pos}: declaration {decl!r}", problems)
+        _require(pre.get("text") == "not Is_Full (B)" and
+                 (pre.get("location") or {}).get("start_line") == 37,
+                 f"{pos}: Pre {pre.get('text')!r}", problems)
+        _require(pre.get("failed_conjunct") is None and
+                 pre.get("attribution") == "not_provided_by_gnatprove",
+                 f"{pos}: failed conjunct claimed", problems)
+    a = checks.get((16, 43), {})
+    _require(a.get("resolution") == "exact" and "assertion" in a
+             and "callee" not in a and "precondition" not in a,
+             "VC_ASSERT 16:43: not assertion-only context", problems)
+    return problems
+
+
 def _load_script(path: Path):
     spec = importlib.util.spec_from_file_location(path.stem, path)
     mod = importlib.util.module_from_spec(spec)
@@ -492,11 +586,14 @@ CASES = {
               e2e_prove, check_prove_positive),
     "prove_negative": ("E2E-E spark-refine prove, GNATprove exit 1 on B3",
                        e2e_prove_negative, check_prove_negative),
+    "semantic": ("E2E-F SRD002 + Libadalang semantic enrichment, "
+                 "ring buffer no_is_full_post",
+                 e2e_semantic, check_semantic),
 }
 
 
 def main(argv: list[str]) -> int:
-    selected = argv or list(CASES)
+    selected = argv or [k for k in CASES if k != "semantic"]
     unknown = [a for a in selected if a not in CASES]
     if unknown:
         print(__doc__)

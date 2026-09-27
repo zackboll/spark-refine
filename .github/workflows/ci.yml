@@ -120,6 +120,64 @@ jobs:
             examples/ring_buffer/obj/e2e_prove_b3/gnatprove/gnatprove.sarif
           if-no-files-found: warn
 
+  # Task 009: OPTIONAL Libadalang semantic enrichment of SRD002, isolated
+  # from every other job (none of them installs Libadalang). Libadalang is
+  # not on PyPI: diagnostics/scripts/setup_libadalang.sh builds the Alire
+  # crate libadalang=26.0.0 (pinned dependency solution, GNAT 15.3.1) once
+  # (~4 min on 32 cores locally; longer on a runner) and bundles it
+  # relocatably; the bundle is cached by the script's hash. Then:
+  #   - the full diagnostics suite INCLUDING the Libadalang tests on the
+  #     committed semantic snapshots (tests/semantic_fixtures), under
+  #     `alr exec` of the ring buffer (SPARKlib project for the snapshots);
+  #   - E2E-F: fresh no_is_full_post ablation + explain --semantic.
+  diagnostics-semantic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: alire-project/setup-alire@v6.0.0
+        with:
+          version: '2.1.1'
+          toolchain: '--disable-assistant'
+      - name: Cache the Libadalang bundle
+        id: lal-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/lal-bundle/python
+          key: libadalang-26.0.0-${{ runner.os }}-${{ hashFiles('diagnostics/scripts/setup_libadalang.sh') }}
+      - name: Build the Libadalang bundle (cache miss only)
+        if: steps.lal-cache.outputs.cache-hit != 'true'
+        run: |
+          time bash diagnostics/scripts/setup_libadalang.sh ~/lal-bundle
+          rm -rf ~/lal-bundle/build
+      - name: Enable the bundle
+        run: |
+          echo "PYTHONPATH=$HOME/lal-bundle/python" >> "$GITHUB_ENV"
+          PYTHONPATH=$HOME/lal-bundle/python python3 -c 'import libadalang; print(libadalang.__file__)'
+          du -sh ~/lal-bundle/python
+      - name: Resolve pinned toolchain and build (ring buffer)
+        working-directory: examples/ring_buffer
+        run: |
+          alr -n update
+          alr -n build
+      - name: Diagnostics suite with Libadalang (no skips allowed)
+        working-directory: examples/ring_buffer
+        run: |
+          set -o pipefail
+          alr -n exec -- python3 -m unittest discover -s ../../diagnostics/tests -t ../../diagnostics/tests -v 2>&1 | tee /tmp/semantic-tests.log
+          ! grep -E "\.\.\. skipped|^OK \(skipped" /tmp/semantic-tests.log
+      - name: "E2E-F: SRD002 + Libadalang semantic enrichment (fresh)"
+        run: python3 diagnostics/scripts/e2e_fresh.py semantic
+      - name: Upload semantic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics-semantic-report
+          path: diagnostics/obj/e2e/semantic.json
+          if-no-files-found: warn
+
   # Ring-buffer proof benchmarks, one toolchain setup for both
   # representations:
   #   A  Task 001  Content + First + Length        (src/)
