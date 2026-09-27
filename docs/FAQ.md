@@ -36,19 +36,34 @@ gnatprove -P my_project.gpr
 spark-refine explain                          # or: spark-refine explain obj/<variant>/gnatprove
 ```
 
-There is no `spark-refine prove` command. Proof-run orchestration is only
-a possible future direction.
+### What does `spark-refine prove` add?
+
+`spark-refine prove -P my_project.gpr` (Task 008) runs GNATprove and then
+explains the result set **that run** wrote. It prints the exact
+GNATprove command first. GNATprove's output goes to stderr, so JSON on
+stdout stays clean. Stale result sets are ignored, and if zero or several
+fresh result sets appear, it refuses instead of guessing. GNATprove's
+exit code is preserved, and a failed proof with fresh results still gets
+SRD001/SRD002.
+
+It proves nothing itself. Its authority equals "run GNATprove, then
+`explain`". The only extra property is fresh-result provenance. The
+two-step `gnatprove` + `explain` workflow remains fully supported.
 
 ### Which command produces SRD003?
 
 `spark-refine compare-provers`, over two or more single-prover GNATprove
-runs. `explain` never produces SRD003.
+runs. `explain` and `prove` never produce SRD003, and `prove` does not
+run a prover matrix.
 
 ### Can an AI agent consume the output?
 
-Yes. `spark-refine explain --format json` produces deterministic
-`format_version` 1 JSON. Every diagnostic carries `code`, `category`,
-`action` and `confidence`, and the report has a derived `summary`. See
+Yes. `spark-refine prove -P project.gpr --format json` (preferred) and
+`spark-refine explain --format json` produce deterministic
+`format_version` 1 JSON. `prove` adds `analysis.orchestration`: the exact
+command, GNATprove's exit code, and the fresh result path. Every
+diagnostic carries `code`, `category`, `action` and `confidence`, and the
+report has a derived `summary`. See
 `docs/AGENT_INTEGRATION.md` for the recommended loop and guardrails.
 
 ### Will it weaken contracts automatically?

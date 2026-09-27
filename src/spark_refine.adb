@@ -22,7 +22,8 @@ procedure Spark_Refine is
       Put_Line ("installed from diagnostics/ and invoked with a HYPHEN:");
       New_Line;
       Put_Line ("    python3 -m pip install ./diagnostics");
-      Put_Line ("    spark-refine explain");
+      Put_Line ("    spark-refine prove -P my_project.gpr   (run GNATprove + explain)");
+      Put_Line ("    spark-refine explain                   (existing results)");
       New_Line;
       Put_Line ("spark_refine (underscore, this Ada program) and spark-refine");
       Put_Line ("(hyphen, the Python CLI) are distinct executables.");
@@ -49,6 +50,7 @@ begin
      or else Argument (1) = "analyze"
      or else Argument (1) = "compare-provers"
      or else Argument (1) = "rules"
+     or else Argument (1) = "prove"
    then
       Put_Line ("'" & Argument (1) & "' is a command of the Python CLI spark-refine"
                 & " (hyphen), not of this Ada executable spark_refine (underscore).");

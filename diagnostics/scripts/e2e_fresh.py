@@ -18,14 +18,27 @@ the fresh, unsanitized SARIF / .spark / .ali output with the real CLI
                  (prover_matrix.py --variant library_backed: cvc5, z3,
                   altergo), then compare-provers
 
+Task 008 adds two cases in which `spark-refine prove` itself launches
+GNATprove (no --results; a stale decoy result set, the committed ring_b3
+fixture, is placed first under obj/e2e_stale_decoy/ and must be ignored,
+as must every result set left by earlier cases):
+
+  E2E-D  prove   ring buffer A positive baseline: GNATprove exit 0,
+                 fresh_discovery selects obj/baseline/gnatprove, fully
+                 proved, no diagnostics
+  E2E-E  prove   ring buffer B3 (materialised with the benchmark's own
+                 apply_fault): GNATprove exit 1, prove exits 1 and still
+                 reports the E2E-A SRD001 from the fresh result set
+
 Only structural fields of the JSON report are checked (codes, entities,
 rules, statuses, locations, confidence, data fields). English diagnostic
 prose is never checked. The total number of SRD003 findings is NOT gated
 (it is not intrinsically stable); only the known Z3-timeout check is.
 
   python3 diagnostics/scripts/e2e_fresh.py [srd001] [srd002] [srd003]
+                                           [prove] [prove_negative]
 
-No argument runs all three. Exit 0 only if every selected case passes.
+No argument runs all five. Exit 0 only if every selected case passes.
 Writes diagnostics/obj/e2e/<case>.json (analyzer report) and
 diagnostics/obj/e2e/summary.json (merged across invocations; git-ignored).
 The script never modifies committed sources: the benchmark scripts
@@ -37,10 +50,15 @@ Environment: GNATPROVE_EXEC as for the benchmark scripts (default
 
 from __future__ import annotations
 
+import importlib.util
 import json
+import os
+import shlex
+import shutil
 import subprocess
 import sys
 import time
+import tomllib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -232,6 +250,74 @@ def check_srd003(report: dict) -> list[str]:
     return problems
 
 
+# E2E-D / E2E-E: `spark-refine prove` (Task 008). The CLI itself runs
+# GNATprove; the report must identify the result set THAT run wrote.
+PROVE_PROJECT = "ring_buffer.gpr"
+PROVE_BASELINE_PATH = "obj/baseline/gnatprove"
+PROVE_DECOY = "obj/e2e_stale_decoy/gnatprove"
+PROVE_B3_VARIANT = "e2e_prove_b3"
+PROVE_B3_PATH = f"obj/{PROVE_B3_VARIANT}/gnatprove"
+PROVE_B3_SRC = "obj/negative_src/head_tail_count/head_advances_wrong"
+
+
+def _check_orchestration(report: dict, command: list[str], exit_code: int,
+                         path: str, problems: list[str]) -> None:
+    o = report.get("analysis", {}).get("orchestration") or {}
+    _require(report.get("format_version") == 1,
+             f"format_version {report.get('format_version')!r}", problems)
+    _require(o.get("command") == command,
+             f"command {o.get('command')!r}, expected {command!r}", problems)
+    _require(o.get("gnatprove_exit_code") == exit_code,
+             f"gnatprove_exit_code {o.get('gnatprove_exit_code')!r}, "
+             f"expected {exit_code}", problems)
+    _require(o.get("fresh") is True, f"fresh {o.get('fresh')!r}", problems)
+    _require(o.get("result_selection") == "fresh_discovery",
+             f"result_selection {o.get('result_selection')!r}", problems)
+    _require(o.get("result_path") == path,
+             f"result_path {o.get('result_path')!r}, expected {path!r}",
+             problems)
+    stale = o.get("stale_result_sets_ignored") or []
+    _require(PROVE_DECOY in stale, f"stale decoy {PROVE_DECOY} not listed "
+             f"as ignored ({len(stale)} ignored)", problems)
+    _require(path not in stale, "selected path also listed as stale",
+             problems)
+
+
+def check_prove_positive(report: dict) -> list[str]:
+    """E2E-D: fresh positive ring-buffer baseline chosen by fresh
+    discovery among stale result sets; GNATprove 0; fully proved."""
+    problems: list[str] = []
+    _check_runs(report, problems)
+    _check_orchestration(report, ["gnatprove", "-P", PROVE_PROJECT, "-j0"],
+                         0, PROVE_BASELINE_PATH, problems)
+    for run in report.get("runs", []):
+        for key in ("unproved", "justified", "pragma_assume"):
+            _require(run.get(key) == 0, f"run {run.get('name')}: {key} = "
+                     f"{run.get(key)!r}", problems)
+        _require((run.get("checks") or 0) > 0 and
+                 run.get("proved") == run.get("checks"),
+                 f"run {run.get('name')}: {run.get('proved')}/"
+                 f"{run.get('checks')} proved", problems)
+        _require({"ring_buffer", "ring_buffer_client_proof"}
+                 <= set(run.get("units", [])),
+                 f"units {run.get('units')!r}", problems)
+    _require(report.get("diagnostics") == [],
+             f"{len(report.get('diagnostics', []))} diagnostics on the "
+             "positive baseline", problems)
+    return problems
+
+
+def check_prove_negative(report: dict) -> list[str]:
+    """E2E-E: GNATprove exits nonzero on B3, and prove still reports the
+    same SRD001 as E2E-A from the fresh result set of that run."""
+    problems = check_srd001(report)
+    _check_orchestration(report, [
+        "gnatprove", "-P", PROVE_PROJECT, "-j0",
+        f"-XRING_BUFFER_SRC={PROVE_B3_SRC}",
+        f"-XRING_BUFFER_VARIANT={PROVE_B3_VARIANT}"],
+        1, PROVE_B3_PATH, problems)
+    return problems
+
 
 # --------------------------------------------------------------------------
 # Driver: fresh GNATprove runs through the benchmark scripts, then the CLI
@@ -333,6 +419,68 @@ def e2e_srd003() -> dict:
     return _cli(["compare-provers", *runs], "srd003")
 
 
+def _place_decoy(ex: Path) -> None:
+    """A valid but STALE result set (the committed ring_b3 fixture) that
+    `explain` would analyse and that `prove` must ignore."""
+    decoy = ex / PROVE_DECOY
+    if decoy.exists():
+        shutil.rmtree(decoy)
+    decoy.mkdir(parents=True)
+    fixture = DIAGNOSTICS / "tests" / "fixtures" / "ring_b3"
+    for f in fixture.iterdir():
+        if f.name != "fixture.json":
+            shutil.copy(f, decoy / f.name)
+
+
+def _prove(ex: Path, passthrough: list[str], name: str,
+           expect_exit: int) -> dict:
+    """Run `spark-refine prove` itself (it launches GNATprove) inside the
+    crate's Alire environment, WITHOUT --results."""
+    prefix = shlex.split(os.environ.get("GNATPROVE_EXEC", "alr -n exec --"))
+    cmd = [*prefix, sys.executable, "-m", "spark_refine_diagnostics",
+           "prove", "-P", PROVE_PROJECT, "--format", "json", "--",
+           *passthrough]
+    env = dict(os.environ, PYTHONPATH=str(DIAGNOSTICS))
+    print(f"$ (cd {ex.relative_to(REPO)} && {shlex.join(cmd)})", flush=True)
+    proc = subprocess.run(cmd, cwd=ex, env=env, stdout=subprocess.PIPE,
+                          text=True)   # GNATprove output: our stderr
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"{name}.json").write_text(proc.stdout, encoding="utf-8")
+    if proc.returncode != expect_exit:
+        raise E2EError(f"spark-refine prove exit {proc.returncode}, "
+                       f"expected {expect_exit}")
+    return json.loads(proc.stdout)   # stdout must be the JSON report only
+
+
+def e2e_prove() -> dict:
+    ex = EXAMPLES / "ring_buffer"
+    _place_decoy(ex)
+    # obj/baseline/gnatprove may already exist (stale); prove must pick it
+    # only because THIS GNATprove run rewrote it
+    return _prove(ex, ["-j0"], "prove", 0)
+
+
+def e2e_prove_negative() -> dict:
+    ex = EXAMPLES / "ring_buffer"
+    _place_decoy(ex)
+    gate = _load_script(ex / "scripts" / "check_proof_results.py")
+    fault = tomllib.loads((ex / "variants" / "head_tail_count" / "negative"
+                           / "head_advances_wrong" / "fault.toml")
+                          .read_text(encoding="utf-8"))
+    gate.apply_fault(fault, ex / PROVE_B3_SRC,
+                     ex / "variants" / "head_tail_count")
+    return _prove(ex, ["-j0", f"-XRING_BUFFER_SRC={PROVE_B3_SRC}",
+                       f"-XRING_BUFFER_VARIANT={PROVE_B3_VARIANT}"],
+                  "prove_negative", 1)
+
+
+def _load_script(path: Path):
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 CASES = {
     "srd001": ("E2E-A SRD001 ring buffer B3 head_advances_wrong",
                e2e_srd001, check_srd001),
@@ -340,6 +488,10 @@ CASES = {
                e2e_srd002, check_srd002),
     "srd003": ("E2E-C SRD003 library-backed pool, cvc5/z3/altergo",
                e2e_srd003, check_srd003),
+    "prove": ("E2E-D spark-refine prove, fresh ring buffer baseline",
+              e2e_prove, check_prove_positive),
+    "prove_negative": ("E2E-E spark-refine prove, GNATprove exit 1 on B3",
+                       e2e_prove_negative, check_prove_negative),
 }
 
 

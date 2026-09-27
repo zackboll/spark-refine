@@ -23,7 +23,7 @@ Deliver a small, trustworthy proof-engineering toolkit that:
 |---|---|---|
 | Reusable proof pattern | `SPARK_Refine_Prefix_Sets` (`proof_patterns/`): unique array prefix → SPARKlib functional set | **implemented, validated** |
 | Proof diagnostics | SRD001 invariant masking risk, SRD002 client-only proof gap, SRD003 prover-portfolio dependency | **implemented, validated** |
-| Installed CLI | `spark-refine explain [PATH]` (SRD001, SRD002; one existing result set; conservative discovery; does not run GNATprove); `compare-provers` (SRD003); `rules`; `analyze` alias | **implemented, validated** |
+| Installed CLI | `spark-refine prove -P PROJECT` (Task 008: runs GNATprove, then SRD001/SRD002 on the result set that run wrote; exact command shown; GNATprove exit code preserved); `explain [PATH]` (SRD001, SRD002; one existing result set; conservative discovery; does not run GNATprove); `compare-provers` (SRD003); `rules`; `analyze` alias | **implemented, validated** |
 | Machine-readable output | deterministic `format_version` 1 JSON with `code`, `category`, `action`, `confidence`, derived `summary`, per-rule `analysis` | **implemented, validated** |
 | Trust behavior | read-only; no assumptions; no source rewriting; no proof-status decisions | **implemented, validated** |
 | Agent guidance | `docs/AGENT_INTEGRATION.md`: loop, freshness, per-action guardrails | **documented** |
@@ -68,14 +68,17 @@ toolchain and runs in CI.
   * See `diagnostics/DIAGNOSTICS_METRICS.md`. The corpus is small, and
     these are per-case results, not accuracy rates.
 * **Fresh end-to-end.** One real GNATprove run per rule, analyzed
-  unsanitized (CI job `diagnostics-e2e`).
+  unsanitized. Since Task 008 there are also two `spark-refine prove`
+  runs, which must select only their own fresh result among stale ones
+  (CI job `diagnostics-e2e`).
 * **Packaging.** The wheel is built, inspected, installed and run outside
   the repository, both as a regular and as an editable install. The
   suite also runs on Python 3.11 (CI job `diagnostics-packaging`).
 
 ## Out of scope for the current MVP
 
-* running GNATprove (`explain` only reads existing results);
+* running more than one GNATprove invocation per command (`prove` runs
+  exactly one; there is no prover-matrix orchestration);
 * editing sources, repairing proofs or changing contracts;
 * Libadalang or any source-semantic analysis;
 * source generation, manifests or source annotations;
@@ -86,8 +89,6 @@ toolchain and runs in CI.
 
 Candidates, each gated on evidence:
 
-* **proof-run orchestration**, e.g. a command that runs GNATprove and
-  then explains, while keeping the exact GNATprove command visible;
 * **Libadalang semantic enrichment**: callee and contract-conjunct
   identification for SRD002, and mapping failures to source
   abstractions;

@@ -175,8 +175,21 @@ spark-refine explain [PATH] [--client-unit U ...] [--format text|json] [--fail-o
 spark-refine compare-provers --run NAME=PATH --run ... [--reference NAME=PATH]
                                                   single-prover runs: SRD003
 spark-refine rules [--format text|json]
+spark-refine prove -P PROJECT [--gnatprove PATH] [--results PATH] [--dry-run]
+                   [--format text|json] [--fail-on CODE] [-- GNATPROVE_ARGS...]
+                                                  runs GNATprove, then one run: SRD001, SRD002
 ```
 
+* `prove` (Task 008, `orchestration.py`) builds the argv
+  `[gnatprove, -P, PROJECT, *ARGS]` and shows it on stderr. It runs the
+  argv with `shell=False`, relaying GNATprove's output to stderr, then
+  selects the **one** result set whose `gnatprove.sarif` was created or
+  changed by that run. Changes are detected with a before/after stamp:
+  device, inode, size, mtime_ns, ctime_ns and sha256. Zero or several
+  fresh result sets are refused. An explicit `--results` must be fresh,
+  with no fallback. It then calls the same `analyze_path_report` as
+  `explain` and adds `analysis.orchestration`. GNATprove's nonzero exit
+  code is `prove`'s exit code.
 * `explain` without `PATH` looks for exactly one result set
   (`gnatprove.sarif` + `*.spark`) under the current directory. If it
   finds zero or several, it exits 2 and lists the candidates. It never
@@ -204,7 +217,13 @@ root `alire.toml` is a legacy bootstrap. It implements no commands.
 
 ## 5. Workflows
 
-Human:
+Human, preferred:
+
+```bash
+spark-refine prove -P my_project.gpr         # GNATprove proves; SRD001 + SRD002 on ITS fresh result
+```
+
+Human, manual two-step (still supported):
 
 ```bash
 gnatprove -P my_project.gpr                  # GNATprove proves
@@ -212,8 +231,9 @@ spark-refine explain                         # SRD001 + SRD002 on that one resul
 spark-refine explain obj/<variant>/gnatprove # explicit path if discovery is ambiguous
 ```
 
-`explain` never runs GNATprove, and auto-discovered results may be stale.
-There is no `spark-refine prove` command.
+`prove` guarantees that the analyzed result was freshly changed by the
+command it just launched. `explain` never runs GNATprove. It analyzes an
+existing result set, so the caller is responsible for freshness.
 
 Prover robustness, SRD003:
 
@@ -228,9 +248,9 @@ Agent / CI (see `docs/AGENT_INTEGRATION.md`):
 ```text
 agent edits source
     ↓
-GNATprove                          (rerun after every change)
-    ↓
-spark-refine explain --format json
+spark-refine prove -P project.gpr --format json
+    (runs GNATprove; analyzes only that run's fresh result;
+     GNATprove exit code preserved in analysis.orchestration)
     ↓
 agent reads code / category / action / confidence
     ↓
@@ -243,7 +263,10 @@ agent chooses the appropriate class of change
 * **No Libadalang integration.** Diagnostics work only from GNATprove
   output. They cannot name a callee, resolve a contract conjunct, or
   map a failure to a source abstraction.
-* **No proof-run orchestration.** `spark-refine` never runs GNATprove.
+* **No prover-matrix orchestration.** `prove` runs exactly one GNATprove
+  invocation. SRD003 still requires separate single-prover runs plus
+  `compare-provers`. `prove` also parses no GPR and has no
+  Alire-specific layer.
 * **No source generation, manifest processing or source annotations.**
   See Part II.
 * **No mechanical enforcement** of the source categories in section 3.

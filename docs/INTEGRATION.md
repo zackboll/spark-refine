@@ -7,10 +7,23 @@
 ## GNATprove (current)
 
 GNATprove remains the proof authority. `spark-refine` never decides
-whether a proof obligation is discharged. Users always run GNATprove
-themselves, and `spark-refine explain` does **not** invoke it. An
-optional orchestration command is future work. It would have to show the
-exact GNATprove command and never hide or alter its verdict.
+whether a proof obligation is discharged. There are two ways to use it:
+
+* `spark-refine prove -P project.gpr [-- ARGS...]` (Task 008) runs
+  `gnatprove -P project.gpr ARGS...`, or `--gnatprove PATH`, as an argv
+  list with no shell. It prints the exact command to stderr first and
+  relays GNATprove's console output to stderr. It then analyzes only the
+  result set that this invocation created or changed (a snapshot of
+  `gnatprove.sarif` before and after the run). GNATprove's verdict and
+  nonzero exit code are preserved, never hidden or altered. Stale
+  results are never analyzed.
+* `gnatprove` run by the user, then `spark-refine explain`, which does
+  **not** invoke GNATprove.
+
+Freshness relies on an observed property of FSF GNATprove 16.1.0: it
+rewrites `gnatprove.sarif` on every run, even an incremental re-run of an
+unchanged project, while the `.spark` files are left untouched in that
+case (`docs/tasks/008-proof-run-orchestration.md`).
 
 `spark-refine` integrates with GNATprove today by reading its
 machine-readable output. It never scrapes terminal text.
@@ -127,11 +140,15 @@ crate once it performed real generation, with `ada_toml` and
 
 **Current.** Users build and prove with their own GPR project. The
 diagnostics read only GNATprove's output directory and never parse GPR
-files.
+files. `spark-refine prove -P project.gpr` passes the project to
+GNATprove unchanged and runs it in the current directory. It does not
+parse the GPR or duplicate project-source discovery; it looks for fresh
+results under the current directory. If the project's `Object_Dir` lies
+outside that tree, pass `--results PATH`.
 
-**Future.** A proof-run orchestration command should take the GPR
-project as the compilation context and should not duplicate
-project-source discovery rules.
+**Alire.** Run the whole CLI inside the crate environment:
+`alr exec -- spark-refine prove -P project.gpr`. There is no
+Alire-specific execution layer.
 
 ## Ada Language Server / editors (future)
 
@@ -166,7 +183,8 @@ pattern around it, for example a masked postcondition.
 ```text
 structural checks + unit tests (fixture-based diagnostics suite)
 diagnostics packaging (wheel build/inspect/install, outside the repo; Python 3.11)
-fresh end-to-end diagnostics (real GNATprove, one case per rule)
+fresh end-to-end diagnostics (real GNATprove, one case per rule, plus
+  `spark-refine prove` E2E-D/E-E)
 GNATprove proof gates per benchmark and variant
 negative proof fixtures
 forbidden-trust scan (incl. proof_patterns/)

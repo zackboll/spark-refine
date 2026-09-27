@@ -32,8 +32,8 @@ and serves AI agents, CI and editors as stable JSON:
 
 | Code | Category | Meaning | Command |
 |---|---|---|---|
-| SRD001 | `proof_context` | a failed invariant may mask downstream proved postconditions (a masking *risk*, never a causality or falsity claim) | `explain` |
-| SRD002 | `abstraction_boundary` | client-only proof gap; the public abstraction *may* be insufficient (medium / low confidence) | `explain` |
+| SRD001 | `proof_context` | a failed invariant may mask downstream proved postconditions (a masking *risk*, never a causality or falsity claim) | `prove` / `explain` |
+| SRD002 | `abstraction_boundary` | client-only proof gap; the public abstraction *may* be insufficient (medium / low confidence) | `prove` / `explain` |
 | SRD003 | `prover_portfolio` | a proof depends on the prover portfolio (confidently matched checks only) | `compare-provers` |
 
 ## Quick start
@@ -46,7 +46,32 @@ python3 -m pip install -e ./diagnostics     # or: editable, for development
 spark-refine rules
 ```
 
-Human workflow, from your SPARK project's directory:
+Preferred workflow, from your SPARK project's directory:
+
+```bash
+spark-refine prove -P my_project.gpr                 # run GNATprove, then explain ITS results
+spark-refine prove -P my_project.gpr --format json   # the same, for agents / CI
+spark-refine prove -P my_project.gpr -- --level=2 --prover=z3   # extra GNATprove args
+```
+
+What `spark-refine prove` does (Task 008):
+
+* it prints the exact GNATprove command to stderr, then runs it (argv,
+  never a shell). GNATprove's console output goes to **stderr**, so
+  stdout carries only the spark-refine report;
+* it analyzes **only the result set that this GNATprove run created or
+  changed**. Unchanged (stale) result sets are ignored. If there are zero
+  or several fresh result sets, it refuses instead of guessing. With
+  `--results PATH`, that location must have been freshly written;
+* if GNATprove fails but wrote fresh results, you still get SRD001/SRD002,
+  and `prove` exits with **GNATprove's exit code**;
+* it proves nothing itself. It is exactly "run GNATprove, then `explain`",
+  plus a guarantee that the analyzed results come from that run.
+  `--dry-run` shows the command without running it.
+
+For an Alire crate: `alr exec -- spark-refine prove -P my_project.gpr`.
+
+Manual two-step workflow (still fully supported):
 
 ```bash
 gnatprove -P my_project.gpr     # 1. GNATprove proves (the proof authority)
@@ -93,11 +118,11 @@ spark-refine compare-provers \
   --run altergo=obj/altergo/gnatprove
 ```
 
-> **Freshness.** `spark-refine explain` analyzes the proof results you
-> point it at. They describe your current sources only if you have just
-> run GNATprove. `spark-refine` does not run GNATprove itself; there is
-> no `spark-refine prove` command. Proof-run orchestration is only a
-> possible future direction (`docs/ROADMAP.md`).
+> **Freshness.** `prove` guarantees that the analyzed result was freshly
+> changed by the GNATprove command it just launched. `explain` analyzes an
+> existing result set, and the caller is responsible for freshness: those
+> results describe your current sources only if you have just run
+> GNATprove. Neither command produces SRD003.
 
 `analyze` remains a compatibility alias of `explain` (path required), and
 `python3 -m spark_refine_diagnostics ...` still works. Full reference:
@@ -108,10 +133,16 @@ boundary: [`docs/AGENT_INTEGRATION.md`](docs/AGENT_INTEGRATION.md).
 
 ```text
 GNATprove        determines proof status (the proof authority)
-spark-refine     interprets proof-result patterns (read-only, deterministic)
+spark-refine     orchestration (`prove`: runs GNATprove, fresh-result
+                 provenance) + interpretation of proof-result patterns
+                 (read-only, deterministic)
 you / an agent   decide what to change; authoritative Pre/Post/model
                  changes deserve explicit human review
 ```
+
+`spark-refine prove` does not prove anything itself. Its authority is the
+same as "run GNATprove, then run `explain` on the result". The only
+extra property it adds is fresh-result provenance.
 
 Neither `spark-refine` nor an AI agent consuming its output is a proof
 authority. `spark-refine` never edits sources, repairs proofs, changes
@@ -194,7 +225,7 @@ docs/ROADMAP.md            completed / near term / later / deferred
 | Status | Documents |
 |---|---|
 | **Current, specialized** | [`docs/AGENT_INTEGRATION.md`](docs/AGENT_INTEGRATION.md), [`diagnostics/README.md`](diagnostics/README.md), [`docs/PROOF_PATTERNS.md`](docs/PROOF_PATTERNS.md), [`docs/TRUST_MODEL.md`](docs/TRUST_MODEL.md), [`docs/INTEGRATION.md`](docs/INTEGRATION.md), [`docs/METRICS.md`](docs/METRICS.md), [ADR 0005](docs/adr/0005-library-and-diagnostics-first.md) |
-| **Historical / deferred** | [`docs/SPEC.md`](docs/SPEC.md), [`docs/MANIFEST.md`](docs/MANIFEST.md), [`docs/history/`](docs/history/), ADRs [0003](docs/adr/0003-manifest-first.md) and [0004](docs/adr/0004-annotations-later.md), task records [`docs/tasks/001`–`006`](docs/tasks/), benchmark experiment records (`examples/*/*METRICS*.md`) |
+| **Historical / deferred** | [`docs/SPEC.md`](docs/SPEC.md), [`docs/MANIFEST.md`](docs/MANIFEST.md), [`docs/history/`](docs/history/), ADRs [0003](docs/adr/0003-manifest-first.md) and [0004](docs/adr/0004-annotations-later.md), task records [`docs/tasks/001`–`007`](docs/tasks/), benchmark experiment records (`examples/*/*METRICS*.md`) |
 
 Some current documents, such as `docs/MVP.md`, `docs/ROADMAP.md` and
 `docs/ARCHITECTURE.md`, also contain clearly labelled historical
@@ -222,7 +253,7 @@ docs/INTEGRATION.md              GNATprove SARIF/.spark/.ali, SPARKlib, Libadala
 docs/MOTIVATION.md, LANDSCAPE.md, RESEARCH.md, FAQ.md
 docs/BENCHMARKS.md, METRICS.md   validation experiments and metrics
 docs/PROOF_PATTERNS.md           pattern notes (circular sequence design + fixed pool)
-docs/tasks/                      task records 001-007
+docs/tasks/                      task records 001-008
 docs/adr/                        architecture decision records (0005: current direction)
 docs/history/ORIGINAL_README.md  original generator-centred README (history)
 docs/SPEC.md, MANIFEST.md        original generator design (historical/deferred)

@@ -36,11 +36,11 @@ write implementation + authoritative contracts
               ├── use reusable proof patterns where applicable
               │
               ▼
-          run GNATprove                  gnatprove -P my_project.gpr
-              │
-              ▼
-      spark-refine explain               reads that run's results (SRD001, SRD002);
-              │                          does not run GNATprove
+  spark-refine prove -P my_project.gpr   runs GNATprove (the proof authority),
+              │                          then explains ONLY the result set that
+              │                          run wrote (SRD001, SRD002); exit code =
+              │                          GNATprove's
+              │    (manual alternative: gnatprove -P ...; spark-refine explain)
               ▼
       understand the failure
               │
@@ -171,11 +171,14 @@ SLOC).
 
 Status: **implemented**:
 
+* `spark-refine prove` (Task 008) runs GNATprove, then SRD001 and SRD002
+  on the one result set **that run** wrote. This is orchestration only:
+  it shows the exact command, preserves GNATprove's exit code, and
+  proves nothing itself;
 * `spark-refine explain` runs SRD001 and SRD002 on one existing result
-  set;
+  set, and does not run GNATprove;
 * `spark-refine compare-provers` runs SRD003 over single-prover runs;
-* both emit stable JSON;
-* neither runs GNATprove.
+* all emit stable JSON.
 
 ### Level 3 — Semantic source enrichment
 

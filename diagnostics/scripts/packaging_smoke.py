@@ -23,6 +23,10 @@ Steps (each failure exits 1 with a message):
       spark-refine analyze <absolute fixture path> --format json
       spark-refine compare-provers --run ... --format json
       python -m spark_refine_diagnostics rules
+      spark-refine prove -P fake.gpr --dry-run   (Task 008; also --format
+                                     json via python -m)
+      spark-refine prove ...        (fake GNATprove: stale result refused;
+                                     fresh result diagnosed, exit preserved)
     and check that the package is imported from the venv, not the repo.
  5. For a wheel install: check the installed files (package size, no
     fixture data in site-packages).
@@ -114,6 +118,9 @@ def inspect_wheel(whl: Path) -> None:
     check("spark-refine = spark_refine_diagnostics.cli:main"
           in entry_points, "console script spark-refine declared")
     check("Requires-Dist" not in meta, "no runtime dependencies")
+    for module in ("cli", "discovery", "orchestration"):
+        check(f"{PACKAGE}/{module}.py" in names,
+              f"{PACKAGE}/{module}.py is in the wheel")
     check(unpacked < 1_000_000,
           "wheel payload well below the 5.5 MB fixture corpus")
 
@@ -213,6 +220,68 @@ def installed_cli_checks(venv: Path, work: Path, editable: bool) -> None:
 
     run([py, "-m", PACKAGE, "rules"], cwd=outside, env=env)
     check(True, "python -m spark_refine_diagnostics rules works")
+
+    prove_checks(exe, py, work, env, p5)
+
+
+FAKE_GNATPROVE = """#!{python}
+import os, shutil, sys
+print("fake gnatprove stdout: Phase 1 of 3 {{not json")
+print("fake gnatprove stderr", file=sys.stderr)
+if os.environ.get("FAKE_WRITE"):
+    dest = os.path.join("obj", "fresh", "gnatprove")
+    os.makedirs(dest, exist_ok=True)
+    for n in sorted(os.listdir(os.environ["FAKE_WRITE"])):
+        if n != "fixture.json":
+            shutil.copy(os.path.join(os.environ["FAKE_WRITE"], n), dest)
+sys.exit(int(os.environ.get("FAKE_EXIT", "0")))
+"""
+
+
+def prove_checks(exe: Path, py: Path, work: Path, env: dict,
+                 fixture: Path) -> None:
+    """Task 008: `spark-refine prove` from the installed package, with a
+    fake GNATprove (no Ada toolchain), outside the repository."""
+    project = work / "prove project"
+    project.mkdir()
+    proc = run([exe, "prove", "-P", "fake.gpr", "--dry-run"], cwd=project,
+               env=env)
+    check("gnatprove -P fake.gpr" in proc.stderr and
+          "dry run" in proc.stdout,
+          "prove -P fake.gpr --dry-run shows the command, runs nothing")
+    doc = json.loads(run([py, "-m", PACKAGE, "prove", "-P", "fake.gpr",
+                          "--dry-run", "--format", "json", "--",
+                          "--level=2"], cwd=project, env=env).stdout)
+    check(doc["orchestration"]["command"] ==
+          ["gnatprove", "-P", "fake.gpr", "--level=2"],
+          "python -m ... prove --dry-run --format json: orchestration plan")
+
+    fake = work / "fake bin" / "gnatprove"
+    fake.parent.mkdir()
+    fake.write_text(FAKE_GNATPROVE.format(python=sys.executable),
+                    encoding="utf-8")
+    fake.chmod(0o755)
+    # a stale, valid result set must never be analysed by prove
+    stale = project / "obj" / "stale" / "gnatprove"
+    shutil.copytree(fixture, stale,
+                    ignore=shutil.ignore_patterns("fixture.json"))
+    proc = run([exe, "prove", "-P", "fake.gpr", "--gnatprove", fake,
+                "--format", "json"], cwd=project, env=env, expect=2)
+    check(proc.stdout == "" and "stale" in proc.stderr,
+          "prove refuses a stale result set (exit 2, no report)")
+    proc = run([exe, "prove", "-P", "fake.gpr", "--gnatprove", fake,
+                "--format", "json"], cwd=project,
+               env={**env, "FAKE_WRITE": str(fixture), "FAKE_EXIT": "1"},
+               expect=1)
+    doc = json.loads(proc.stdout)
+    o = doc["analysis"]["orchestration"]
+    check(o["result_path"] == "obj/fresh/gnatprove" and
+          o["gnatprove_exit_code"] == 1 and o["fresh"] is True and
+          o["stale_result_sets_ignored"] == ["obj/stale/gnatprove"] and
+          doc["summary"]["by_code"]["SRD001"] == 1 and
+          "fake gnatprove stdout" in proc.stderr,
+          "prove with fake GNATprove (exit 1): fresh result diagnosed, "
+          "exit code preserved, GNATprove output on stderr, JSON stdout")
 
 
 def inspect_installed(venv: Path) -> None:

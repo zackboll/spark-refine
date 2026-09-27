@@ -5,6 +5,7 @@ contains timestamps or absolute paths added by the tool."""
 from __future__ import annotations
 
 import json
+import shlex
 
 from .model import Diagnostic, ProofRun
 from .model import Confidence
@@ -85,9 +86,29 @@ def _matching_text(m: dict) -> list[str]:
     return out
 
 
+def orchestration_text(o: dict) -> list[str]:
+    """`prove` provenance (analysis.orchestration), shown first."""
+    return [f"proof command: {shlex.join(o['command'])}",
+            f"GNATprove exit: {o['gnatprove_exit_code']}",
+            f"fresh results: {o['result_path']}",
+            f"selection: {o['result_selection']}"]
+
+
+def orchestration_plan_text(plan: dict) -> str:
+    """`prove --dry-run` text output."""
+    return "\n".join([
+        f"proof command: {shlex.join(plan['command'])}",
+        "dry run: GNATprove not executed; no result set inspected",
+        f"selection: {plan['result_selection']}",
+        *([f"results: {plan['result_path']}"] if plan["result_path"]
+          else [])]) + "\n"
+
+
 def to_text(runs: list[ProofRun], diags: list[Diagnostic],
             notes: list[str], analysis: dict | None = None) -> str:
     out = []
+    if analysis and "orchestration" in analysis:
+        out += orchestration_text(analysis["orchestration"])
     source = (analysis or {}).get("input")
     if source and source.get("discovered"):
         out.append(f"results: {source['path']} (auto-discovered; "
