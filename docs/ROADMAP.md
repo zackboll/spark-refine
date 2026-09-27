@@ -16,6 +16,28 @@ Deliverables:
 
 This bootstrap repository is Phase 0.
 
+> **Evidence so far (history preserved):**
+>
+> * **Task 001** (ring buffer A: `P = 19`) weakened the generator
+>   hypothesis.
+> * **Task 002** (ring buffer B: 21) weakened it again.
+> * **Task 003** (fixed pool: 36, all generic) gave **REVIEW**.
+> * **Task 004** decided library vs. generator: a hand-written reusable
+>   generic (`proof_patterns/`) left `R = 10` per-instance SLOC, giving
+>   **PIVOT**.
+>
+> The phases below were written before that evidence.
+>
+> * **Phase 2** (circular-sequence generator) and **Phase 3** are **not
+>   pursued** on current evidence.
+> * The project proceeds as:
+>   1. a reusable SPARK proof-pattern library (grown one validated pattern
+>      at a time, each with independent validation instances);
+>   2. refinement/specification diagnostics, i.e. Phase 7 brought forward
+>      (next: invariant-masking and contract-sufficiency diagnosis, as
+>      proposed in `docs/tasks/004-prefix-set-proof-library.md`);
+>   3. optional thin convenience tooling around the libraries.
+
 ## Phase 1 — manual proof benchmark
 
 Build and prove the circular-buffer baseline by hand.

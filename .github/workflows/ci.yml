@@ -171,3 +171,87 @@ jobs:
             examples/fixed_pool/obj/*/gnatprove.log
             examples/fixed_pool/obj/negative_summary.json
           if-no-files-found: warn
+
+  # Task 004: the same fixed pool (same public spec, production code, client
+  # proof and runtime tests) with its proof support moved into the reusable
+  # generic library proof_patterns/ (SPARK_Refine_Prefix_Sets). Independent
+  # of the Task 003 job above, which keeps gating the manual baseline.
+  # Green only if: the visible spec is token-identical to Task 003, the
+  # client proof and runtime tests are byte-identical to the Task 004 base,
+  # both inventories partition their sources, the trust scan (incl. the
+  # library) passes, the library-backed build passes the same runtime tests
+  # with and without -gnata, the library-backed proof has 0 unproved /
+  # 0 justified, L1-L6 fail at their expected (rule, entity), and the
+  # independent validation instances of the library prove.
+  spark-fixed-pool-library-backed:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/fixed_pool
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the unchanged-controls check diffs against the Task 004 base
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Repository checks
+        working-directory: .
+        run: python3 scripts/check_repo.py
+      - uses: alire-project/setup-alire@v6.0.0
+        with:
+          version: '2.1.1'
+          toolchain: '--disable-assistant'
+      - name: Resolve pinned toolchain
+        run: |
+          alr -n update
+          alr -n exec -- gnat --version | head -1
+          alr -n exec -- gnatprove --version
+      # ---- controls ------------------------------------------------------
+      - name: Public API equivalence (manual vs library-backed visible part)
+        run: python3 scripts/check_public_api_equivalence.py
+      - name: Client proof and runtime tests unchanged since Task 004 base
+        run: |
+          git diff --exit-code 47a431c4e375a93372ed7f39daafdfb1cb768d8f -- \
+            proof/fixed_pool_client_proof.ads \
+            proof/fixed_pool_client_proof.adb \
+            tests/fixed_pool_runtime_tests.adb \
+            src/fixed_pool.ads \
+            src/fixed_pool.adb \
+            negative/
+      - name: Proof inventories are consistent (manual P and library-backed R, L, A)
+        run: python3 scripts/proof_inventory.py --all
+      - name: Trust / forbidden-assumption scan (incl. reusable library)
+        run: python3 scripts/check_proof_results.py trust-scan
+      # ---- library-backed variant ---------------------------------------
+      - name: "Library-backed: build"
+        run: alr -n build -- -XFIXED_POOL_SRC=variants/library_backed -XFIXED_POOL_VARIANT=library_backed
+      - name: "Library-backed: same runtime tests (production build)"
+        run: ./bin/fixed_pool_runtime_tests
+      - name: "Library-backed: same runtime tests (-gnata, library ghost model executed)"
+        run: |
+          alr -n build -- -XFIXED_POOL_SRC=variants/library_backed -XFIXED_POOL_VARIANT=library_backed -XFIXED_POOL_ASSERTIONS=on
+          ./bin/assertions/fixed_pool_runtime_tests
+      - name: "Library-backed: positive GNATprove gate"
+        run: python3 scripts/check_proof_results.py positive --variant library_backed
+      - name: "Library-backed: negative proof fixtures (L1-L6)"
+        run: python3 scripts/check_proof_results.py negative --variant library_backed
+      - name: "Reusable library: resolve its (identical) pinned toolchain"
+        working-directory: proof_patterns
+        run: alr -n update
+      - name: "Reusable library: independent validation instances"
+        run: python3 scripts/check_proof_results.py library-validation
+      - name: Upload proof results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixed-pool-library-backed-proof-results
+          path: |
+            examples/fixed_pool/obj/library_backed/proof_summary.json
+            examples/fixed_pool/obj/library_backed/gnatprove/gnatprove.out
+            examples/fixed_pool/obj/library_backed/gnatprove/gnatprove.sarif
+            examples/fixed_pool/obj/*/gnatprove.log
+            examples/fixed_pool/obj/negative_summary_library_backed.json
+            proof_patterns/validation/obj/validation_summary.json
+            proof_patterns/validation/obj/gnatprove/gnatprove.out
+          if-no-files-found: warn

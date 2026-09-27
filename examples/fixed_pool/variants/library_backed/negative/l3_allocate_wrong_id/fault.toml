@@ -1,0 +1,16 @@
+id = "L3"
+name = "l3_allocate_wrong_id"
+baseline_equivalent = "P3"
+description = """
+Library-backed equivalent of P3 (identical edit). Allocate returns the
+bottom stack entry Free_Stack (1) instead of the top entry while still
+decrementing Top."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = "      Id := P.Free_Stack (P.Top);"
+replace = "      Id := P.Free_Stack (1);"
+
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Allocate"

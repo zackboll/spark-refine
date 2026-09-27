@@ -22,6 +22,20 @@ The MVP is successful even if the answer is “only for representation X under c
 > reusable SPARK library instead of generated source.
 > See `docs/tasks/003-fixed-pool-proof-baseline.md`.
 
+> **Status after Task 004.** That experiment ran. With a hand-written
+> reusable generic (`proof_patterns/SPARK_Refine_Prefix_Sets`, 98 SLOC),
+> the fixed pool's per-instance proof support drops from 36 to **R = 10**
+> SLOC (4 generic actuals), with an unchanged public API and client proof.
+> The pre-registered rule gives **PIVOT** (R ≤ 10, at the boundary).
+>
+> * Source generation is **not justified** for this pattern, so phases
+>   M1–M3 below are **not pursued** on current evidence.
+> * The recommended direction is a reusable proof-pattern library plus
+>   refinement/specification diagnostics.
+>
+> The history of this file is kept as-is. See
+> `docs/tasks/004-prefix-set-proof-library.md`.
+
 ## Out of scope
 
 The MVP does not need:

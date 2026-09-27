@@ -1,0 +1,25 @@
+id = "L6"
+name = "l6_model_adapter_omits_entry"
+baseline_equivalent = "P6"
+description = """
+Library-backed equivalent of P6: a wrong abstract-model adapter. The only
+place an application can get the mapping wrong is now the one-line
+Free_Model adapter; here it passes Top - 1 as the prefix length, so the top
+stack entry Free_Stack (Top) is invisible in the model. (P6 omitted the
+bottom entry by editing the local model loop; the library's model always
+starts at the first position, so the equivalent adapter fault omits an end
+entry instead.) The library call itself still proves; the public contracts
+that relate Free_Count / Is_Free to the model must fail."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = "     (Free_Prefix.Model (P.Free_Stack, P.Top));"
+replace = "     (Free_Prefix.Model (P.Free_Stack, Natural'Max (P.Top - 1, 0)));"
+
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Free_Count"
+
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Is_Free"

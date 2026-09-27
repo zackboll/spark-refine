@@ -1,0 +1,156 @@
+# Machine-readable classification of the Task 004 library-backed fixed pool
+# (variants/library_backed/). Same rules as proof_inventory.toml: every
+# non-blank, non-comment line is counted exactly once; unclassified lines
+# are "production"; `anchor` must occur on the first line of the range.
+#
+# group:
+#   specification  authoritative, developer-owned requirement (not in R)
+#   mechanical     residual per-instance proof/refinement support (= R)
+#
+# The reusable library (proof_patterns/src) is NOT classified here: it is
+# measured separately as L by `scripts/proof_inventory.py --variant
+# library_backed` (library section).
+
+format_version = 1
+sources = ["variants/library_backed/fixed_pool.ads",
+           "variants/library_backed/fixed_pool.adb"]
+
+# ---------------------------------------------------------------- spec ----
+# Token-identical to the Task 003 visible part (API-equivalence gate).
+
+[[artifact]]
+name = "SPARKlib Big_Integers / Functional.Sets dependencies"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [1, 2]
+anchor = "with SPARK.Big_Integers;"
+
+[[artifact]]
+name = "Id_Sets (abstract model type instantiation)"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [14, 16]
+anchor = "package Id_Sets is new"
+
+[[artifact]]
+name = "Free_Model (public ghost abstraction + capacity bound)"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [20, 23]
+anchor = "function Free_Model (P : Pool)"
+
+[[artifact]]
+name = "Free_Count contract"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [26, 27]
+anchor = "with Post => To_Big_Integer (Free_Count'Result)"
+
+[[artifact]]
+name = "Is_Free contract"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [30, 30]
+anchor = "Is_Free'Result"
+
+[[artifact]]
+name = "Is_Allocated contract"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [33, 34]
+anchor = "Is_Allocated'Result"
+
+[[artifact]]
+name = "Is_Exhausted contract"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [37, 37]
+anchor = "Is_Exhausted'Result"
+
+[[artifact]]
+name = "Initialize contract"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [40, 42]
+anchor = "with Post => Free_Count (P) = Max_Objects"
+
+[[artifact]]
+name = "Allocate contract"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [45, 49]
+anchor = "with Pre  => Free_Count (P) > 0"
+
+[[artifact]]
+name = "Release contract"
+group = "specification"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [52, 54]
+anchor = "with Pre  => Is_Allocated (P, Id)"
+
+# ---------------------------------------------------- mechanical (= R) ----
+
+[[artifact]]
+name = "Library dependency (private with)"
+entity = "Fixed_Pool (context clause)"
+group = "mechanical"
+category = "library_configuration"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [3, 3]
+anchor = "private with SPARK_Refine_Prefix_Sets;"
+generic = true
+application_specific = false
+ablation = "(required: without it the instance does not compile)"
+why = "Context clause needed only to instantiate the proof library."
+
+[[artifact]]
+name = "Library instantiation (4 semantic actuals)"
+entity = "Fixed_Pool.Free_Prefix"
+group = "mechanical"
+category = "library_configuration"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [61, 65]
+anchor = "package Free_Prefix is new SPARK_Refine_Prefix_Sets"
+generic = true
+application_specific = false
+ablation = "(required: every other residual artifact names Free_Prefix)"
+why = "Configures the pattern: identity type, index type, storage array type, caller's Functional.Sets instance (A = 4). Written in the private part, next to the representation it describes."
+
+[[artifact]]
+name = "Pool.Top default (invariant must hold on default value)"
+entity = "Fixed_Pool.Pool (Top => 0)"
+group = "mechanical"
+category = "representation_invariant"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [69, 69]
+anchor = "Top        : Pool_Count := 0;"
+generic = true
+application_specific = false
+ablation = "residual_no_top_default"
+why = "Unchanged from Task 003, counted conservatively (same line)."
+
+[[artifact]]
+name = "Uniqueness Type_Invariant via library predicate"
+entity = "Fixed_Pool.Pool'Type_Invariant"
+group = "mechanical"
+category = "representation_invariant"
+file = "variants/library_backed/fixed_pool.ads"
+lines = [71, 71]
+anchor = "with Type_Invariant => Free_Prefix.Is_Unique"
+generic = true
+application_specific = false
+ablation = "residual_no_invariant, residual_local_quantified_invariant"
+why = "Type_Invariant => Free_Prefix.Is_Unique (Pool.Free_Stack, Pool.Top). Same counting convention as Task 003 (range starts at 'with Type_Invariant'; 'end record' stays production, so production SLOC is unchanged at 41). Replaces the 4-line local double quantifier."
+
+[[artifact]]
+name = "Free_Model adapter (one call into the library)"
+entity = "Fixed_Pool.Free_Model"
+group = "mechanical"
+category = "model_construction"
+file = "variants/library_backed/fixed_pool.adb"
+lines = [9, 10]
+anchor = "function Free_Model (P : Pool) return Id_Sets.Set is"
+generic = true
+application_specific = false
+ablation = "(required: the body is the model; L6 shows a wrong adapter is caught)"
+why = "The only application-owned mapping from representation to model: (Free_Stack, Top) -> library Model. No Refined_Post, no loop, no loop invariants remain."

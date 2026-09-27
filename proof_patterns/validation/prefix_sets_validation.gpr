@@ -1,0 +1,24 @@
+with "sparklib";
+with "../spark_refine_proof_patterns.gpr";
+
+--  Task 004: proof-only validation instances of the reusable prefix-set
+--  library. Nothing here is executed; it is analysed by GNATprove only.
+--  Same proof switches as the benchmarks (examples/fixed_pool/fixed_pool.gpr).
+project Prefix_Sets_Validation is
+
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatwa", "-gnatW8", "-g");
+   end Compiler;
+
+   package Prove is
+      for Proof_Switches ("Ada") use
+        ("-U", "--mode=all", "--level=2", "--no-loop-unrolling",
+         "--report=statistics", "--checks-as-errors=on",
+         "--warnings=error");
+   end Prove;
+
+end Prefix_Sets_Validation;

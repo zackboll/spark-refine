@@ -204,6 +204,24 @@ The representation change is intentionally substantial and exercises a different
 > or only a reusable SPARK *library*. See
 > `docs/tasks/003-fixed-pool-proof-baseline.md`.
 
+> **Task 004 outcome (same pool, library-backed,
+> `examples/fixed_pool/variants/library_backed/`).**
+>
+> * **Setup:** the 36 generic SLOC were moved into a hand-written reusable
+>   generic, `proof_patterns/` `SPARK_Refine_Prefix_Sets` (`L = 98`
+>   SLOC). The public spec is token-identical, and the client proof and
+>   runtime tests are unchanged.
+> * **Proof:** 161/161 checks, 0 unproved, 0 justified.
+> * **Residual per-instance support: `R = 10`**, with `A = 4` generic
+>   actuals. It consists of 6 lines of instantiation and context, the
+>   one-line `Type_Invariant => Is_Unique`, `Top := 0` and a 2-line model
+>   adapter. No local loop invariant, lemma, quantifier or `Refined_Post`
+>   remains.
+> * **Validation:** 3 independent validation instances prove (356/356).
+> * **Decision:** the pre-registered rule gives **PIVOT**, at the boundary
+>   (R ≤ 10). See `docs/tasks/004-prefix-set-proof-library.md` and
+>   `examples/fixed_pool/LIBRARY_METRICS.md`.
+
 ## Stop criteria
 
 The project should be willing to stop or pivot if the first two patterns show that:

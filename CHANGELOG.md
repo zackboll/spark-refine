@@ -14,6 +14,13 @@
   client proof, runtime tests, five machine-checked negative proof fixtures,
   a proof-support inventory (`BASELINE_METRICS.md`), and a pinned
   GNAT/GNATprove/SPARKlib 16.1.0 CI proof job.
+- Task 004: reusable SPARK proof-pattern library `proof_patterns/`
+  (`SPARK_Refine_Prefix_Sets`) with three independent proof-only validation
+  instances; a library-backed fixed-pool variant
+  (`examples/fixed_pool/variants/library_backed`) with an unchanged public
+  API, client proof and runtime tests; public-API equivalence, inventory
+  (`R`, `L`, `A`), negative (L1-L6) and library-validation gates; a new CI
+  job; `LIBRARY_METRICS.md`. Pre-registered decision: PIVOT (R = 10).
 
 ### Changed
 

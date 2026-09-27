@@ -39,3 +39,23 @@ Toolchain pins and proof switches are identical to `examples/ring_buffer`
 
 Result: 136/136 checks proved, `P = 36`, `G = 100 %`, `M = 5`. The
 pre-registered decision is **REVIEW** (see `BASELINE_METRICS.md` §13).
+
+## Task 004: library-backed variant
+
+`variants/library_backed/` is the same pool (token-identical visible spec,
+same production code, same `proof/` client and `tests/`). Its proof
+support comes from the reusable library
+`../../proof_patterns/` (`SPARK_Refine_Prefix_Sets`). `src/` above is the
+unchanged Task 003 baseline.
+
+```bash
+python3 scripts/check_public_api_equivalence.py
+python3 scripts/proof_inventory.py --all
+alr -n build -- -XFIXED_POOL_SRC=variants/library_backed -XFIXED_POOL_VARIANT=library_backed
+./bin/fixed_pool_runtime_tests
+python3 scripts/check_proof_results.py all --variant library_backed   # + L1-L6 + library validation
+```
+
+Result: 161/161 proved, residual per-instance support `R = 10` (vs
+`P = 36`), library `L = 98`, `A = 4` generic actuals. The pre-registered
+decision is **PIVOT**; see `LIBRARY_METRICS.md`.

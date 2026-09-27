@@ -1,0 +1,17 @@
+id = "L2"
+name = "l2_allocate_keeps_top"
+baseline_equivalent = "P2"
+description = """
+Library-backed equivalent of P2 (identical edit). Allocate returns
+Free_Stack (Top) but does not decrement Top, so the returned identity is
+still free. The representation invariant still holds."""
+
+[[edit]]
+file = "fixed_pool.adb"
+find = """      Id := P.Free_Stack (P.Top);
+      P.Top := P.Top - 1;"""
+replace = """      Id := P.Free_Stack (P.Top);"""
+
+[[expect]]
+rule = "VC_POSTCONDITION"
+entity = "Fixed_Pool.Allocate"

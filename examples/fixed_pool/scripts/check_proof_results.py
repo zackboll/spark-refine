@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Machine-checked GNATprove gate for the fixed-pool benchmark (Task 003).
+"""Machine-checked GNATprove gate for the fixed-pool benchmark (Tasks 003/004).
 
 Sub-commands:
 
@@ -12,9 +12,22 @@ Sub-commands:
               require that each expected (rule, entity) obligation is
               reported unproved. A nonzero exit status alone is not
               accepted. Writes obj/negative_summary.json.
-  trust-scan  Scan src/, proof/, tests/ and every negative fault patch for
-              forbidden trust-affecting constructs.
-  all         trust-scan, positive, negative (in that order).
+  trust-scan  Scan src/, proof/, tests/, the library-backed variant, the
+              reusable proof library (proof_patterns/, incl. validation
+              instances) and every negative fault patch for forbidden
+              trust-affecting constructs.
+  library-validation
+              Prove the independent validation instances of the reusable
+              library (proof_patterns/validation) with the same criteria.
+  all         trust-scan, positive, negative (in that order); with
+              --variant library_backed also library-validation.
+
+--variant selects the implementation (default: baseline, alias manual =
+Task 003 src/). --variant library_backed (Task 004) proves
+variants/library_backed/ against the same proof/ client and uses
+variants/library_backed/negative/ fixtures L1-L6. Its positive summary
+also reports how many checks are located in the application sources vs.
+the reusable library sources (obj/library_backed/proof_summary.json).
 
 Results are read from GNATprove's SARIF output (gnatprove.sarif) and
 cross-checked against the per-unit .spark JSON files. English message text
@@ -50,20 +63,47 @@ SRC = EXAMPLE / "src"
 NEGATIVE = EXAMPLE / "negative"
 OBJ = EXAMPLE / "obj"
 
+LIBRARY_BACKED = "variants/library_backed"
+
 VARIANTS = {
+    # Task 003: manual proof support (historical baseline, unchanged).
     "baseline": {
         "impl": "src", "obj_name": "baseline", "negative": NEGATIVE,
         "min_fixtures": 6, "neg_prefix": "negative_",
         "neg_src": OBJ / "negative_src",
         "neg_summary": "negative_summary.json",
     },
+    # Task 004: same production code and public spec; proof support from
+    # the reusable library in proof_patterns/ (SPARK_Refine_Prefix_Sets).
+    "library_backed": {
+        "impl": LIBRARY_BACKED, "obj_name": "library_backed",
+        "negative": EXAMPLE / LIBRARY_BACKED / "negative",
+        "min_fixtures": 6, "neg_prefix": "negative_lib_",
+        "neg_src": OBJ / "negative_src_library_backed",
+        "neg_summary": "negative_summary_library_backed.json",
+    },
 }
+# "manual" is accepted as an alias of the Task 003 baseline.
+VARIANT_ALIASES = {"manual": "baseline"}
 
 GATED_UNITS = ("fixed_pool", "fixed_pool_client_proof")
 
+# Source files of the reusable proof library. Its instance VCs are reported
+# inside fixed_pool.spark (GNATprove proves generics per instance) but are
+# located in these files; the positive summary reports them separately.
+LIBRARY_FILES = ("spark_refine_prefix_sets.ads", "spark_refine_prefix_sets.adb")
+APPLICATION_FILES = ("fixed_pool.ads", "fixed_pool.adb")
+
+REPO = EXAMPLE.parents[1]
+
 TRUST_SCAN_GLOBS = ("src/*.ad[sb]", "proof/*.ad[sb]", "tests/*.ad[sb]",
-                    "fixed_pool.gpr")
-FAULT_GLOBS = ("negative/*/fault.toml",)
+                    f"{LIBRARY_BACKED}/*.ad[sb]", "fixed_pool.gpr")
+# Reusable proof library + its validation instances (relative to REPO).
+LIBRARY_TRUST_SCAN_GLOBS = ("proof_patterns/src/*.ad[sb]",
+                            "proof_patterns/validation/src/*.ad[sb]",
+                            "proof_patterns/*.gpr",
+                            "proof_patterns/validation/*.gpr")
+FAULT_GLOBS = ("negative/*/fault.toml", f"{LIBRARY_BACKED}/negative/*/fault.toml")
 
 FORBIDDEN_PATTERNS = {
     "pragma Assume": re.compile(r"pragma\s+Assume\b", re.I),
@@ -230,6 +270,25 @@ def prover_effort(out_dir: Path) -> dict:
                                       for s, _, w in worst[:3]]}
 
 
+def vc_locations(res: dict) -> dict:
+    """Checks (proved + justified + unproved) by the source file that holds
+    them: application package, reusable proof library, client proof, or
+    SPARKlib/runtime (instance-level checks of Functional.Sets)."""
+    out = {"application": 0, "reusable_library": 0, "client_proof": 0,
+           "sparklib_or_runtime": 0}
+    for item in res["proved"] + res["justified"] + res["unproved"]:
+        f = item["file"]
+        if f in APPLICATION_FILES:
+            out["application"] += 1
+        elif f in LIBRARY_FILES:
+            out["reusable_library"] += 1
+        elif f.startswith("fixed_pool_client_proof"):
+            out["client_proof"] += 1
+        else:
+            out["sparklib_or_runtime"] += 1
+    return out
+
+
 # --------------------------------------------------------------------------
 # Gates
 # --------------------------------------------------------------------------
@@ -258,6 +317,7 @@ def gate_positive(args) -> None:
         "allowed_foundation_warnings": len(res["allowed_warnings"]),
         "pragma_assume": res["pragma_assume"],
         "proved_by_rule": dict(sorted(by_rule.items())),
+        "vcs_by_location": vc_locations(res),
         **prover_effort(run["out_dir"]),
     }
     (OBJ / var["obj_name"] / "proof_summary.json").write_text(
@@ -361,6 +421,11 @@ def gate_negative(args) -> None:
             "unproved": len(res["unproved"]),
             "expected": [f"{e['rule']}@{e['entity']}" for e in spec["expect"]],
             "observed_unproved": [f"{r}@{e}" for r, e in observed],
+            # Diagnostic-location comparison (Task 004 section 28): where
+            # GNATprove reports each failure (application vs. library file).
+            "observed_locations": sorted({
+                f"{u['rule']}@{u['entity']} ({u['file']}:{u['line']})"
+                for u in res["unproved"]}),
             "detected": not missing and bool(res["unproved"]),
         })
     OBJ.mkdir(exist_ok=True)
@@ -373,13 +438,82 @@ def gate_negative(args) -> None:
           "fixtures detected as expected)")
 
 
+VALIDATION_GPR = REPO / "proof_patterns" / "validation" / \
+    "prefix_sets_validation.gpr"
+VALIDATION_UNITS = ("validate_capacity_1", "validate_offset_large",
+                    "validate_enum_overcapacity")
+
+
+def gate_library_validation(_args) -> None:
+    """Prove the independent validation instances of the reusable library
+    (Task 004 sections 22/23). Same criteria as the positive gate; every
+    validation unit must have been analysed and must contain library VCs."""
+    print("== reusable library validation instances ==")
+    obj = VALIDATION_GPR.parent / "obj"
+    if obj.exists():
+        shutil.rmtree(obj)
+    cmd = exec_prefix() + ["gnatprove", "-P", VALIDATION_GPR.name, "-j0"]
+    start = time.monotonic()
+    proc = subprocess.run(cmd, cwd=VALIDATION_GPR.parent,
+                          capture_output=True, text=True)
+    wall = time.monotonic() - start
+    out_dir = obj / "gnatprove"
+    (obj / "gnatprove.log").write_text(proc.stdout + proc.stderr,
+                                       encoding="utf-8")
+    global GATED_UNITS
+    saved, GATED_UNITS = GATED_UNITS, VALIDATION_UNITS
+    try:
+        res = load_results(out_dir)
+    finally:
+        GATED_UNITS = saved
+    per_unit = {}
+    for unit in VALIDATION_UNITS:
+        data = json.loads((out_dir / f"{unit}.spark").read_text(
+            encoding="utf-8"))
+        per_unit[unit] = sum(1 for e in data.get("proof", [])
+                             if e.get("file") in LIBRARY_FILES)
+    summary = {
+        "returncode": proc.returncode, "wall_seconds": round(wall, 2),
+        "total_checks": len(res["proved"]) + len(res["justified"])
+                        + len(res["unproved"]),
+        "proved": len(res["proved"]), "unproved": len(res["unproved"]),
+        "justified": len(res["justified"]),
+        "unexpected_warnings": len(res["warnings"]),
+        "pragma_assume": res["pragma_assume"],
+        "library_proof_vcs_per_instance": per_unit,
+    }
+    (obj / "validation_summary.json").write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(summary, indent=2))
+    problems = [f"unproved: {u['rule']} {u['entity']} {u['file']}:"
+                f"{u['line']}" for u in res["unproved"]]
+    problems += [f"unexpected warning: {w['rule']} {w['file']}:{w['line']}: "
+                 f"{w['message']}" for w in res["warnings"]]
+    if proc.returncode != 0:
+        problems.append(f"gnatprove exited with {proc.returncode}")
+    if res["justified"] or res["pragma_assume"] or res["spark_unproved"]:
+        problems.append("justified / pragma Assume / .spark unproved present")
+    problems += [f"{u}: no reusable-library proof VCs analysed"
+                 for u, n in per_unit.items() if n == 0]
+    if problems:
+        raise GateError("library validation FAILED:\n  "
+                        + "\n  ".join(problems))
+    print(f"library validation: PASS ({summary['proved']} proved, "
+          f"{len(VALIDATION_UNITS)} instances, 0 unproved, 0 justified)")
+
+
 def gate_trust(_args) -> None:
     print("== trust scan ==")
     problems = []
     scanned = 0
-    for pattern in TRUST_SCAN_GLOBS:
-        for path in sorted(EXAMPLE.glob(pattern)):
-            rel = path.relative_to(EXAMPLE).as_posix()
+    for base, pattern in ([(EXAMPLE, p) for p in TRUST_SCAN_GLOBS]
+                          + [(REPO, p) for p in LIBRARY_TRUST_SCAN_GLOBS]):
+        paths = sorted(base.glob(pattern))
+        if not paths:
+            problems.append(f"trust-scan pattern matched nothing: {pattern}")
+        for path in paths:
+            rel = path.relative_to(EXAMPLE if base == EXAMPLE else REPO
+                                   ).as_posix()
             scanned += 1
             lines = path.read_text(encoding="utf-8").splitlines()
             for lineno, line in enumerate(lines, 1):
@@ -405,12 +539,17 @@ def main() -> int:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command",
-                        choices=("positive", "negative", "trust-scan", "all"))
+                        choices=("positive", "negative", "trust-scan",
+                                 "library-validation", "all"))
     parser.add_argument("--only", nargs="*",
                         help="negative fixture directory names to run")
-    parser.add_argument("--variant", choices=tuple(VARIANTS),
-                        default="baseline", help=argparse.SUPPRESS)
+    parser.add_argument("--variant",
+                        choices=tuple(VARIANTS) + tuple(VARIANT_ALIASES),
+                        default="baseline",
+                        help="baseline (= manual, Task 003) or "
+                             "library_backed (Task 004)")
     args = parser.parse_args()
+    args.variant = VARIANT_ALIASES.get(args.variant, args.variant)
     try:
         if args.command in ("trust-scan", "all"):
             gate_trust(args)
@@ -418,6 +557,9 @@ def main() -> int:
             gate_positive(args)
         if args.command in ("negative", "all"):
             gate_negative(args)
+        if args.command == "library-validation" or (
+                args.command == "all" and args.variant == "library_backed"):
+            gate_library_validation(args)
     except GateError as exc:
         print(exc, file=sys.stderr)
         return 1

@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""Single-prover measurement of the positive fixed-pool baseline (Task 003).
+"""Single-prover measurement of the positive fixed-pool proof (Tasks 003/004).
 
 Under --level=2 -j0 the three provers race and the losers are killed, so the
 winner (and thus reported step counts) varies between runs (Task 002). This
 script re-runs the positive baseline once per prover with --prover=<p> and
 otherwise the project's normal switches (timeout/steps from --level=2 are
 NOT raised), and records for each: all checks proved?, unproved list, max
-steps, slowest check, wall time. Output: obj/prover_matrix.json.
+steps, slowest check, wall time. Output: obj/prover_matrix.json
+(--variant library_backed: obj/prover_matrix_library_backed.json, where
+unproved checks also carry their file:line so that failures inside the
+reusable library are distinguishable from application failures).
 
 Measurement only; not a CI gate.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 
@@ -39,12 +43,19 @@ def effort(out_dir) -> dict:
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--variant", default="baseline",
+                    choices=tuple(g.VARIANTS) + tuple(g.VARIANT_ALIASES))
+    args = ap.parse_args()
+    variant = g.VARIANT_ALIASES.get(args.variant, args.variant)
+    impl = g.VARIANTS[variant]["impl"]
+    tag = "" if variant == "baseline" else f"_{variant}"
     results = []
     for prover in PROVERS:
         old = g.gnatprove_cmd
         g.gnatprove_cmd = lambda v, i: old(v, i) + [f"--prover={prover}"]
         try:
-            run = g.run_gnatprove(f"prover_{prover}", "src")
+            run = g.run_gnatprove(f"prover{tag}_{prover}", impl)
         finally:
             g.gnatprove_cmd = old
         res = g.load_results(run["out_dir"])
@@ -53,13 +64,15 @@ def main() -> int:
                         + len(res["justified"]),
                "proved": len(res["proved"]),
                "unproved": sorted(f"{u['rule']}@{u['entity']}"
+                                  + (f" ({u['file']}:{u['line']})"
+                                     if tag else "")
                                   for u in res["unproved"]),
                "all_proved": not res["unproved"] and run["returncode"] == 0,
                "wall_seconds": round(run["wall_seconds"], 2),
                **effort(run["out_dir"])}
         results.append(row)
         print(json.dumps(row), flush=True)
-    (g.OBJ / "prover_matrix.json").write_text(
+    (g.OBJ / f"prover_matrix{tag}.json").write_text(
         json.dumps(results, indent=2) + "\n", encoding="utf-8")
     return 0
 

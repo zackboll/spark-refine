@@ -85,6 +85,23 @@ The valuable niche is **refinement-aware diagnosis**. Because `spark-refine` kno
 >
 > Whether diagnostics becomes the *primary* direction is still open; see
 > the REVIEW decision in `docs/tasks/003-fixed-pool-proof-baseline.md`.
+>
+> **Update (Task 004).** A reusable SPARK generic library reduced the
+> pool's per-instance proof support from 36 to 10 SLOC, giving **PIVOT**.
+> The recurring proof knowledge fits in a library, so generation is not
+> justified for this pattern, and diagnostics becomes the primary
+> direction.
+>
+> The library did **not** remove any of the diagnostic needs above:
+>
+> * invariant masking is identical (L1/L5);
+> * Alt-Ergo is still the only single prover that proves everything;
+> * the invariant-removal baseline got noisier (2 → 8 failures), because
+>   library contracts are guarded by `Is_Unique`;
+> * GNATprove emits a misleading hint ("mention P in a precondition") when
+>   the invariant is missing.
+>
+> See `docs/tasks/004-prefix-set-proof-library.md`.
 
 ## 4. Concurrency and temporal verification
 
