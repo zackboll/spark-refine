@@ -1,6 +1,16 @@
 # ADR 0003: Use a TOML manifest for the MVP
 
-Status: Accepted for bootstrap
+Status: Accepted for bootstrap. **Implementation priority superseded by
+[ADR 0005](0005-library-and-diagnostics-first.md) (deferred).**
+
+> **Note (Task 007).** The manifest existed to drive a source generator.
+> Tasks 001–004 found generation not justified for the demonstrated
+> patterns, so no manifest-driven tooling is planned. The only manifest
+> in the repository, `examples/ring_buffer/spark-refine.toml`, is an
+> illustrative fixture. Only the repository's structural checks read it;
+> the product does not. The
+> decision and rationale below are kept unchanged as history. They would
+> apply again if future evidence revived generation.
 
 ## Context
 

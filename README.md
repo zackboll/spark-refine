@@ -2,9 +2,10 @@
 
 **Reusable proof patterns and proof-aware diagnostics for SPARK.**
 
-`spark-refine` is an open-source proof-engineering toolkit for SPARK.
-It provides reusable proof patterns and proof-aware diagnostics while
-keeping GNATprove as the proof authority.
+`spark-refine` is an open-source proof-engineering toolkit for SPARK. It
+combines reusable, GNATprove-verified proof patterns with proof-aware
+diagnostics for humans and AI agents. GNATprove remains the proof
+authority.
 
 > Status: pre-alpha. Both pillars below are real, tested and exercised by
 > CI on the pinned FSF GNAT / GNATprove / SPARKlib 16.1.0 toolchain.
@@ -29,11 +30,11 @@ A deterministic analyzer over GNATprove's machine-readable output
 outcomes into proof-engineering diagnostics. It serves humans directly
 and serves AI agents, CI and editors as stable JSON:
 
-| Code | Category | Meaning |
-|---|---|---|
-| SRD001 | `proof_context` | a failed invariant may mask downstream proved postconditions (a masking *risk*, never a causality or falsity claim) |
-| SRD002 | `abstraction_boundary` | client-only proof gap; the public abstraction *may* be insufficient (medium / low confidence) |
-| SRD003 | `prover_portfolio` | a proof depends on the prover portfolio (confidently matched checks only) |
+| Code | Category | Meaning | Command |
+|---|---|---|---|
+| SRD001 | `proof_context` | a failed invariant may mask downstream proved postconditions (a masking *risk*, never a causality or falsity claim) | `explain` |
+| SRD002 | `abstraction_boundary` | client-only proof gap; the public abstraction *may* be insufficient (medium / low confidence) | `explain` |
+| SRD003 | `prover_portfolio` | a proof depends on the prover portfolio (confidently matched checks only) | `compare-provers` |
 
 ## Quick start
 
@@ -48,20 +49,28 @@ spark-refine rules
 Human workflow, from your SPARK project's directory:
 
 ```bash
-gnatprove -P my_project.gpr
-
-spark-refine explain
+gnatprove -P my_project.gpr     # 1. GNATprove proves (the proof authority)
+spark-refine explain            # 2. spark-refine interprets those results
 ```
+
+What `spark-refine explain` does:
+
+* it analyzes **one existing** GNATprove result set and runs **SRD001**
+  and **SRD002** on it;
+* it does **not** run GNATprove. Results it discovers may be **stale** if
+  you changed sources since the last GNATprove run;
+* it does **not** produce SRD003, which needs several single-prover runs
+  and comes from `spark-refine compare-provers` (below).
 
 Without a path, `explain` looks under the current directory for exactly
 one GNATprove result set: `gnatprove.sarif` + `*.spark`, e.g. in
 `obj/gnatprove/` or `obj/<variant>/gnatprove/`. If it finds none or
-several, it exits 2 and lists the candidates. It never guesses. Pass the
-location explicitly when needed:
+several, it exits 2 and lists the candidates. It never guesses. When
+discovery is ambiguous, pass the results path explicitly:
 
 ```bash
-spark-refine explain obj/proof/gnatprove
-spark-refine explain obj/proof/gnatprove/gnatprove.sarif
+spark-refine explain obj/<variant>/gnatprove
+spark-refine explain obj/<variant>/gnatprove/gnatprove.sarif
 ```
 
 JSON for an agent or CI. The format is `format_version` 1. Every
@@ -73,7 +82,9 @@ spark-refine explain --format json > spark-refine.json
 spark-refine explain --format json --fail-on SRD001   # exit 1 if emitted
 ```
 
-Prover-portfolio comparison over single-prover runs:
+Prover-portfolio comparison over single-prover runs. This is the only
+command that produces **SRD003**. Run GNATprove once per prover first,
+e.g. `--prover=cvc5`, each into its own object directory:
 
 ```bash
 spark-refine compare-provers \
@@ -84,7 +95,9 @@ spark-refine compare-provers \
 
 > **Freshness.** `spark-refine explain` analyzes the proof results you
 > point it at. They describe your current sources only if you have just
-> run GNATprove. `spark-refine` does not run GNATprove itself.
+> run GNATprove. `spark-refine` does not run GNATprove itself; there is
+> no `spark-refine prove` command. Proof-run orchestration is only a
+> possible future direction (`docs/ROADMAP.md`).
 
 `analyze` remains a compatibility alias of `explain` (path required), and
 `python3 -m spark_refine_diagnostics ...` still works. Full reference:
@@ -105,6 +118,17 @@ authority. `spark-refine` never edits sources, repairs proofs, changes
 contracts or emits unchecked assumptions. See
 [`docs/TRUST_MODEL.md`](docs/TRUST_MODEL.md).
 
+The project distinguishes three kinds of source. The distinction is a
+recommended policy and is not mechanically enforced:
+
+| Kind | Examples | Policy |
+|---|---|---|
+| Production implementation | operation bodies, concrete representation | normal engineering changes |
+| Authoritative specification | public `Pre`/`Post`, abstract model semantics, requirements | high sensitivity; do not weaken it just to get a green proof |
+| Mechanical proof support | representation invariants, model adapters, lemmas, loop invariants, proof-pattern instantiation | may change to make the proof architecture work; still checked by GNATprove |
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) §3.
+
 ## How the project got here
 
 The project began as a hypothesis: *generate* the refinement proof
@@ -121,16 +145,25 @@ deprioritized**:
 | 005 | deterministic diagnostics work on real GNATprove output (SRD001–SRD003) |
 | 006 | diagnostics packaged as the installable `spark-refine explain` CLI |
 
-The original design documents are preserved unchanged as history:
+The decision is recorded in
+[ADR 0005](docs/adr/0005-library-and-diagnostics-first.md). Source
+generation is **deferred pending new evidence**, not ruled out.
 
-* the original README, in [`docs/history/ORIGINAL_README.md`](docs/history/ORIGINAL_README.md);
-* [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md);
-* [`docs/SPEC.md`](docs/SPEC.md);
-* [`docs/MANIFEST.md`](docs/MANIFEST.md);
-* the ADRs in [`docs/adr/`](docs/adr/).
+The original generator design is preserved as history:
 
-The current direction is in [`docs/ROADMAP.md`](docs/ROADMAP.md). Each
-task's full record is in [`docs/tasks/`](docs/tasks/).
+* the original README, unchanged, in [`docs/history/ORIGINAL_README.md`](docs/history/ORIGINAL_README.md);
+* [`docs/SPEC.md`](docs/SPEC.md) and [`docs/MANIFEST.md`](docs/MANIFEST.md), with a historical/deferred banner;
+* Part II of [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), the historical
+  sections of [`docs/VISION.md`](docs/VISION.md),
+  [`docs/MVP.md`](docs/MVP.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md);
+* ADRs [0003](docs/adr/0003-manifest-first.md) and
+  [0004](docs/adr/0004-annotations-later.md), marked
+  superseded/deferred.
+
+The current direction is in [`docs/VISION.md`](docs/VISION.md),
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and
+[`docs/ROADMAP.md`](docs/ROADMAP.md). Each task's full record is in
+[`docs/tasks/`](docs/tasks/).
 
 ## Two executables, two names
 
@@ -143,6 +176,32 @@ The generator commands once sketched for the Ada executable (`validate`,
 `generate`, `check`) are historical, deprioritized research. They are not
 planned commands.
 
+## Where to start: documentation hierarchy
+
+Read the current-direction documents in this order. When documents
+disagree, the higher one wins:
+
+```text
+README.md                  what spark-refine is, how to use it
+  ↓
+docs/VISION.md             mission, developer loop, maturity levels
+  ↓
+docs/ARCHITECTURE.md       current components, trust boundary, three kinds of source
+  ↓
+docs/ROADMAP.md            completed / near term / later / deferred
+```
+
+| Status | Documents |
+|---|---|
+| **Current, specialized** | [`docs/AGENT_INTEGRATION.md`](docs/AGENT_INTEGRATION.md), [`diagnostics/README.md`](diagnostics/README.md), [`docs/PROOF_PATTERNS.md`](docs/PROOF_PATTERNS.md), [`docs/TRUST_MODEL.md`](docs/TRUST_MODEL.md), [`docs/INTEGRATION.md`](docs/INTEGRATION.md), [`docs/METRICS.md`](docs/METRICS.md), [ADR 0005](docs/adr/0005-library-and-diagnostics-first.md) |
+| **Historical / deferred** | [`docs/SPEC.md`](docs/SPEC.md), [`docs/MANIFEST.md`](docs/MANIFEST.md), [`docs/history/`](docs/history/), ADRs [0003](docs/adr/0003-manifest-first.md) and [0004](docs/adr/0004-annotations-later.md), task records [`docs/tasks/001`–`006`](docs/tasks/), benchmark experiment records (`examples/*/*METRICS*.md`) |
+
+Some current documents, such as `docs/MVP.md`, `docs/ROADMAP.md` and
+`docs/ARCHITECTURE.md`, also contain clearly labelled historical
+sections. Anything under a "Historical" or "Deferred" heading describes
+the generator hypothesis explored before the pivot. It is not the
+current product.
+
 ## Repository map
 
 ```text
@@ -153,17 +212,20 @@ diagnostics/                     spark-refine CLI (Python package, SRD001-SRD003
 proof_patterns/                  reusable SPARK proof-pattern library
 examples/ring_buffer/            Tasks 001-002 benchmark (two representations)
 examples/fixed_pool/             Tasks 003-004 benchmark (manual + library-backed)
+docs/VISION.md                   current vision and maturity levels
+docs/ARCHITECTURE.md             current architecture (Part II: deferred generator design)
+docs/MVP.md                      current MVP: implemented / validated / future
+docs/ROADMAP.md                  evidence-gated roadmap
 docs/AGENT_INTEGRATION.md        safe agent loop over spark-refine JSON
 docs/TRUST_MODEL.md              soundness and trust boundary
-docs/ROADMAP.md                  evidence-gated roadmap
-docs/tasks/                      task records 001-006
-docs/history/ORIGINAL_README.md  original generator-centred README (history)
-docs/ARCHITECTURE.md, SPEC.md,   original generator design (history)
-  MANIFEST.md, PROOF_PATTERNS.md
-docs/MOTIVATION.md, LANDSCAPE.md, RESEARCH.md, VISION.md, FAQ.md
+docs/INTEGRATION.md              GNATprove SARIF/.spark/.ali, SPARKlib, Libadalang (future), Alire
+docs/MOTIVATION.md, LANDSCAPE.md, RESEARCH.md, FAQ.md
 docs/BENCHMARKS.md, METRICS.md   validation experiments and metrics
-docs/INTEGRATION.md              GNATprove/SPARKlib/Libadalang/Alire notes
-docs/adr/                        architecture decision records
+docs/PROOF_PATTERNS.md           pattern notes (circular sequence design + fixed pool)
+docs/tasks/                      task records 001-007
+docs/adr/                        architecture decision records (0005: current direction)
+docs/history/ORIGINAL_README.md  original generator-centred README (history)
+docs/SPEC.md, MANIFEST.md        original generator design (historical/deferred)
 src/                             legacy Ada bootstrap executable spark_refine
 ```
 

@@ -1,6 +1,16 @@
 # ADR 0002: No generated axioms or assumptions by default
 
-Status: Accepted for bootstrap
+Status: Accepted for bootstrap. **Still current.**
+
+> **Note (Task 007).** With generation deferred
+> ([ADR 0005](0005-library-and-diagnostics-first.md)), this rule now
+> applies to the current product:
+>
+> * proof-pattern libraries contain no `pragma Assume`, axioms,
+>   justifications, imports or suppressions, as gated by the trust scan;
+> * diagnostics never emit assumptions or edit sources.
+>
+> The wording below is unchanged.
 
 ## Context
 

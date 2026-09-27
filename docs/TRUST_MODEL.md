@@ -1,10 +1,27 @@
 # Trust Model and Soundness Policy
 
+> **Status (Task 007).** The trust principles below were written for a
+> generator. They apply unchanged to the current product
+> ([ADR 0005](adr/0005-library-and-diagnostics-first.md)), where the
+> "generator" is replaced by proof-pattern libraries and read-only
+> diagnostics. Sections 1–2 were updated. Sections 3–6 and 8 carry a
+> "current reading" note above their original generator wording, which
+> is historical/deferred and kept as written.
+
 ## 1. Objective
 
 `spark-refine` must save proof-engineering effort without weakening the meaning of “proved by SPARK.”
 
-The safest architecture treats the generator as an **untrusted convenience tool** whose generated claims are independently checked by GNATprove.
+The safest architecture treats every `spark-refine` component as an
+**untrusted convenience**:
+
+* proof-pattern libraries are ordinary SPARK whose claims GNATprove
+  checks at every instantiation;
+* diagnostics only *interpret* GNATprove results, and never decide proof
+  status.
+
+(Originally: "treats the generator as an untrusted convenience tool
+whose generated claims are independently checked by GNATprove".)
 
 ## 2. Intended trust boundary
 
@@ -14,20 +31,35 @@ Trusted/accepted for a normal SPARK proof
 Ada/SPARK language semantics
 GNAT compiler/frontend assumptions required by GNATprove
 GNATprove / Why3 / selected automated provers
+SPARKlib contracts (e.g. Functional.Sets, Big_Integers) the project uses
 Explicit project-level trusted foundations already accepted by the user
 
 Not trusted for correctness
 ---------------------------
-spark-refine parser
-spark-refine pattern implementation
-source generator
-future AI suggestions
+spark-refine proof-pattern libraries   (re-proved per instance by GNATprove)
+spark-refine diagnostics               (interpret results; never decide status)
+AI agents consuming diagnostics
 future IDE integration
+(historical/deferred: spark-refine parser, source generator)
 ```
 
-If `spark-refine` emits a wrong lemma, the desired result is a failed proof.
+If a proof-pattern library contains a wrong lemma or contract, the
+desired result is a failed proof. If a diagnostic is wrong, the proof
+status reported by GNATprove is unaffected. The diagnostic may mislead,
+which is why diagnostics are conservative and must never claim more
+certainty than their evidence supports (see `SECURITY.md`).
+
+The three kinds of source, and the change policy for each, are defined
+in `docs/ARCHITECTURE.md` §3. Changes to authoritative specification are
+the most trust-relevant, because GNATprove proves whatever it is given.
 
 ## 3. The central rule: no generated axioms
+
+> **Current reading.** This rule applies today to proof-pattern libraries:
+> no library may create a path where a false pattern theorem is
+> accepted merely because the library states it. The list below is
+> enforced by the CI trust scan over `proof_patterns/` and the
+> benchmarks. The original generator wording follows.
 
 The default generator must not create a path where a false pattern theorem becomes accepted merely because the generator emitted it.
 
@@ -42,11 +74,19 @@ Disallowed by default:
 
 ## 4. Lemmas
 
+> **Current reading.** Library lemmas, such as `Lemma_Can_Add` in
+> `SPARK_Refine_Prefix_Sets`, are ordinary ghost subprograms with bodies
+> that GNATprove proves. The generator wording below is historical.
+
 A generated lemma should normally be an ordinary ghost procedure/function with a body or specification structure whose required property GNATprove verifies.
 
 If a lemma is reused from SPARKlib or another reviewed library, the generated code should reference the library rather than copying a trusted assertion.
 
 ## 5. Pattern verification
+
+> **Current reading.** Libraries use proof tests only: application and
+> validation instances are proved, negative fixtures fail, and the trust
+> scan is clean. "Generator tests" below are deferred with generation.
 
 Patterns need two forms of testing.
 
@@ -67,6 +107,13 @@ Proof tests are more important than golden text tests.
 
 ## 6. Trust report
 
+> **Current equivalent.** No `trust-report` command exists. Today, the
+> CI trust scan (`examples/fixed_pool/scripts/check_proof_results.py
+> trust-scan`) covers `proof_patterns/` and the benchmarks. Separately,
+> `spark-refine explain` reports `pragma Assume` counts, justified checks
+> and SARIF/.spark consistency notes found in GNATprove results. The
+> sketch below is historical.
+
 A future command should print the proof-affecting trust configuration:
 
 ```text
@@ -84,6 +131,9 @@ If advanced modes eventually permit user-trusted assumptions, the report must ma
 ## 7. AI policy
 
 AI-generated proof changes are suggestions, not evidence.
+
+The operational form of this policy for agents consuming
+`spark-refine explain --format json` is `docs/AGENT_INTEGRATION.md`.
 
 An AI integration must classify edits:
 
@@ -104,9 +154,13 @@ Proof results depend on toolchain versions and solver behavior. Benchmarks and C
 - GNAT/GNATprove version;
 - project configuration;
 - prover set and timeout/steps where relevant;
-- generator version;
+- generator version (historical/deferred);
 - pattern version;
-- generated-source digest.
+- generated-source digest (historical/deferred).
+
+The current diagnostics record the GNATprove version and command line of
+each analyzed run in their JSON output (`runs[].gnatprove`,
+`runs[].command_line`).
 
 The project should distinguish “source generation reproducibility” from “solver timing reproducibility.” Byte-stable generated code is realistic; identical prover runtime is not.
 

@@ -7,6 +7,14 @@ public abstract model: a SPARKlib functional sequence
 against which `spark-refine` generation will be measured. No generator code
 is involved.
 
+> **Status (Task 007).** "Generation will be measured" was the Task 001
+> plan. The measurement was done (19 and 21 SLOC), and generation was
+> then deferred ([ADR 0005](../../docs/adr/0005-library-and-diagnostics-first.md)).
+> `spark-refine.toml` and `generated/` below are historical design
+> artifacts that no tool reads or writes. This benchmark now serves as
+> evidence and as a source of real GNATprove results for the diagnostics
+> corpus.
+
 Results, measurements, difficulty analysis and the hypothesis assessment are
 in [`BASELINE_METRICS.md`](BASELINE_METRICS.md). In short: **116/116 checks
 proved, 0 unproved, 0 justified, ≈ 2 s**. The hand-written proof support is
@@ -26,7 +34,7 @@ still the default everywhere.
 ```text
 alire.toml                 pinned toolchain: gnat_native/gnatprove/sparklib 16.1.0
 ring_buffer.gpr            build + proof configuration (package Prove)
-spark-refine.toml          future generator manifest (design; unused here)
+spark-refine.toml          historical generator manifest (deferred design; unused)
 proof_inventory.toml       machine-readable classification of every source line
 src/ring_buffer.ads/.adb   implementation, public spec, manual proof support
 proof/                     representation-independent client proof (A4)
@@ -36,7 +44,7 @@ variants/head_tail_count/  Task 002 representation B (.ads/.adb) + negative/B1-B
 proof_inventory_head_tail_count.toml   classification of representation B
 REFACTOR_METRICS.md        Task 002 A-vs-B measurements and decision
 scripts/                   proof gate, inventory, ablation, API-equivalence, churn tools
-generated/                 reserved for future generator output (empty)
+generated/                 historical placeholder for deferred generator output (empty)
 ```
 
 Representation B commands (add `-XRING_BUFFER_REPR=head_tail_count` to

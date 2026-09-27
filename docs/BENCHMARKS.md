@@ -6,6 +6,13 @@ Formal-methods tooling can easily move complexity rather than remove it. `spark-
 
 Every stable pattern should have a benchmark that compares manual and generated proof engineering.
 
+> **Status (Task 007).** Benchmarks now compare manual proof support
+> against **library-backed** support (`P` vs `R`), because generation is
+> deferred ([ADR 0005](adr/0005-library-and-diagnostics-first.md)). The
+> generator-specific item A2 ("Generated refinement") was never built.
+> The same benchmarks also provide the real GNATprove results behind the
+> diagnostics corpus (`diagnostics/tests/fixtures/`).
+
 ## Benchmark A — bounded circular buffer
 
 ### A1. Manual baseline

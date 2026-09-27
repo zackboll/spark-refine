@@ -1,5 +1,34 @@
 # Executive Summary
 
+> **Status (Task 007): the problem statement is current, the proposal is
+> not.** The problem analysis below still stands. The proposed solution,
+> "generates ordinary SPARK proof artifacts from a small, explicit
+> refinement description", was tested in Tasks 001–004 and deprioritized.
+>
+> **Current summary.** `spark-refine` is a proof-engineering toolkit for
+> SPARK. It combines reusable, GNATprove-verified proof patterns with
+> proof-aware diagnostics for humans and AI agents. GNATprove remains the
+> proof authority.
+>
+> * **Reusable proof patterns.** On the fixed pool, the SPARK generic
+>   `SPARK_Refine_Prefix_Sets` cut per-instance proof support from 36 to
+>   10 SLOC (−72.2 %). The public API and client proof were unchanged, and
+>   no assumptions were added.
+> * **Diagnostics.** `spark-refine explain` interprets GNATprove's
+>   SARIF / `.spark` / `.ali` output:
+>   * SRD001, invariant masking risk;
+>   * SRD002, client-only proof gap;
+>   * SRD003, prover-portfolio dependency.
+>
+>   It emits stable JSON for agents and is read-only.
+>
+> The falsifiable hypothesis in "The first falsifiable hypothesis" was
+> measured. The circular buffer needed only 19–21 SLOC of support, and
+> for the pool a library, not generated source, delivered the reduction.
+> See [ADR 0005](adr/0005-library-and-diagnostics-first.md),
+> `docs/VISION.md` and `docs/ARCHITECTURE.md`. The original text follows
+> unchanged.
+
 ## The problem
 
 SPARK makes it possible to prove strong properties about production Ada code, but production representations and proof representations optimize for different things.

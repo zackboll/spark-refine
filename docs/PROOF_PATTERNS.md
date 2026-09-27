@@ -1,8 +1,20 @@
 # Proof Pattern Library
 
+> **Status (Task 007).** Patterns are now delivered as hand-written,
+> reviewed SPARK generic libraries in `proof_patterns/`, not as generator
+> templates ([ADR 0005](adr/0005-library-and-diagnostics-first.md)).
+>
+> * The only implemented pattern is `SPARK_Refine_Prefix_Sets` (see
+>   "Evidence from Task 004" below and `proof_patterns/README.md`).
+> * The circular-sequence notes are design and evidence records. No
+>   circular-sequence library exists, because Tasks 001–002 found its
+>   support too small to justify one.
+> * Mentions of "generated" artifacts below describe the original
+>   generator design and are historical.
+
 ## Purpose
 
-Patterns are the reusable intellectual property of the project. The generator is infrastructure; patterns encode proof-engineering knowledge.
+Patterns are the reusable intellectual property of the project. The generator is infrastructure; patterns encode proof-engineering knowledge. (Current reading: the patterns *are* the product, as reusable SPARK libraries. The generator is deferred.)
 
 A pattern is not simply a code template. It defines a relation among:
 
@@ -14,6 +26,11 @@ A pattern is not simply a code template. It defines a relation among:
 - reusable lemmas.
 
 ## Pattern 001: circular sequence
+
+> **Historical design + evidence record.** This section was written for
+> the generator hypothesis. "Generate" below means that deferred design.
+> The Task 001/002 evidence showed that no library or generator was
+> justified for this pattern.
 
 ### Abstract meaning
 
@@ -223,7 +240,7 @@ No allocated identity is returned twice without release
 
 This is a strong second pattern because its abstract model is set-oriented, unlike the sequence-oriented first pattern.
 
-After Task 002 this is the deciding benchmark for generation. Circular
+*(Historical, pre-Task 003 framing:)* After Task 002 this is the deciding benchmark for generation. Circular
 sequences needed only 19–21 SLOC of generic support, because they map
 directly onto SPARKlib sequence primitives. The open question is whether a
 free-index stack refined to a `Functional.Sets` free/allocated set needs
@@ -335,15 +352,20 @@ Enums, flags, counters, or packed protocol state.
 
 ### Long-term leverage
 
-This pattern could become a bridge to temporal/specification tools without requiring that bridge in the core generator.
+This pattern could become a bridge to temporal/specification tools without requiring that bridge in the core library. (Originally: "in the core generator"; generation is deferred.)
 
 ## Pattern 005 candidate: descriptor ring
 
 This should **not** be an MVP pattern. It combines circular structure with ownership, volatility, memory ordering, hardware interaction, and sometimes concurrency.
 
-It is a high-value long-term target precisely because it demonstrates the real-time systems use case, but the project should establish proof-generation soundness on simpler structures first.
+It is a high-value long-term target precisely because it demonstrates the real-time systems use case, but the project should establish proof-pattern soundness on simpler structures first. (Originally: "proof-generation soundness".)
 
 ## Pattern acceptance criteria
+
+> **Current (Task 007).** These criteria apply to proof-pattern
+> *libraries*. Items 6 and 8 originally read "deterministic generated
+> output" and "no default generated assumptions". They are restated for
+> libraries.
 
 A new pattern should not enter the stable library until it has:
 
@@ -352,9 +374,11 @@ A new pattern should not enter the stable library until it has:
 3. complete GNATprove proof under the project's supported profile;
 4. negative tests showing important invalid implementations fail;
 5. measured reduction in developer-authored proof support;
-6. deterministic generated output;
+6. independent validation instances proved by GNATprove, since the
+   generic is re-proved per instance;
 7. documentation of unsupported representation variants;
-8. no default generated assumptions.
+8. no assumptions, axioms, justifications, imports or suppressions in
+   library source (CI trust scan).
 
 ## Pattern evolution
 
@@ -362,8 +386,10 @@ Patterns require semantic versioning because proof behavior matters.
 
 A change is potentially breaking if it:
 
-- strengthens generated preconditions;
-- weakens generated obligations;
+- strengthens library preconditions (originally: "generated
+  preconditions");
+- weakens library contracts/obligations (originally: "generated
+  obligations");
 - changes abstract indexing semantics;
 - changes the meaning of a role;
 - changes required trust foundations;

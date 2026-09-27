@@ -76,6 +76,33 @@
   points to the Python `spark-refine explain`, and marks
   `validate`/`generate`/`check` as historical, deprioritized research.
 
+- Task 007: documentation realigned with the evidence-backed direction:
+  reusable GNATprove-verified proof patterns plus proof-aware
+  diagnostics, with GNATprove as the proof authority.
+  - New [ADR 0005](docs/adr/0005-library-and-diagnostics-first.md),
+    accepted. It prefers libraries and diagnostics over a
+    generator-first architecture. ADRs 0003 and 0004 are marked
+    superseded/deferred, and 0001 and 0002 are confirmed current.
+  - `docs/VISION.md`, `ARCHITECTURE.md`, `MVP.md` and `ROADMAP.md` were
+    rewritten around the current product. Each keeps its generator-era
+    content in a labelled historical section.
+  - `docs/SPEC.md` and `MANIFEST.md` got historical/deferred banners.
+  - `LANDSCAPE.md`, `INTEGRATION.md`, `MOTIVATION.md`, `FAQ.md`,
+    `METRICS.md`, `TRUST_MODEL.md`, `CONTRIBUTING.md` and `SECURITY.md`
+    were updated.
+  - Status notes were added to the remaining design documents.
+  - The three kinds of source (implementation, authoritative
+    specification, mechanical proof support) are documented as policy.
+  - The human workflow is stated consistently:
+    `gnatprove` → `spark-refine explain` (SRD001/SRD002; does not run
+    GNATprove); SRD003 comes only from `compare-provers`.
+  - README gains a "Where to start" documentation hierarchy.
+  - `scripts/check_repo.py` now requires ADR 0005 and the Task 007
+    record.
+
+  Documentation-focused; no behavior change. See
+  `docs/tasks/007-documentation-realignment.md`.
+
 - Root `alire.toml`: dropped the placeholder `maintainers` entry and the
   over-long `formal-verification` tag, which Alire 2.1.1 rejects. Without
   this change `alr build` fails at the repository root.
