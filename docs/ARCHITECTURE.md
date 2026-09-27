@@ -1,6 +1,292 @@
 # Architecture
 
+> **Status.** Part I describes the current architecture: reusable proof
+> patterns plus proof-aware diagnostics
+> ([ADR 0005](adr/0005-library-and-diagnostics-first.md)). Part II keeps
+> the original generator-first architecture as **deferred research**. It
+> was not implemented. It was deprioritized after Tasks 001–004, and its
+> text is preserved for the record.
+
+**Documentation hierarchy.** Current direction: `README.md` →
+`docs/VISION.md` → this file → `docs/ROADMAP.md`. Specialized current
+docs:
+
+* `docs/AGENT_INTEGRATION.md`;
+* `diagnostics/README.md`;
+* `docs/PROOF_PATTERNS.md`;
+* `docs/TRUST_MODEL.md`;
+* `docs/INTEGRATION.md`;
+* `docs/METRICS.md`.
+
+`docs/SPEC.md`, `docs/MANIFEST.md`, `docs/history/`, ADRs 0003/0004,
+task records 001–006 and the benchmark `*METRICS*.md` files are
+historical or deferred. See the README section "Where to start".
+
+# Part I — Current architecture
+
 ## 1. Architectural goals
+
+1. **GNATprove is the only proof authority.** Nothing in `spark-refine`
+   decides whether a proof obligation is discharged.
+2. **No hidden trust.** Proof-pattern libraries contain no assumptions,
+   axioms, justifications or suppressions. Diagnostics never emit any.
+3. **Read-only interpretation.** Diagnostics never edit sources, repair
+   proofs or change contracts.
+4. **Conservative inference.** When evidence is missing or ambiguous, a
+   rule is skipped or its confidence is lowered, and the report says so.
+5. **Determinism.** The same inputs give byte-identical reports, with no
+   timestamps.
+6. **Incremental adoption.** A project can use one library, or only the
+   diagnostics, without adopting anything else.
+
+## 2. Overview
+
+```text
+                Ada/SPARK application
+      (implementation + authoritative contracts)
+                       │
+            ┌──────────┴──────────┐
+            │                     │
+            ▼                     ▼
+   proof-pattern library       GNATprove   ◄── proof authority
+   (instantiated generics;        │            (proves the application
+    re-proved per instance)       │             and every library instance)
+            │                     │
+            └──────────┬──────────┘
+                       │
+                       ▼
+              SARIF / .spark / .ali
+                       │
+                       ▼
+          spark-refine diagnostics      (read-only, deterministic)
+                       │
+             ┌─────────┴─────────┐
+             ▼                   ▼
+           human               agent / CI
+      (text report)     (format_version 1 JSON)
+```
+
+The key rule:
+
+```text
+GNATprove determines whether proof obligations are discharged.
+spark-refine interprets patterns in those results.
+```
+
+Neither `spark-refine` nor an AI agent consuming its output is a proof
+authority.
+
+## 3. Three kinds of source
+
+The architecture, the diagnostics and the agent guidance all rely on
+separating three kinds of source:
+
+| Kind | Examples | Change policy |
+|---|---|---|
+| **1. Production implementation** | executable Ada: operation bodies, concrete representation | normal engineering changes |
+| **2. Authoritative specification** | public `Pre`/`Post`, abstract model semantics (what `Model` *means*), user-owned requirements | **high sensitivity**; should not be weakened just to get a green proof; changes deserve explicit human review |
+| **3. Mechanical proof support** | representation invariants, model adapters, lemmas, loop invariants, reusable proof-pattern instantiation | may be changed to make the proof architecture work; still checked by GNATprove |
+
+Proof-pattern libraries aim to shrink category 3. Diagnostics help decide
+which category a failure should be fixed in.
+
+A representation invariant is mechanical proof support in intent. Still,
+changing it can change what the proved postconditions rest on (see
+SRD001), so `docs/AGENT_INTEGRATION.md` asks for review of invariant
+changes as well.
+
+**This policy is not mechanically enforced.** `spark-refine` cannot yet
+tell which source lines belong to which category. The policy is for
+developers, reviewers and agent operators.
+
+## 4. Components
+
+### 4.1 Proof-pattern libraries: `proof_patterns/`
+
+Hand-written, reviewed SPARK generics that encode recurring refinement
+proof knowledge once.
+
+* **Current pattern:** `SPARK_Refine_Prefix_Sets`. It reads a unique
+  active prefix of a bounded array as a SPARKlib `Functional.Sets` set
+  (`L = 98` SLOC, all ghost).
+* **Application side:** a small instantiation, a representation
+  invariant and a one-call model adapter. On the fixed pool this is
+  `R = 10` SLOC, down from 36 manual SLOC (−72.2 %).
+* **Trust:**
+  * only SPARKlib `Functional.Sets` / `Big_Integers` contracts are relied
+    on;
+  * no `pragma Assume`, axioms, justifications, imports or suppressions,
+    as gated by a trust scan in CI;
+  * GNATprove re-proves the generic body **per instance**, so the library
+    is not a trusted theorem oracle. An instance whose VCs do not prove is
+    not proved.
+* **Validation:** three independent proof-only validation instances
+  plus the fixed-pool instance are proved in CI, and negative fixtures
+  L1–L6 show that seeded faults are detected.
+
+See `proof_patterns/README.md`, `docs/PROOF_PATTERNS.md` and
+`examples/fixed_pool/LIBRARY_METRICS.md`.
+
+### 4.2 GNATprove result adapters: `diagnostics/spark_refine_diagnostics/`
+
+| Source | Module | Used for |
+|---|---|---|
+| `gnatprove.sarif` | `sarif.py` | check results: rule id, status, location, message (messages never decide status) |
+| `*.spark` | `spark_results.py` | unit ownership, proof/flow metadata, per-unit analysis completeness, consistency checks against SARIF |
+| `*.ali` | `ali.py` | **only** SRD002's client dependency closure |
+
+`loader.py` joins SARIF and `.spark`. A disagreement between them, such
+as a check present in one but not the other, or a different status, is
+recorded as a consistency issue and reported in the output. It is never
+silently resolved, and it lowers or blocks the rules that depend on it.
+
+The `.ali` adapter is intentionally narrow:
+
+* it has been validated only on GNAT 16.1.0 `.ali` files (header
+  `V "GNAT Lib v16"`), because `.ali` is a compiler-internal,
+  version-sensitive format;
+* it reads only the `V`, `U`, `W` and `Z` records and never raises;
+* an unsupported version, or a missing, truncated or malformed file,
+  gives a structured status. SRD002 is then **skipped** and reported as
+  not evaluated. Dependencies are never guessed;
+* the user can instead name client units explicitly
+  (`explain --client-unit U`), which overrides `.ali` discovery;
+* SRD001 and SRD003 do not use `.ali`.
+
+### 4.3 Diagnostic rules
+
+| Code | Category | Action | Structural rule |
+|---|---|---|---|
+| SRD001 | `proof_context` | `fix_invariant_then_reprove` | in one entity, an unproved invariant check and a proved postcondition, so there is a masking *risk* |
+| SRD002 | `abstraction_boundary` | `validate_client_goal_then_review_public_contracts` | the client's whole `.ali` dependency closure is fully proved, but the client's `Pre`/`Assert` is not, so there is a client-only proof gap (medium/low confidence) |
+| SRD003 | `prover_portfolio` | `preserve_portfolio_or_strengthen_proof` | a confidently matched check is proved by some single-prover runs and not others |
+
+The rules interpret structure. They do not claim causality, falsity or
+contract deficiency. See `diagnostics/DIAGNOSTICS_METRICS.md`.
+
+### 4.4 Installed CLI: `spark-refine`
+
+A Python ≥ 3.11 package with no runtime dependencies, installed from
+`diagnostics/`.
+
+```text
+spark-refine explain [PATH] [--client-unit U ...] [--format text|json] [--fail-on CODE]
+                                                  one run:  SRD001, SRD002
+spark-refine compare-provers --run NAME=PATH --run ... [--reference NAME=PATH]
+                                                  single-prover runs: SRD003
+spark-refine rules [--format text|json]
+```
+
+* `explain` without `PATH` looks for exactly one result set
+  (`gnatprove.sarif` + `*.spark`) under the current directory. If it
+  finds zero or several, it exits 2 and lists the candidates. It never
+  guesses.
+* `explain` does **not** run GNATprove. It analyzes existing results,
+  which are fresh only if GNATprove was just run.
+* The JSON output is `format_version` 1. Every diagnostic carries `code`,
+  `category`, `action` and `confidence`. The report also has a derived
+  `summary`, `notes`, and per-rule `analysis` including whether each rule
+  was evaluated.
+* `analyze` is a compatibility alias, and
+  `python3 -m spark_refine_diagnostics` also works.
+
+The Ada executable `spark_refine` (with an underscore) built from the
+root `alire.toml` is a legacy bootstrap. It implements no commands.
+
+### 4.5 Benchmark and evidence fixtures
+
+| Location | Role |
+|---|---|
+| `examples/ring_buffer/` | Tasks 001–002: two representations, proof inventories, negative fixtures |
+| `examples/fixed_pool/` | Tasks 003–004: manual and library-backed variants, P1–P6 / L1–L6 negatives, prover matrix |
+| `diagnostics/tests/fixtures/` | 49 sanitized real GNATprove 16.1.0 result sets with provenance and ablation ground truth |
+| `diagnostics/scripts/e2e_fresh.py` | fresh end-to-end gate: one real GNATprove run per rule, CI job `diagnostics-e2e` |
+
+## 5. Workflows
+
+Human:
+
+```bash
+gnatprove -P my_project.gpr                  # GNATprove proves
+spark-refine explain                         # SRD001 + SRD002 on that one result set
+spark-refine explain obj/<variant>/gnatprove # explicit path if discovery is ambiguous
+```
+
+`explain` never runs GNATprove, and auto-discovered results may be stale.
+There is no `spark-refine prove` command.
+
+Prover robustness, SRD003:
+
+```bash
+# after one GNATprove run per prover (--prover=cvc5 / z3 / altergo)
+spark-refine compare-provers --run cvc5=obj/cvc5/gnatprove \
+  --run z3=obj/z3/gnatprove --run altergo=obj/altergo/gnatprove
+```
+
+Agent / CI (see `docs/AGENT_INTEGRATION.md`):
+
+```text
+agent edits source
+    ↓
+GNATprove                          (rerun after every change)
+    ↓
+spark-refine explain --format json
+    ↓
+agent reads code / category / action / confidence
+    ↓
+agent chooses the appropriate class of change
+(implementation or proof support; authoritative specs only via review)
+```
+
+## 6. What does not exist yet
+
+* **No Libadalang integration.** Diagnostics work only from GNATprove
+  output. They cannot name a callee, resolve a contract conjunct, or
+  map a failure to a source abstraction.
+* **No proof-run orchestration.** `spark-refine` never runs GNATprove.
+* **No source generation, manifest processing or source annotations.**
+  See Part II.
+* **No mechanical enforcement** of the source categories in section 3.
+
+## 7. Compatibility
+
+Validated on the pinned FSF GNAT / GNATprove / SPARKlib 16.1.0 toolchain
+(Alire 2.1.1):
+
+* the SARIF and `.spark` readers are parity-tested against the benchmark
+  gates;
+* `.ali` support is limited to `GNAT Lib v16`, and other versions degrade
+  as described above;
+* generic proof libraries depend on prover behavior, as the prover matrix
+  in `LIBRARY_METRICS.md` shows. Their proofs are pinned by CI, not
+  assumed portable.
+
+---
+
+# Part II — Deferred generator research (historical)
+
+> **Status: historical/deferred.** Everything below is the original
+> generator-first architecture (manifest → refinement IR → pattern
+> registry → generator), preserved unchanged. None of it is implemented.
+>
+> **Why it was deprioritized.** Tasks 001–004 found:
+>
+> * the ring-buffer mechanical support was small (19 and 21 SLOC);
+> * the larger fixed-pool support (36 SLOC) was entirely generic;
+> * a reusable SPARK library reduced the pool's local support to 10 SLOC.
+>
+> Source generation is therefore **not justified on current evidence**
+> for the demonstrated patterns, and is **deferred pending new
+> evidence** ([ADR 0005](adr/0005-library-and-diagnostics-first.md)).
+> This does not rule it out for patterns a library cannot absorb.
+>
+> Some ideas below carried over to Part I in a different form. The
+> determinism, compatibility recording and no-premature-plugin rules
+> apply to libraries and diagnostics. The "future refinement-aware
+> explain" became `spark-refine explain` over GNATprove output, with no
+> generated source map.
+
+## G1. Architectural goals
 
 The architecture must satisfy five constraints simultaneously:
 
@@ -10,7 +296,7 @@ The architecture must satisfy five constraints simultaneously:
 4. **Determinism:** generation must be stable enough for CI drift checks and meaningful code review.
 5. **Extensibility:** new patterns should not require invasive changes to the core.
 
-## 2. Major components
+## G2. Major components
 
 ```text
                          +----------------------+
@@ -65,7 +351,7 @@ The architecture must satisfy five constraints simultaneously:
                       future refinement-aware explain
 ```
 
-## 3. Refinement IR
+## G3. Refinement IR
 
 The core should not generate directly from TOML syntax. Parse configuration and source into an internal model with explicit semantics.
 
@@ -88,11 +374,11 @@ The same IR can later be populated from `pragma Annotate`, TOML, or another fron
 
 This is important because the first manifest format should not become accidental architecture.
 
-## 4. Three model backends
+## G4. Three model backends
 
 A single strategy will not be ideal for every SPARK proof. The architecture should permit three related backends.
 
-### 4.1 Derived model
+### G4.1 Derived model
 
 The abstract model is computed from concrete state by a ghost function:
 
@@ -114,7 +400,7 @@ Costs:
 
 This should be the first backend because it has the smallest conceptual trust surface.
 
-### 4.2 Shadow model
+### G4.2 Shadow model
 
 A ghost model is stored/updated alongside concrete state:
 
@@ -135,7 +421,7 @@ Costs:
 
 This backend is especially important because existing SPARK examples use this style.
 
-### 4.3 Layered refinement
+### G4.3 Layered refinement
 
 Complex structures may require:
 
@@ -153,7 +439,7 @@ Each step is intentionally small enough for automated proof.
 
 Recent AdaCore container work demonstrates why this can be necessary. The project should eventually let a pattern own these intermediate layers so application developers do not have to reinvent them.
 
-## 5. Pattern interface
+## G5. Pattern interface
 
 A pattern should declare:
 
@@ -192,7 +478,7 @@ remove_first_preserves_suffix
 
 Patterns must not simply be string templates. Their inputs should be typed in the IR and validated before generation.
 
-## 6. Generated-package boundary
+## G6. Generated-package boundary
 
 Generated artifacts should normally live in a sibling/child proof package, not be interleaved unpredictably with production source.
 
@@ -217,7 +503,7 @@ One early architecture task is to compare:
 
 The selection should minimize production API pollution while remaining legal SPARK.
 
-## 7. Source metadata strategy
+## G7. Source metadata strategy
 
 ### MVP
 
@@ -240,7 +526,7 @@ or an equivalent aspect where legal and ergonomic.
 
 The exact annotation schema must be designed after the MVP reveals which metadata is stable.
 
-## 8. GNATprove integration
+## G8. GNATprove integration
 
 Generation and proving should remain separable:
 
@@ -266,7 +552,7 @@ Future `explain` support can ingest GNATprove machine-readable artifacts and use
 
 This makes diagnostics semantic rather than merely textual.
 
-## 9. Determinism
+## G9. Determinism
 
 Generation should avoid nondeterminism from:
 
@@ -278,7 +564,7 @@ Generation should avoid nondeterminism from:
 
 Generated metadata may contain a tool version and input digest, but timestamp inclusion should be optional or kept outside files used for drift comparison.
 
-## 10. Compatibility
+## G10. Compatibility
 
 The project should record:
 
@@ -290,7 +576,7 @@ The project should record:
 
 A pattern's semantic version matters because changing a generated lemma or invariant can affect proof behavior even when the public CLI is unchanged.
 
-## 11. Future plugin architecture
+## G11. Future plugin architecture
 
 Do not build dynamic plugins first. Start with in-tree patterns and a stable internal interface. Once two or three patterns demonstrate common structure, define a versioned external pattern package format.
 

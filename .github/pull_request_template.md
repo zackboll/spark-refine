@@ -6,7 +6,8 @@ Describe the proof/tooling problem addressed by this PR.
 
 - [ ] No unrelated changes
 - [ ] Public proof semantics documented
-- [ ] Generated/trusted assumptions disclosed
+- [ ] Trusted assumptions (library axioms, `pragma Assume`, justifications) disclosed
+- [ ] No diagnostic claims proof status or more certainty than its evidence supports
 
 ## Validation
 

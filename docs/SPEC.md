@@ -1,5 +1,17 @@
 # Proposed Semantic Specification
 
+> **Status: historical/deferred generator design.**
+>
+> This document records the generator-first architecture explored before
+> Tasks 001–004. Source generation is not part of the current product
+> path, because the experiments favoured reusable SPARK proof libraries
+> ([ADR 0005](adr/0005-library-and-diagnostics-first.md)). Nothing
+> described here is implemented or planned.
+>
+> See [`README.md`](../README.md), [`docs/VISION.md`](VISION.md),
+> [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) and
+> [`docs/ROADMAP.md`](ROADMAP.md) for the current direction.
+
 This is a design document, not yet an implemented language specification.
 
 ## 1. Core concepts

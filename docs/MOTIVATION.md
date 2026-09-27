@@ -45,6 +45,17 @@ For example, every conventional circular sequence proof needs some form of the f
 
 Re-proving and re-encoding those facts in every project is an opportunity for tooling.
 
+> **What the benchmarks found (Tasks 001–004).** The opportunity is real,
+> but smaller and differently shaped than first assumed:
+>
+> * for the two ring-buffer representations, GNATprove and SPARKlib
+>   discharged the wraparound and index facts listed above
+>   **automatically**. The manual support was only 19 and 21 SLOC, with
+>   no lemmas;
+> * the fixed pool needed more (36 SLOC, including a pigeonhole lemma),
+>   but all of it was generic. A reusable SPARK library absorbed it,
+>   leaving 10 SLOC per instance.
+
 ## 3. Why real-time code benefits disproportionately
 
 The more implementation constraints a component has, the greater the distance between its physical and logical representations can become.
@@ -87,17 +98,62 @@ Its externally visible mathematical behavior may be unchanged. Ideally client pr
 ```text
               stable public contract
                        |
-                abstract sequence
+                abstract model
                        |
-             generated refinement
+        reusable proof pattern + small adapter
                 /             \
                /               \
        representation A   representation B
 ```
 
+(The original diagram had "generated refinement" in the middle. Tasks
+001–004 replaced it with a reviewed library plus a small
+application-owned adapter.)
+
+The evidence supports the localization claim:
+
+* moving the ring buffer from `First + Length` to `Head + Tail + Count`
+  changed 0 lines of the public spec and the client proof;
+* moving the fixed pool onto the library left the public API (visible
+  part, CI-checked equivalent) and the client proof unchanged.
+
 The proof architecture then becomes an explicit software architecture rather than an informal convention scattered through ghost code.
 
 ## 5. Why a reusable pattern library is more valuable than code generation alone
+
+The project initially suspected that repeated proof machinery should be
+**generated** from a declaration. The experiments showed that, for at
+least some patterns, a **reviewed SPARK generic library** is the better
+abstraction.
+
+Evidence from the fixed pool (Tasks 003–004):
+
+| | Manual | Library-backed |
+|---|---:|---:|
+| Per-instance mechanical proof support | 36 SLOC | **10 SLOC** |
+| Local lemmas | 1 (12 SLOC incl. call) | 0 |
+| Local loop invariants | 5 SLOC | 0 |
+| Reusable library (written once) | — | 98 SLOC |
+| Public API / client proof changes | — | none |
+
+The ten remaining lines are a generic instantiation, a representation
+invariant and a one-call model adapter. That is roughly the size a
+manifest declaration would have been. A generator would have added a
+tool layer that users must review and trust, for little further saving.
+
+Advantages of a library over generated source:
+
+* it is ordinary SPARK that users read, instantiate and prove with stock
+  tools;
+* GNATprove re-proves it per instance, so it is not a trusted theorem
+  oracle;
+* hard, prover-sensitive VCs are tuned once, in library source, by the
+  library author.
+
+The cost is that generic bodies are re-proved per instance (fixed pool:
+136 → 161 checks; gate wall time ≈ 1.9 s → 2.2 s).
+
+The original argument below still holds, with "generated" read as "provided by the library":
 
 A code generator that prints boilerplate is useful but shallow. The deeper asset is a reviewed library of **refinement patterns**.
 
@@ -118,11 +174,24 @@ Over time, this becomes shared proof-engineering infrastructure.
 
 A team should not need five different engineers to rediscover five slightly different versions of the same wraparound lemma. A community should not need every SPARK codebase to invent its own proof conventions for a fixed pool.
 
-## 6. Why not hide the generated proof code
+## 6. Why proof support must stay visible
 
-High-assurance developers need to understand why a proof works. The generated source therefore should be ordinary Ada/SPARK that can be inspected, versioned if desired, and passed directly to GNATprove.
+High-assurance developers need to understand why a proof works. Proof
+support, whether library-provided or local, should therefore be
+ordinary Ada/SPARK that can be inspected, versioned and passed directly
+to GNATprove.
 
-The tool should optimize for:
+> **Update (Task 007).** This section was originally titled "Why not hide
+> the generated proof code". The point now applies to proof-pattern
+> libraries: they are plain, reviewed SPARK generics, and nothing is
+> hidden or generated. The *teaching* role once expected of generated
+> code falls to two things:
+>
+> * readable libraries with documented meaning and restrictions
+>   (`proof_patterns/README.md`);
+> * diagnostics that explain *what kind* of proof failure occurred.
+
+Library code should optimize for:
 
 - deterministic names;
 - comments that identify the originating pattern rule;
@@ -131,26 +200,35 @@ The tool should optimize for:
 - explicit dependencies;
 - no mysterious solver-specific scripts where normal SPARK is sufficient.
 
-Generated code should teach as well as automate.
+Proof libraries should teach as well as automate.
 
-A developer learning SPARK should be able to inspect a generated `Logical_To_Physical` function or preservation lemma and understand the pattern that would otherwise have been written by hand.
+A developer learning SPARK should be able to inspect `SPARK_Refine_Prefix_Sets.Model` and its contract, or a library lemma, and understand the pattern that would otherwise have been written by hand.
 
 ## 7. Why this helps AI-assisted development without depending on AI
 
 Large language models can be useful for SPARK development, but unconstrained proof repair has a bad failure mode: an agent may make the proof easier by weakening the property.
 
-A structured refinement description gives an agent something much safer to operate on:
+Structure gives an agent something much safer to operate on:
 
 ```text
-public requirement        -> user-owned
-representation mapping    -> explicit metadata
-pattern lemmas            -> reviewed library
-proof result               -> GNATprove
+authoritative specification  -> user-owned (public Pre/Post, model semantics)
+mechanical proof support     -> reviewed library + small local adapter/invariant
+implementation               -> ordinary engineering changes
+proof result                 -> GNATprove
+interpretation               -> spark-refine explain --format json
 ```
 
-An agent can explain “the wraparound preservation obligation failed after `First` changed” instead of blindly editing a postcondition.
+An agent that receives `SRD001 / fix_invariant_then_reprove` knows to
+repair the invariant or state transition first, and to distrust the
+listed "proved" postconditions until it re-proves them. It does not
+blindly edit a postcondition. An agent that receives
+`SRD002 / validate_client_goal_then_review_public_contracts` knows to
+check whether the client's goal is true before proposing any public
+contract change. See `docs/AGENT_INTEGRATION.md`.
 
-This should be a later integration. The core project's value must be measurable with no AI at all.
+That interface now exists. The core project's value is still measurable
+with no AI at all: the library and the diagnostics are useful to a human
+alone.
 
 ## 8. What we hope to accomplish
 
@@ -163,15 +241,22 @@ A developer should spend most proof-design effort on:
 - application-specific invariants;
 - difficult domain properties.
 
-The tool should shoulder more of:
+Reusable proof libraries should shoulder more of:
 
 - mechanical model construction;
 - standard representation validity;
 - routine refinement lemmas;
-- predictable preservation conditions;
-- generated proof-package structure;
-- drift detection;
-- diagnostics that identify which refinement layer failed.
+- predictable preservation conditions.
+
+Proof-aware diagnostics should shoulder more of:
+
+- recognizing which kind of proof-engineering failure occurred;
+- flagging "proved" results that may rest on a failed invariant;
+- separating program problems from prover-portfolio problems;
+- giving humans and agents conservative, structured next steps.
+
+(Generated proof-package structure and drift detection were on this list
+originally. They are deferred together with generation.)
 
 The ambition is not “push a button and formally verify arbitrary software.”
 

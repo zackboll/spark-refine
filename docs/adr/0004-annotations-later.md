@@ -1,6 +1,15 @@
 # ADR 0004: Prefer standard Ada annotations for later source-local metadata
 
-Status: Proposed
+Status: Proposed. **Deferred by
+[ADR 0005](0005-library-and-diagnostics-first.md).**
+
+> **Note (Task 007).** This ADR concerns source-local metadata *for
+> generation*. With generation deferred, no annotation schema is being
+> designed. `pragma Annotate` plus Libadalang may still be useful later
+> for other purposes, such as marking which source is authoritative
+> specification versus mechanical proof support for diagnostics or agent
+> policy. That would need its own evidence and ADR. The text below is
+> kept unchanged as history.
 
 ## Context
 

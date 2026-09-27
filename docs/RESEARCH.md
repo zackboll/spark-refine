@@ -2,6 +2,20 @@
 
 Research date: 2026-09-26.
 
+> **Status (Task 007).** The survey predates the experiments. Its
+> findings still stand. Three conclusions were refined by Tasks 001–006
+> ([ADR 0005](adr/0005-library-and-diagnostics-first.md)):
+>
+> * Finding 5 said a diagnostics formatter is less compelling than
+>   refinement-aware diagnostics. Proof-engineering diagnostics
+>   (SRD001–SRD003) turned out to be feasible directly on GNATprove
+>   output, with no generator;
+> * findings 7–9 (`Annotate`, Libadalang, TOML) supported a generator
+>   that is now deferred. Libadalang remains relevant for future
+>   semantic diagnostics;
+> * "What we did not find" concerns generation tools; the project no
+>   longer depends on that gap.
+
 This repository was bootstrapped after surveying current SPARK/AdaCore documentation and adjacent tooling to avoid building a project that merely duplicates an existing feature.
 
 ## Key findings

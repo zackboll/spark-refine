@@ -1,6 +1,15 @@
 # ADR 0001: Start as an external tool
 
-Status: Accepted for bootstrap
+Status: Accepted for bootstrap. **Still current.**
+
+> **Note (Task 007).** The core decision still holds: stay external and
+> rely on stock GNATprove. What changed is the form of the external tool.
+> Per [ADR 0005](0005-library-and-diagnostics-first.md), it is now:
+>
+> * reusable SPARK proof-pattern libraries, proved by stock GNATprove;
+> * a read-only diagnostics CLI (`spark-refine`) over GNATprove output.
+>
+> It is no longer a source generator. The wording below is unchanged.
 
 ## Context
 

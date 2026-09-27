@@ -27,6 +27,14 @@ but neither spark-refine nor the AI is a proof authority.
   but it should propose, not silently apply, changes that weaken or
   re-state a requirement. `spark-refine` does not enforce source
   ownership mechanically; this is a policy for the agent's operator.
+* The three kinds of source (implementation, authoritative
+  specification, mechanical proof support) are defined in
+  `docs/ARCHITECTURE.md` §3. There, representation invariants and ghost
+  model *adapters* count as mechanical proof support, and the abstract
+  model's *meaning* is authoritative. Because a type invariant is also
+  something GNATprove assumes, a change to it can alter what "proved"
+  means (see SRD001). This page therefore asks for review of invariant
+  changes, which is stricter than the category alone would require.
 
 ## Freshness
 
@@ -144,6 +152,11 @@ review. SRD002 does not identify a callee or a specific contract.
 
 A check is proved by some single provers and not by others. The proof is
 valid under the portfolio that proves it.
+
+SRD003 is **not** produced by `explain`. It comes from
+`spark-refine compare-provers --run NAME=PATH --run ... --format json`,
+run over separate single-prover GNATprove runs. In `explain` output,
+`by_code.SRD003` is therefore always `0`.
 
 Do **not** assume "one solver fails ⇒ the proof architecture is wrong".
 Keep the working prover portfolio (`--prover=...` / project switches).

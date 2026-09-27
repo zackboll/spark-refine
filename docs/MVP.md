@@ -1,5 +1,124 @@
 # Minimum Viable Product
 
+> **Status.** Task 007 redefined the MVP around capabilities that now
+> exist. The original generator MVP (phases M0–M5) ran as an experiment.
+> Its manual-baseline phases (M0, M5) were completed, and the generator
+> phases (M1–M3) were not pursued: the evidence rejected source
+> generation as the primary direction
+> ([ADR 0005](adr/0005-library-and-diagnostics-first.md)). That plan is
+> preserved below as history.
+
+## Current MVP objective
+
+Deliver a small, trustworthy proof-engineering toolkit that:
+
+1. removes recurring proof support from applications with a reviewed,
+   GNATprove-verified SPARK library; and
+2. helps humans and agents understand GNATprove results, without ever
+   becoming a proof authority.
+
+## Current MVP scope
+
+| Capability | Content | Status |
+|---|---|---|
+| Reusable proof pattern | `SPARK_Refine_Prefix_Sets` (`proof_patterns/`): unique array prefix → SPARKlib functional set | **implemented, validated** |
+| Proof diagnostics | SRD001 invariant masking risk, SRD002 client-only proof gap, SRD003 prover-portfolio dependency | **implemented, validated** |
+| Installed CLI | `spark-refine explain [PATH]` (SRD001, SRD002; one existing result set; conservative discovery; does not run GNATprove); `compare-provers` (SRD003); `rules`; `analyze` alias | **implemented, validated** |
+| Machine-readable output | deterministic `format_version` 1 JSON with `code`, `category`, `action`, `confidence`, derived `summary`, per-rule `analysis` | **implemented, validated** |
+| Trust behavior | read-only; no assumptions; no source rewriting; no proof-status decisions | **implemented, validated** |
+| Agent guidance | `docs/AGENT_INTEGRATION.md`: loop, freshness, per-action guardrails | **documented** |
+
+## Implemented
+
+* `proof_patterns/`, which contains `SPARK_Refine_Prefix_Sets`:
+  * `L = 98` SLOC, all ghost;
+  * no assumptions, axioms, justifications, imports or suppressions.
+* `examples/fixed_pool/variants/library_backed`, where the library
+  replaces 36 manual SLOC with `R = 10` per-instance SLOC. The public
+  API, client proof and runtime tests are unchanged.
+* `diagnostics/`, the Python package `spark_refine_diagnostics`. It
+  installs the `spark-refine` command, needs Python ≥ 3.11 and has no
+  runtime dependencies. Its adapters:
+  * SARIF for results;
+  * `.spark` for unit ownership, proof metadata and consistency checks;
+  * `.ali` as a narrow GNAT 16.1.0 dependency adapter, used only by
+    SRD002.
+
+## Validated
+
+All validation uses the pinned FSF GNAT / GNATprove / SPARKlib 16.1.0
+toolchain and runs in CI.
+
+* **Library.**
+  * The fixed-pool instance and three independent validation instances
+    are fully proved.
+  * Negative fixtures L1–L6 are all detected.
+  * The trust scan is clean.
+  * The unchanged public API and client proof are CI-gated.
+* **Diagnostics.**
+  * 49 sanitized real GNATprove result sets and 137 fixture-based tests.
+  * SRD001 detects 9/9 structural masking-risk cases, including 6/6
+    ablation-confirmed secondary failures. It also gives 3 conservative
+    warnings where the abstract postcondition was in fact true.
+  * SRD002 fires on every known abstraction-gap ablation and on the
+    false-client-assertion control, which is why SRD002 claims a gap, not
+    a contract defect. It stays silent on all implementation-failing
+    controls.
+  * SRD003 reports only `exact` or `unique_entity` matches.
+  * See `diagnostics/DIAGNOSTICS_METRICS.md`. The corpus is small, and
+    these are per-case results, not accuracy rates.
+* **Fresh end-to-end.** One real GNATprove run per rule, analyzed
+  unsanitized (CI job `diagnostics-e2e`).
+* **Packaging.** The wheel is built, inspected, installed and run outside
+  the repository, both as a regular and as an editable install. The
+  suite also runs on Python 3.11 (CI job `diagnostics-packaging`).
+
+## Out of scope for the current MVP
+
+* running GNATprove (`explain` only reads existing results);
+* editing sources, repairing proofs or changing contracts;
+* Libadalang or any source-semantic analysis;
+* source generation, manifests or source annotations;
+* support for `.ali` versions other than `GNAT Lib v16`;
+* concurrency, WCET and certification evidence.
+
+## Future (not implemented)
+
+Candidates, each gated on evidence:
+
+* **proof-run orchestration**, e.g. a command that runs GNATprove and
+  then explains, while keeping the exact GNATprove command visible;
+* **Libadalang semantic enrichment**: callee and contract-conjunct
+  identification for SRD002, and mapping failures to source
+  abstractions;
+* **additional evidence-backed proof patterns**, each with validation
+  instances and a per-instance burden measurement;
+* **editor integration** through ALS / VS Code / GNAT Studio, consuming
+  the JSON;
+* **agent integration** beyond the documented loop;
+* **broader toolchain compatibility**, i.e. validated support for more
+  GNATprove / `.ali` versions.
+
+## MVP completion definition
+
+The current MVP is complete when:
+
+* every capability in the scope table is implemented, tested in CI and
+  documented. This holds after Task 006;
+* the documentation consistently describes that product and its trust
+  boundary. This is Task 007;
+* no document presents generation as the current path.
+
+---
+
+# Historical: generator MVP (M0–M5)
+
+> **Status: historical.** Everything below is the original generator MVP
+> and its status notes, preserved unchanged. The M0 and M5 manual
+> baselines are the evidence
+> behind the pivot. M1–M4 and the `spark_refine validate` / `generate` /
+> `check` CLI were never implemented and are not planned.
+
 ## MVP objective
 
 Prove or disprove one narrow hypothesis:

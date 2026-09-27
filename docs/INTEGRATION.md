@@ -1,14 +1,52 @@
 # Ecosystem Integration
 
-## GNATprove
+> **Status (Task 007).** Sections are marked **current**, **future** or
+> **historical** according to the evidence-backed direction
+> ([ADR 0005](adr/0005-library-and-diagnostics-first.md)).
 
-GNATprove remains the verification authority.
+## GNATprove (current)
 
-`spark-refine` should generate normal SPARK and invoke or integrate with GNATprove only as an orchestrator. Users must be able to run GNATprove independently.
+GNATprove remains the proof authority. `spark-refine` never decides
+whether a proof obligation is discharged. Users always run GNATprove
+themselves, and `spark-refine explain` does **not** invoke it. An
+optional orchestration command is future work. It would have to show the
+exact GNATprove command and never hide or alter its verdict.
 
-Future diagnostics can consume GNATprove's machine-readable outputs rather than scraping terminal text.
+`spark-refine` integrates with GNATprove today by reading its
+machine-readable output. It never scrapes terminal text.
 
-## SPARK functional/formal containers
+| Artifact | What `spark-refine` reads | Used by |
+|---|---|---|
+| `gnatprove.sarif` | per-check result: rule id, status (proved / unproved / justified), location, message. Messages are never used to decide status | all rules |
+| `*.spark` | unit ownership of checks; proof/flow metadata and per-unit analysis completeness; **consistency checks** against SARIF | all rules. Disagreements are reported, never silently resolved, and they lower confidence or block SRD002 |
+| `*.ali` | `with` dependencies (`W`/`Z` records) to build a client's dependency closure | **SRD002 only** |
+
+The `.ali` adapter is narrow and version-sensitive:
+
+* only GNAT 16.1.0 `.ali` files (header `V "GNAT Lib v16"`) are
+  supported;
+* any other version, or a missing or malformed file, makes SRD002
+  **skip** with an explicit "not evaluated" note. Dependencies are never
+  guessed;
+* `explain --client-unit U` lets a user name client units explicitly
+  instead.
+
+Proof-pattern libraries integrate in the most ordinary way. They are
+SPARK generics that GNATprove proves at each instantiation, in the user's
+own GNATprove run.
+
+Result discovery: `spark-refine explain` without a path looks for exactly
+one directory holding `gnatprove.sarif` and `*.spark` (e.g.
+`obj/gnatprove/`). If it finds zero or several, it exits 2 and lists the
+candidates.
+
+## SPARK functional/formal containers (current)
+
+**Current.** `SPARK_Refine_Prefix_Sets` uses SPARKlib
+`SPARK.Containers.Functional.Sets` (and `Big_Integers`) as its abstract
+model, and it takes the application's existing `Functional.Sets`
+instance as a generic actual. The ring-buffer benchmark uses SPARKlib
+functional sequences.
 
 Use existing SPARK mathematical container abstractions rather than inventing incompatible sequence/set/map theories when practical.
 
@@ -16,11 +54,13 @@ Functional containers are particularly appropriate for ghost models because they
 
 The project should investigate each pattern against current SPARKlib capabilities and prefer library models where they produce stable proofs.
 
-## Libadalang
+## Libadalang (future)
 
-Production source analysis should use Libadalang.
+**Libadalang is not used, and not required, for current operation.**
+Diagnostics work purely from GNATprove output.
 
-Why:
+When source semantics become necessary, they should come from
+Libadalang, not a home-grown parser:
 
 - Ada parsing is complex;
 - name resolution matters;
@@ -28,9 +68,30 @@ Why:
 - semantic type compatibility matters;
 - a home-grown parser would become a maintenance liability.
 
-The first generator can bootstrap with explicit manifest names, but semantic integration should happen early.
+The concrete motivation is now diagnostic, not generative. Libadalang
+could provide:
 
-## `pragma Annotate` / `aspect Annotate`
+- **call → callee mapping**, to name the call whose precondition a client
+  cannot prove;
+- **contract conjunct resolution**, to name which conjunct of a
+  `Pre`/`Post` is involved;
+- **a source semantic graph**, to map a failed check to a source
+  abstraction (model, invariant, adapter, library instance);
+- **a stronger SRD002 explanation**, since SRD002 today cannot identify
+  a callee or a contract.
+
+It could also later help separate authoritative specification from
+mechanical proof support.
+
+*Historical note:* the original plan was for the first generator to
+bootstrap with explicit manifest names and to add semantic integration
+early. Generation is deferred.
+
+## `pragma Annotate` / `aspect Annotate` (historical/deferred)
+
+> Deferred with generation ([ADR 0004](adr/0004-annotations-later.md),
+> [ADR 0005](adr/0005-library-and-diagnostics-first.md)). No annotation
+> schema is being designed. The text below is kept as history.
 
 Ada's implementation-defined `Annotate` mechanism is intended for information consumed by external tools and is allowed in SPARK. This is a promising long-term way to place refinement metadata near the code it describes without introducing a custom language extension.
 
@@ -49,50 +110,78 @@ Do not freeze this syntax before the manifest MVP.
 
 ## Alire
 
-Publish the CLI as an Alire crate once the project performs real generation.
+**Current.** The benchmarks and the proof-pattern library
+(`proof_patterns/alire.toml`) are Alire crates. CI pins Alire 2.1.1 and
+GNAT / GNATprove / SPARKlib 16.1.0 through them. The diagnostics CLI is
+a Python package installed with `pip` (`python3 -m pip install
+./diagnostics`), not an Alire crate.
 
-Likely dependencies after bootstrap include:
+**Future.** Publishing proof-pattern libraries to the Alire index is the
+natural distribution path once more than one pattern is validated.
 
-- `ada_toml` for TOML parsing;
-- `libadalang` for semantic analysis.
-
-Exact versions should be selected and tested when implementation starts rather than hard-coded in this design bootstrap.
+*Historical:* the original plan was to publish the Ada CLI as an Alire
+crate once it performed real generation, with `ada_toml` and
+`libadalang` dependencies. Generation is deferred.
 
 ## GPR projects
 
-The tool should accept a GPR project as the source of compilation context. It should not attempt to duplicate project-source discovery rules.
+**Current.** Users build and prove with their own GPR project. The
+diagnostics read only GNATprove's output directory and never parse GPR
+files.
 
-## Ada Language Server / editors
+**Future.** A proof-run orchestration command should take the GPR
+project as the compilation context and should not duplicate
+project-source discovery rules.
 
-Editor integration should consume structured output from `spark-refine`.
+## Ada Language Server / editors (future)
+
+Editor integration should consume the structured JSON of
+`spark-refine explain --format json` (`format_version` 1: `code`,
+`category`, `action`, `confidence`, locations). It should fit existing
+Ada tooling rather than fork it.
 
 Desired features later:
 
-- go from a generated lemma to its manifest/source role;
-- show refinement-layer errors inline;
-- command to regenerate/check drift;
-- visualize model layers;
-- preview generated proof changes.
+- show SRD001–SRD003 diagnostics inline, beside GNATprove's own
+  messages;
+- mark "potentially affected" proved postconditions (SRD001);
+- navigate to related locations;
+- surface "rule not evaluated" states rather than implying a clean
+  result.
 
-These should fit existing Ada tooling rather than fork it.
+*Historical:* earlier ideas were to navigate from generated lemmas to
+manifest roles and to preview generated proof changes. They depended on
+the deferred generator.
 
-## GNATtest/GNATfuzz
+## GNATtest/GNATfuzz (future)
 
-GNATprove counterexamples can already participate in test workflows. A future `spark-refine` diagnostic layer could preserve provenance when a failed proof/counterexample originates from a generated refinement property.
+GNATprove counterexamples can already participate in test workflows. A
+future diagnostic could relate a counterexample to the proof-engineering
+pattern around it, for example a masked postcondition.
 
 ## CI
 
-A mature CI workflow should contain separate gates:
+**Current.** The repository's CI has separate gates:
 
 ```text
-format/lint
-unit tests
-generator determinism
-manifest/source semantic validation
-forbidden-trust scan
-GNAT build
-GNATprove proof fixtures
+structural checks + unit tests (fixture-based diagnostics suite)
+diagnostics packaging (wheel build/inspect/install, outside the repo; Python 3.11)
+fresh end-to-end diagnostics (real GNATprove, one case per rule)
+GNATprove proof gates per benchmark and variant
 negative proof fixtures
+forbidden-trust scan (incl. proof_patterns/)
+library validation instances
+public-API / client-proof unchanged controls
 ```
 
-Separating these makes a failure understandable.
+**For users.** A project can add, after its own GNATprove step:
+
+```bash
+spark-refine explain --format json > spark-refine.json
+spark-refine explain --fail-on SRD001     # optional gate
+```
+
+GNATprove's own result remains the pass/fail proof gate. A
+`spark-refine` gate is additional policy, not proof.
+
+Separating the gates makes a failure understandable.
