@@ -1,0 +1,4 @@
+# The root .gitignore ignores *.ali (build output). In this directory the
+# .ali files are committed, sanitized GNAT 16.1.0 test fixtures (V/U/W/Z
+# records only) that SRD002 needs for unit dependencies.
+!*.ali

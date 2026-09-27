@@ -37,6 +37,21 @@ This bootstrap repository is Phase 0.
 >      (next: invariant-masking and contract-sufficiency diagnosis, as
 >      proposed in `docs/tasks/004-prefix-set-proof-library.md`);
 >   3. optional thin convenience tooling around the libraries.
+>
+> **Task 005** started item 2 with `diagnostics/`, a deterministic
+> analyzer over GNATprove SARIF/.spark. It has three rules:
+>
+> * SRD001: invariant masking risk. All 9 structural masking-risk cases
+>   were detected, and all 6 ablation-confirmed secondary failures were
+>   among them.
+> * SRD002: client-only proof gap; the public abstraction may be
+>   insufficient. Confidence is medium or low, and the rule makes no
+>   contract-deficiency claim.
+> * SRD003: prover-portfolio dependency, for confidently matched checks
+>   only.
+>
+> See `docs/tasks/005-proof-diagnostics-mvp.md` and
+> `diagnostics/DIAGNOSTICS_METRICS.md`.
 
 ## Phase 1 — manual proof benchmark
 

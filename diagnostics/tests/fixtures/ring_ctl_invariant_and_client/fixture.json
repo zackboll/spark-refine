@@ -1,0 +1,27 @@
+{
+  "edits": [
+    "ablation:head_tail_count:no_is_full_post",
+    "fault:variants/head_tail_count/negative/tail_not_advanced"
+  ],
+  "example": "ring_buffer",
+  "name": "ring_ctl_invariant_and_client",
+  "obj": "ablation_htc_srd_ctl_invariant_and_client",
+  "producer": "case",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "ring_buffer",
+    "case": "ablation:head_tail_count:no_is_full_post + fault:variants/head_tail_count/negative/tail_not_advanced",
+    "command_line": "gnatprove -P ring_buffer.gpr -j0 -XRING_BUFFER_SRC=obj/ablation_src/htc_srd_ctl_invariant_and_client -XRING_BUFFER_VARIANT=ablation_htc_srd_ctl_invariant_and_client",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "project Prove switches: --level=2 portfolio (cvc5, z3, altergo)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "head_tail_count"
+  },
+  "source": "examples/ring_buffer/obj/ablation_htc_srd_ctl_invariant_and_client/gnatprove",
+  "variant": "head_tail_count"
+}

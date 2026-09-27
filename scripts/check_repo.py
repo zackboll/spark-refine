@@ -27,6 +27,12 @@ REQUIRED = [
     "examples/fixed_pool/variants/library_backed/fixed_pool.adb",
     "proof_patterns/src/spark_refine_prefix_sets.ads",
     "proof_patterns/src/spark_refine_prefix_sets.adb",
+    "docs/tasks/005-proof-diagnostics-mvp.md",
+    "diagnostics/README.md",
+    "diagnostics/DIAGNOSTICS_METRICS.md",
+    "diagnostics/spark_refine_diagnostics/__main__.py",
+    "diagnostics/tests/expectations.toml",
+    "diagnostics/tests/fixtures/manifest.toml",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

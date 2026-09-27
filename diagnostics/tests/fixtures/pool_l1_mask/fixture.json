@@ -1,0 +1,22 @@
+{
+  "example": "fixed_pool",
+  "name": "pool_l1_mask",
+  "obj": "ablation_lib_mask_l1_duplicate_initial",
+  "producer": "benchmark",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "fixed_pool",
+    "case": "ablation_lib_mask_l1_duplicate_initial",
+    "command_line": "gnatprove -P fixed_pool.gpr -j0 -XFIXED_POOL_SRC=obj/ablation_lib_src/mask_l1_duplicate_initial/app -XFIXED_POOL_VARIANT=ablation_lib_mask_l1_duplicate_initial -XPROOF_PATTERNS_SRC=<repo>/examples/fixed_pool/obj/ablation_lib_src/mask_l1_duplicate_initial/lib -XPROOF_PATTERNS_VARIANT=ablation_mask_l1_duplicate_initial",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "project Prove switches: --level=2 portfolio (cvc5, z3, altergo)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "library_backed"
+  },
+  "source": "examples/fixed_pool/obj/ablation_lib_mask_l1_duplicate_initial/gnatprove"
+}

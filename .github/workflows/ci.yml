@@ -16,6 +16,11 @@ jobs:
         run: python3 scripts/check_repo.py
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
+      # Task 005: proof-diagnostics MVP. Runs on the committed, sanitized
+      # GNATprove 16.1.0 fixtures (diagnostics/tests/fixtures); no toolchain.
+      - name: Proof-diagnostics tests (SRD001-SRD003)
+        working-directory: diagnostics
+        run: python3 -m unittest discover -s tests -t tests -v
 
   # Ring-buffer proof benchmarks, one toolchain setup for both
   # representations:

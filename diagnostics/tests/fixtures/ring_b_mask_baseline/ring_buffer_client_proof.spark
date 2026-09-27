@@ -1,0 +1,32 @@
+{
+"entities": {"1": {"name": "Ring_Buffer_Client_Proof.Push_Push_Pop"}, "10": {"name": "Ring_Buffer.Sequences.\"=\""}, "11": {"name": "Ring_Buffer.Sequences.Aggr_Append"}, "12": {"name": "Ring_Buffer.Sequences.Empty_Sequence"}, "13": {"name": "Ring_Buffer.Peek"}, "14": {"name": "Ring_Buffer.Sequences.Add"}, "15": {"name": "Ring_Buffer.Sequences.Remove"}, "16": {"name": "Ring_Buffer.Sequences.Get"}, "2": {"name": "Ring_Buffer_Client_Proof.Rotate"}, "3": {"name": "Ring_Buffer_Client_Proof"}, "4": {"name": "Ring_Buffer.Initialize"}, "5": {"name": "Ring_Buffer.Is_Empty"}, "6": {"name": "Ring_Buffer.Is_Full"}, "7": {"name": "Ring_Buffer.Model"}, "8": {"name": "Ring_Buffer.Pop"}, "9": {"name": "Ring_Buffer.Push"}},
+"flow": [
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 4, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 45, "entity": 1, "file": "ring_buffer_client_proof.ads", "line": 15, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 1, "file": "ring_buffer_client_proof.ads", "line": 17, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 20, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 13, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 20, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 26, "rule": "GLOBAL_WRONG", "severity": "info"}
+],
+"pragma_assume": [],
+"proof": [
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 22, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00441899988800287}}},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 23, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0071390001103282}}},
+{"col": 22, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 24, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00949299987405539}}},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 25, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0145650003105402}}},
+{"col": 45, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 24, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 2, "max_steps": 1, "max_time": 0.0121750002726912}}},
+{"col": 45, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 25, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"CVC5": {"count": 1, "max_steps": 1, "max_time": 0.0260509997606277}, "Z3": {"count": 1, "max_steps": 1, "max_time": 0.0071229999884963}}},
+{"col": 30, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 24, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0104909995570779}}},
+{"col": 19, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 23, "rule": "VC_POSTCONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0128509998321533}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 7, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0103350002318621}}},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 9, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00283099990338087}}},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 10, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0130040002986789}}},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 11, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0101100001484156}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 13, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00764300022274256}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 14, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00849500019103289}}},
+{"col": 34, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 15, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00708900019526482}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 15, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0109949996694922}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 16, "rule": "VC_ASSERT", "severity": "info", "stats": {"CVC5": {"count": 1, "max_steps": 1, "max_time": 0.0203109998255968}, "Z3": {"count": 1, "max_steps": 1, "max_time": 0.00476900022476912}}}
+],
+"stop_reason": "STOP_REASON_NONE"
+}

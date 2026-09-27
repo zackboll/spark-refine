@@ -1,0 +1,22 @@
+{
+  "example": "ring_buffer",
+  "name": "ring_b1",
+  "obj": "negative_htc_tail_not_advanced",
+  "producer": "benchmark",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "ring_buffer",
+    "case": "negative_htc_tail_not_advanced",
+    "command_line": "gnatprove -P ring_buffer.gpr -j0 -XRING_BUFFER_SRC=obj/negative_src/head_tail_count/tail_not_advanced -XRING_BUFFER_VARIANT=negative_htc_tail_not_advanced",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "project Prove switches: --level=2 portfolio (cvc5, z3, altergo)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "head_tail_count"
+  },
+  "source": "examples/ring_buffer/obj/negative_htc_tail_not_advanced/gnatprove"
+}

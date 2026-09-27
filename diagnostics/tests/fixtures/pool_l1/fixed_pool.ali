@@ -1,0 +1,22 @@
+V "GNAT Lib v16"
+U fixed_pool%b		fixed_pool.adb		0d063d79 OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+Z spark.containers.functional.base%s  spark-containers-functional-base.adb  spark-containers-functional-base.ali  ED
+Z spark.containers.functional.holder%s  spark-containers-functional-holder.adb  spark-containers-functional-holder.ali  ED
+Z spark.containers.functional.sets%s  spark-containers-functional-sets.adb  spark-containers-functional-sets.ali  ED
+Z spark.containers.parameter_checks%s  spark-containers-parameter_checks.adb  spark-containers-parameter_checks.ali  ED
+Z spark_refine_prefix_sets%s  spark_refine_prefix_sets.adb  spark_refine_prefix_sets.ali  ED
+U fixed_pool%s		fixed_pool.ads		abe6326c OO PK
+W ada%s			ada.ads			ada.ali
+Z ada.finalization%s	a-finali.ads		a-finali.ali
+Z ada.unchecked_deallocation%s  a-uncdea.ads	a-uncdea.ali
+W spark%s		spark.ads		spark.ali
+W spark.big_integers%s	spark-big_integers.ads	spark-big_integers.ali
+W spark.containers%s	spark-containers.ads	spark-containers.ali
+W spark.containers.functional%s  spark-containers-functional.ads  spark-containers-functional.ali
+Z spark.containers.functional.base%s  spark-containers-functional-base.adb  spark-containers-functional-base.ali
+Z spark.containers.functional.holder%s  spark-containers-functional-holder.adb  spark-containers-functional-holder.ali
+W spark.containers.functional.sets%s  spark-containers-functional-sets.adb  spark-containers-functional-sets.ali
+Z spark.containers.parameter_checks%s  spark-containers-parameter_checks.adb  spark-containers-parameter_checks.ali
+Z spark.containers.types%s  spark-containers-types.ads  spark-containers-types.ali
+W spark_refine_prefix_sets%s  spark_refine_prefix_sets.adb  spark_refine_prefix_sets.ali

@@ -1,0 +1,22 @@
+{
+  "example": "fixed_pool",
+  "name": "pool_p4_mask",
+  "obj": "ablation_mask_p4_release_wrong_id",
+  "producer": "benchmark",
+  "provenance": {
+    "ali_producer": "GNAT 16.1.0",
+    "ali_version_header": [
+      "GNAT Lib v16"
+    ],
+    "benchmark": "fixed_pool",
+    "case": "ablation_mask_p4_release_wrong_id",
+    "command_line": "gnatprove -P fixed_pool.gpr -j0 -XFIXED_POOL_SRC=obj/ablation_src/mask_p4_release_wrong_id -XFIXED_POOL_VARIANT=ablation_mask_p4_release_wrong_id",
+    "gnat_version": "16.1.0",
+    "gnatprove_version": "FSF 16.1.0",
+    "prover_configuration": "project Prove switches: --level=2 portfolio (cvc5, z3, altergo)",
+    "source_ref": "d761a99edc4f23a2d36c162449784701e7a0d042",
+    "sparklib_version": "16.1.0",
+    "variant": "baseline"
+  },
+  "source": "examples/fixed_pool/obj/ablation_mask_p4_release_wrong_id/gnatprove"
+}

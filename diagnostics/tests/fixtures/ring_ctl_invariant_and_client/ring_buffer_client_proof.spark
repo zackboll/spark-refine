@@ -1,0 +1,32 @@
+{
+"entities": {"1": {"name": "Ring_Buffer_Client_Proof.Push_Push_Pop"}, "2": {"name": "Ring_Buffer_Client_Proof.Rotate"}, "3": {"name": "Ring_Buffer_Client_Proof"}},
+"flow": [
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 4, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 45, "entity": 1, "file": "ring_buffer_client_proof.ads", "line": 15, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 1, "file": "ring_buffer_client_proof.ads", "line": 17, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 20, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 13, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 20, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 26, "rule": "GLOBAL_WRONG", "severity": "info"}
+],
+"pragma_assume": [],
+"proof": [
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 22, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00350699992850423}}},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 23, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00481799989938736}}},
+{"col": 22, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 24, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00937299989163876}}},
+{"col": 7, "entity": 2, "file": "ring_buffer_client_proof.adb", "line": 25, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 45, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 24, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 2, "max_steps": 1, "max_time": 0.006610999815166}}},
+{"col": 45, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 25, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 2, "max_steps": 1, "max_time": 0.00749300001189113}}},
+{"col": 30, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 24, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0135880000889301}}},
+{"col": 19, "entity": 2, "file": "ring_buffer_client_proof.ads", "line": 23, "rule": "VC_POSTCONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.01244099996984}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 7, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0165529996156693}}},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 9, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 10, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 7, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 11, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0111680002883077}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 13, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00813100021332502}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 14, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 9.99999997475243e-07}}},
+{"col": 34, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 15, "rule": "VC_PRECONDITION", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.00715800002217293}}},
+{"col": 22, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 15, "rule": "VC_ASSERT", "severity": "info", "stats": {"Z3": {"count": 1, "max_steps": 1, "max_time": 0.0155870001763105}}},
+{"col": 43, "entity": 1, "file": "ring_buffer_client_proof.adb", "line": 16, "rule": "VC_ASSERT", "severity": "medium"}
+],
+"stop_reason": "STOP_REASON_NONE"
+}
