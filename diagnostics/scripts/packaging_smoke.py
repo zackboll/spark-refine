@@ -118,7 +118,7 @@ def inspect_wheel(whl: Path) -> None:
     check("spark-refine = spark_refine_diagnostics.cli:main"
           in entry_points, "console script spark-refine declared")
     check("Requires-Dist" not in meta, "no runtime dependencies")
-    for module in ("cli", "discovery", "orchestration"):
+    for module in ("cli", "discovery", "orchestration", "semantic_groups"):
         check(f"{PACKAGE}/{module}.py" in names,
               f"{PACKAGE}/{module}.py is in the wheel")
     check(unpacked < 1_000_000,
@@ -168,6 +168,9 @@ def installed_cli_checks(venv: Path, work: Path, editable: bool) -> None:
               sem["reason"] and doc["summary"]["by_code"]["SRD002"] == 2,
               "core install: --semantic without libadalang degrades "
               "(exit 0, base SRD002 kept, evaluated=false)")
+        check("srd002_groups" not in sem,
+              "core install: no semantic triage groups fabricated when "
+              "the backend is unavailable")
     out = run([exe, "rules"], cwd=outside, env=env).stdout
     check(all(c in out for c in ("SRD001", "SRD002", "SRD003")),
           "spark-refine rules lists SRD001-SRD003")

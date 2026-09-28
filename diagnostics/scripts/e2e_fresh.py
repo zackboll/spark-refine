@@ -56,6 +56,13 @@ scripts/setup_libadalang.sh on PYTHONPATH; not part of the default set):
                  checkout, and then the provenance gate correctly degrades
                  those checks to `unavailable`.
 
+Task 010 extends both (no new proof run): analysis.semantic.srd002_groups
+must satisfy the coverage invariant and have the expected shape. E2E-F:
+one Ring_Buffer.Push / `not Is_Full (B)` group with the three calls
+9:7, 10:7, 25:7, and the VC_ASSERT at 16:43 ungrouped. E2E-G: exactly the
+four groups Pop, Push, Sequences.Remove, Sequences.Get, the two
+assertions ungrouped. Never a group-level confidence or failed conjunct.
+
   python3 diagnostics/scripts/e2e_fresh.py [srd001] [srd002] [srd003]
                                            [prove] [prove_negative]
                                            [semantic] [semantic_external]
@@ -608,7 +615,51 @@ def check_semantic(report: dict) -> list[str]:
     _require(a.get("resolution") == "exact" and "assertion" in a
              and "callee" not in a and "precondition" not in a,
              "VC_ASSERT 16:43: not assertion-only context", problems)
+    groups = _groups(report, problems)
+    counts = _group_counts(groups)
+    _require(counts == (1, 3, 1), f"srd002_groups (groups, grouped, "
+             f"ungrouped) {counts}, expected (1, 3, 1)", problems)
+    for g in groups.get("groups", []):
+        pre = g.get("precondition") or {}
+        _require((g.get("callee") or {}).get("name") == "Ring_Buffer.Push"
+                 and pre.get("text") == "not Is_Full (B)"
+                 and g.get("check_count") == 3,
+                 f"group {(g.get('callee') or {}).get('name')!r} Pre "
+                 f"{pre.get('text')!r} x{g.get('check_count')}", problems)
+        locs = sorted((o["location"]["line"], o["location"]["column"])
+                      for o in g.get("occurrences", []))
+        _require(locs == sorted(SEMANTIC_PUSH_CALLS),
+                 f"Push group call sites {locs}", problems)
+    ung = [(u.get("rule"), (u.get("location") or {}).get("line"),
+            (u.get("location") or {}).get("column"), u.get("reason"))
+           for u in groups.get("ungrouped", [])]
+    _require(ung == [("VC_ASSERT", 16, 43, "assertion_has_no_callee")],
+             f"ungrouped {ung}, expected the VC_ASSERT at 16:43", problems)
     return problems
+
+
+def _groups(report: dict, problems: list[str]) -> dict:
+    """Task 010 common criteria for analysis.semantic.srd002_groups: it
+    exists and satisfies the coverage invariant (every SRD002 client
+    failure exactly once, counts consistent, only VC_PRECONDITION grouped,
+    no group-level confidence, no failed-conjunct claim)."""
+    if str(DIAGNOSTICS) not in sys.path:
+        sys.path.insert(0, str(DIAGNOSTICS))
+    from spark_refine_diagnostics.semantic_groups import (
+        coverage_problems, report_occurrence_ids)
+    groups = report.get("analysis", {}).get("semantic", {}).get(
+        "srd002_groups")
+    if not isinstance(groups, dict):
+        problems.append("analysis.semantic.srd002_groups missing")
+        return {}
+    problems += [f"srd002_groups: {p}" for p in
+                 coverage_problems(groups, report_occurrence_ids(report))]
+    return groups
+
+
+def _group_counts(groups: dict) -> tuple:
+    return (groups.get("group_count"), groups.get("grouped_check_count"),
+            groups.get("ungrouped_check_count"))
 
 
 EXTERNAL_ABLATION = "no_is_empty_post"
@@ -623,6 +674,9 @@ EXTERNAL_CALLS = {
     (f"{EXTERNAL_CLIENT}.ads", 25, 45): "Ring_Buffer.Sequences.Get",
 }
 EXTERNAL_DECL_FILE = "spark-containers-functional-vectors.ads"
+# Task 010: expected callee/contract groups of the fresh E2E-G report
+EXTERNAL_GROUPS = ("Ring_Buffer.Pop", "Ring_Buffer.Push",
+                   "Ring_Buffer.Sequences.Remove", "Ring_Buffer.Sequences.Get")
 
 
 def e2e_semantic_external() -> dict:
@@ -667,6 +721,20 @@ def check_semantic_external(report: dict) -> list[str]:
         _require(d.get("file") == EXTERNAL_DECL_FILE,
                  f"{pos}: declaration {d!r}, expected SPARKlib "
                  f"{EXTERNAL_DECL_FILE}", problems)
+    # Task 010: all four preconditions exact -> four singleton groups
+    groups = _groups(report, problems)
+    counts = _group_counts(groups)
+    _require(counts == (4, 4, 2), f"srd002_groups (groups, grouped, "
+             f"ungrouped) {counts}, expected (4, 4, 2)", problems)
+    names = sorted((g.get("callee") or {}).get("name")
+                   for g in groups.get("groups", []))
+    _require(names == sorted(EXTERNAL_GROUPS),
+             f"group callees {names}, expected {sorted(EXTERNAL_GROUPS)}",
+             problems)
+    ung = sorted((u.get("rule"), u.get("reason"))
+                 for u in groups.get("ungrouped", []))
+    _require(ung == [("VC_ASSERT", "assertion_has_no_callee")] * 2,
+             f"ungrouped {ung}, expected the two assertions", problems)
     return problems
 
 

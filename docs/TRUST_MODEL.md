@@ -48,7 +48,9 @@ spark-refine --semantic / Libadalang   (optional, descriptive source context
                                         is NOT byte identity (same-second
                                         layout edits undetectable; reported
                                         as layout_exact=false); ambiguity or
-                                        mismatch degrades, never guesses)
+                                        mismatch degrades, never guesses;
+                                        Task 010 triage groups only collect
+                                        identical callee+Pre, no causality)
 AI agents consuming diagnostics
 future IDE integration
 (historical/deferred: spark-refine parser, source generator)

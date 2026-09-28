@@ -265,7 +265,11 @@ agent chooses the appropriate class of change
   callee and explicit `Pre` behind an SRD002 precondition failure, but it
   cannot say which conjunct failed (GNATprove 16.1.0 output does not
   record it). It does not map failures to source abstractions, and no rule
-  depends on it.
+  depends on it. Task 010 adds a backend-neutral report-level view
+  (`semantic_groups.py`, `analysis.semantic.srd002_groups`). It groups
+  exact precondition failures by identical callee declaration + `Pre`, for
+  triage only. There is no causality, no group confidence, and no change to
+  any diagnostic. Enrichment stays opt-in (see `docs/ROADMAP.md`).
 * **No prover-matrix orchestration.** `prove` runs exactly one GNATprove
   invocation. SRD003 still requires separate single-prover runs plus
   `compare-provers`. `prove` also parses no GPR and has no

@@ -116,6 +116,57 @@ def semantic_meta_text(m: dict) -> str:
     return line
 
 
+GROUPS_DISCLAIMER = ("Groups are descriptive: sharing a callee and Pre does "
+                     "not establish a shared cause, does not identify a "
+                     "failed conjunct and does not show that a public "
+                     "contract must change. GNATprove remains the proof "
+                     "authority.")
+
+
+def _plural(n: int, word: str) -> str:
+    return f"{n} {word}{'' if n == 1 else 's'}"
+
+
+def _loc_text(loc: dict) -> str:
+    return f"{loc['file']}:{loc['line']}:{loc['column']}"
+
+
+def semantic_groups_text(g: dict) -> list[str]:
+    """Task 010: report-level SRD002 semantic triage section (summary;
+    the per-diagnostic detail follows unchanged)."""
+    grouped = _plural(g["grouped_check_count"], "grouped precondition check")
+    out = ["SRD002 semantic triage:",
+           f"  {grouped} -> "
+           f"{_plural(g['group_count'], 'callee/contract group')}",
+           f"  {_plural(g['ungrouped_check_count'], 'ungrouped check')}"]
+    for grp in g["groups"]:
+        c, pre = grp["callee"], grp["precondition"]
+        out.append("")
+        out.append(f"  {c['name']} ({c['kind']}, "
+                   f"{_span(c['declaration'])})")
+        if pre["explicit"]:
+            out += wrap(f"public Pre: {_one_line(pre['text'])}", "    ")
+        else:
+            out.append("    public Pre: none (no explicit Pre aspect)")
+        out.append(f"    calls: {grp['check_count']}")
+        width = max(len(_loc_text(o["location"]))
+                    for o in grp["occurrences"])
+        for o in grp["occurrences"]:
+            dup = (f" (reported {o['duplicate_count']} times)"
+                   if o.get("duplicate_count") else "")
+            out.append(f"      {_loc_text(o['location']).ljust(width)} "
+                       f"{_one_line(o['call']['text'])}{dup}")
+    if g["ungrouped"]:
+        out.append("")
+        out.append("  ungrouped:")
+        for u in g["ungrouped"]:
+            out.append(f"    {_loc_text(u['location'])} {u['rule']}")
+            out.append(f"      {u['reason']}")
+    out.append("")
+    out += wrap(GROUPS_DISCLAIMER, "  ")
+    return out
+
+
 def run_header(run: ProofRun) -> str:
     s = run.summary()
     return (f"run {run.name}: GNATprove {run.tool_version or '?'}; "
@@ -180,6 +231,10 @@ def to_text(runs: list[ProofRun], diags: list[Diagnostic],
         out.append(semantic_meta_text(analysis["semantic"]))
     if analysis and "srd003_matching" in analysis:
         out += _matching_text(analysis["srd003_matching"])
+    groups = ((analysis or {}).get("semantic") or {}).get("srd002_groups")
+    if groups is not None:
+        out.append("")
+        out += semantic_groups_text(groups)
     out.append("")
     if not diags:
         out.append("no SRD diagnostics")

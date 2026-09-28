@@ -30,13 +30,24 @@ Two pillars, with GNATprove as the proof authority:
 | Fresh proof-run orchestration | 008 | `spark-refine prove -P project.gpr`: runs GNATprove (argv, exact command shown), analyzes only the result set that run created or changed, preserves GNATprove's exit code; `analysis.orchestration` in JSON; real E2E-D/E |
 | Semantic SRD002 enrichment (experimental) | 009 | opt-in `--semantic`: Libadalang resolves each SRD002 failure to its exact call, callee, declaration and explicit `Pre` (conjuncts decomposed); sources gated on GNAT `.ali` source identity metadata (checksum + second-resolution timestamp; not byte-exact); failed-conjunct attribution measured **NOT ATTRIBUTABLE** from GNATprove 16.1.0 output, so never claimed; core package unchanged |
 
+| SRD002 semantic triage groups | 010 | report-level `analysis.semantic.srd002_groups` and a text triage section: exact `VC_PRECONDITION` failures grouped by identical callee declaration + explicit `Pre`; everything else is ungrouped with a machine reason; every failure appears exactly once. `ring_no_is_full_post`: 3 Push failures → 1 group. Descriptive only (no cause, no group confidence, no conjunct). Diagnostics unchanged |
+
+## Decisions
+
+* **Semantic enrichment stays opt-in (Task 010).** Libadalang is not a
+  normal pip dependency, a cold hosted setup measured ~23.5 min
+  (Task 009), and the core diagnostics package deliberately has zero
+  runtime dependencies. `--semantic` (and with it the triage groups)
+  therefore remains an explicit flag. This is not permanent: revisit
+  automatic enablement if Libadalang distribution improves (for example
+  a prebuilt wheel or a fast, cached install).
+
 ## Near term
 
-* **Semantic enrichment follow-up.** Measure the `diagnostics-semantic`
-  CI job on hosted runners. Decide whether enrichment stays opt-in.
-  Conjunct attribution would need *new* proof evidence (e.g. a
-  pre-registered per-conjunct re-proof experiment), since existing
-  GNATprove output does not provide it (Task 009).
+* **Conjunct attribution needs new evidence.** Existing GNATprove output
+  does not identify a failed `Pre` conjunct (Task 009). Attribution would
+  need a separately pre-registered experiment with its own trust model,
+  for example re-proving each conjunct. It is not started.
 
 ## Later
 

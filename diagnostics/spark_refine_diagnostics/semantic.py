@@ -42,6 +42,7 @@ from pathlib import Path
 
 from .ali import load_ali_sources
 from .model import Diagnostic, Report
+from .semantic_groups import build_srd002_groups
 
 BACKEND = "libadalang"
 ATTRIBUTION = "not_provided_by_gnatprove"
@@ -118,6 +119,10 @@ def enrich_report(report: Report, result_dir: Path,
         out.append(d)
     meta["resolutions"] = counts
     report.diagnostics[:] = out
+    # Task 010: report-level triage view over the enriched diagnostics
+    # (descriptive grouping only; see semantic_groups.py). Added last so
+    # every Task 009 field keeps its position and value.
+    meta["srd002_groups"] = build_srd002_groups(report.diagnostics)
     return report
 
 

@@ -4,6 +4,25 @@
 
 ### Added
 
+- Task 010: SRD002 semantic triage groups. When `--semantic` enrichment is
+  evaluated, the report gains `analysis.semantic.srd002_groups` and an
+  `SRD002 semantic triage` text section before the individual
+  diagnostics. Exact `VC_PRECONDITION` client failures are grouped by
+  identical callee (qualified name, kind, declaration span) and identical
+  extracted `Pre` (verbatim text, span, conjuncts). Overloads and textually
+  different `Pre`s never merge. Every other failure is `ungrouped` with a
+  stable reason (`assertion_has_no_callee`, `semantic_ambiguous`,
+  `semantic_unresolved`, `semantic_unavailable`, `semantic_incomplete`,
+  `rule_not_groupable`). Every client failure appears exactly once
+  (`coverage_problems`). Groups carry no confidence (occurrences keep
+  `diagnostic_confidence`) and make no causal or conjunct claim. New
+  backend-neutral module `semantic_groups.py` (no Libadalang import).
+  Diagnostics, the SRD002 count, Task 009 per-check semantic blocks and
+  `format_version` 1 are unchanged. Without `--semantic`, output is
+  byte-identical to Task 009. E2E-F and E2E-G are extended; there is no new
+  proof run, no new CI job and no new rule. Semantic enrichment stays
+  opt-in (`docs/ROADMAP.md`).
+
 - Task 009 (experimental, opt-in): Libadalang semantic enrichment of
   SRD002. `--semantic` for `explain`/`analyze`/`prove`, with `-P/--project`
   for `explain`/`analyze` and `-X NAME=VALUE` scenario values for the

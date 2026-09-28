@@ -252,6 +252,38 @@ range), the callee's explicit `Pre` and its top-level conjuncts. For a
   result and does not change SRD002. It means only that no enrichment was
   produced.
 
+**Semantic triage groups (Task 010).** When enrichment is evaluated,
+`analysis.semantic.srd002_groups` groups the report's SRD002 client
+failures. Each group is one resolved declaration plus one identical
+explicit `Pre`, listing every call site (`occurrences`). Every other
+failure appears once in `ungrouped` with a machine `reason`. Use it to
+avoid inspecting the same call boundary repeatedly:
+
+```text
+Good: "Three failed checks call Ring_Buffer.Push with the same explicit
+       Pre `not Is_Full (B)`. Inspect that call boundary once, then
+       examine why each client state (9:7, 10:7, 25:7) cannot establish
+       it."
+Bad:  "Push's contract is wrong."   /   "These share one root cause."
+```
+
+* Grouping **reduces repeated inspection**. It does **not** establish a
+  shared cause, it does **not** identify a failed conjunct
+  (`failed_conjunct` stays `null`), and it does **not** authorize a
+  contract change.
+* A group has no confidence. Act on each occurrence's
+  `diagnostic_confidence`; `diagnostic_confidences` only lists them.
+* Assertions are never grouped (`assertion_has_no_callee`), and neither are
+  non-exact preconditions (`semantic_ambiguous` / `semantic_unresolved` /
+  `semantic_unavailable` / `semantic_incomplete`). Treat these
+  individually, with no guessed callee.
+* Still apply the SRD002 policy per occurrence: validate the client goal
+  first, then check the client's preconditions and reasoning, and only
+  then review public contracts, as a proposal for human review.
+* Check `grouped_check_count + ungrouped_check_count ==
+  client_failure_count` before relying on the summary. The individual
+  `diagnostics[]` are unchanged and remain the detail view.
+
 ### SRD003: `preserve_portfolio_or_strengthen_proof` (category `prover_portfolio`)
 
 A check is proved by some single provers and not by others. The proof is
