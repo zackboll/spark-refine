@@ -413,6 +413,113 @@ class ConjunctExperiment(unittest.TestCase):
                               if "conj" in k or "sub" in k})
 
 
+EXTERNAL_DECL_FILE = "spark-containers-functional-vectors.ads"
+# the exact provenance_problem() messages of semantic_lal.py for a source
+# whose identity does not match a D record
+_PROVENANCE_MISMATCHES = (
+    "GNAT checksum matches but the second-resolution timestamp does not "
+    "match the result set's .ali D record (layout may differ)",
+    "GNAT checksum does not match the result set's .ali D record")
+
+
+def assert_external_call(tc: unittest.TestCase, check: dict,
+                         expected_name: str,
+                         decl_file: str = EXTERNAL_DECL_FILE) -> str:
+    """Portable assertion for a VC_PRECONDITION whose callee is declared in
+    an EXTERNAL dependency (SPARKlib) that the archived semantic snapshots
+    deliberately do not copy. The archived fixture cannot control the
+    active Alire checkout's mtime, so exactly two outcomes are allowed:
+
+    A. `exact`: the external declaration passed the production provenance
+       gate; the callee must be `expected_name`, declared in `decl_file`,
+       with no failed-conjunct attribution.
+    B. `unavailable`: the gate refused the external declaration; there must
+       be no call/callee/precondition claim, and the reason must name the
+       callee declaration's source-identity (D record) mismatch.
+
+    Anything else (ambiguous, unresolved, other reasons) fails, with the
+    complete check object in the message. Returns the outcome."""
+    res = check.get("resolution")
+    if res == "exact":
+        callee = check.get("callee") or {}
+        tc.assertEqual(callee.get("name"), expected_name, check)
+        tc.assertEqual((callee.get("declaration") or {}).get("file"),
+                       decl_file, check)
+        pre = check.get("precondition")
+        tc.assertIsInstance(pre, dict, check)
+        tc.assertIsNone(pre["failed_conjunct"], check)
+        tc.assertEqual(pre["attribution"], ATTRIBUTION, check)
+        return res
+    tc.assertEqual(res, "unavailable",
+                   f"external call must be exact or unavailable: {check}")
+    for k in ("call", "callee", "precondition"):
+        tc.assertNotIn(k, check, check)
+    reason = check.get("reason") or ""
+    prefix = f"callee declaration: {decl_file}: "
+    tc.assertTrue(reason.startswith(prefix),
+                  f"reason must identify the callee-declaration provenance "
+                  f"mismatch of {decl_file}: {check}")
+    tc.assertIn(reason[len(prefix):], _PROVENANCE_MISMATCHES, check)
+    return res
+
+
+class ExternalCallAssertion(unittest.TestCase):
+    """The helper itself (no Libadalang): accepts only the two portable
+    outcomes and rejects everything else."""
+
+    NAME = "Ring_Buffer.Sequences.Remove"
+    LOC = {"file": "ring_buffer_client_proof.ads", "line": 24, "column": 45}
+
+    def exact(self, name=NAME, file=EXTERNAL_DECL_FILE):
+        return {"rule": "VC_PRECONDITION", "location": self.LOC,
+                "resolution": "exact",
+                "call": {"text": "Sequences.Remove (M, 1)", "location": None},
+                "callee": {"name": name, "kind": "function",
+                           "declaration": {"file": file, "start_line": 1,
+                                           "start_column": 1, "end_line": 1,
+                                           "end_column": 1}},
+                "precondition": {"explicit": True, "text": "P",
+                                 "location": None, "conjuncts": [],
+                                 "failed_conjunct": None,
+                                 "attribution": ATTRIBUTION}}
+
+    def unavailable(self, detail=_PROVENANCE_MISMATCHES[0],
+                    file=EXTERNAL_DECL_FILE):
+        return {"rule": "VC_PRECONDITION", "location": self.LOC,
+                "resolution": "unavailable",
+                "reason": f"callee declaration: {file}: {detail}"}
+
+    def test_accepts_exact(self):
+        self.assertEqual(assert_external_call(self, self.exact(), self.NAME),
+                         "exact")
+
+    def test_accepts_provenance_unavailable(self):
+        for detail in _PROVENANCE_MISMATCHES:
+            self.assertEqual(assert_external_call(
+                self, self.unavailable(detail), self.NAME), "unavailable")
+
+    def test_rejects_everything_else(self):
+        bad = [self.exact(name="Ring_Buffer.Sequences.Get"),
+               self.exact(file="ring_buffer.ads"),
+               {**self.unavailable(), "callee": {"name": self.NAME}},
+               self.unavailable(file="ring_buffer.ads"),
+               {**self.unavailable(), "reason": "boom"},
+               {"resolution": "ambiguous", "reason": "2 calls anchored"},
+               {"resolution": "unresolved", "reason": "no call anchored"}]
+        c = self.exact()
+        c["precondition"]["failed_conjunct"] = 0
+        bad.append(c)
+        for check in bad:
+            with self.assertRaises(AssertionError, msg=check):
+                assert_external_call(self, check, self.NAME)
+
+    def test_failure_message_shows_the_check(self):
+        with self.assertRaises(AssertionError) as cm:
+            assert_external_call(self, {"resolution": "unresolved",
+                                        "reason": "xyzzy"}, self.NAME)
+        self.assertIn("xyzzy", str(cm.exception))
+
+
 def _lal_available() -> str | None:
     try:
         import libadalang  # noqa: F401
@@ -476,6 +583,12 @@ class WithLibadalang(unittest.TestCase):
                 for c in d.semantic["checks"]}
 
     def call(self, c):
+        """(resolution, call text, callee, Pre text) of an expected `exact`
+        precondition check; on anything else the failure shows the whole
+        check (resolution + reason) instead of a KeyError."""
+        self.assertEqual(c.get("resolution"), "exact", c)
+        for k in ("call", "callee", "precondition"):
+            self.assertIn(k, c, c)
         return (c["resolution"], c["call"]["text"], c["callee"]["name"],
                 c["precondition"]["text"])
 
@@ -519,14 +632,73 @@ class WithLibadalang(unittest.TestCase):
         c = self.checks("ring_no_public_model_bound")
         self.assertEqual(self.call(c[(25, 7)]), ("exact", "Push (Q, X)",
                          "Ring_Buffer.Push", "not Is_Full (B)"))
-        c = self.checks("ring_no_is_empty_post")
+        name = "ring_no_is_empty_post"
+        # base SRD002 exists and is unchanged by enrichment
+        rep = self.reports[name]
+        self.assertEqual(
+            {d.entity: (d.code, d.confidence.value) for d in rep.diagnostics},
+            {"Ring_Buffer_Client_Proof.Push_Push_Pop": ("SRD002", "low"),
+             "Ring_Buffer_Client_Proof.Rotate": ("SRD002", "medium")})
+        c = self.checks(name)
         self.assertEqual(self.call(c[(11, 7)]), ("exact", "Pop (Q, X)",
                          "Ring_Buffer.Pop", "not Is_Empty (B)"))
-        self.assertEqual(c[(24, 45)]["callee"]["name"],
-                         "Ring_Buffer.Sequences.Remove")
-        self.assertEqual(c[(25, 45)]["callee"]["name"],
-                         "Ring_Buffer.Sequences.Get")
-        self.assertTrue(all(x["resolution"] == "exact" for x in c.values()))
+        # Project-local source is snapshotted: everything except the two
+        # SPARKlib callees must resolve exact.
+        external = {(24, 45): "Ring_Buffer.Sequences.Remove",
+                    (25, 45): "Ring_Buffer.Sequences.Get"}
+        for pos, x in c.items():
+            if pos not in external:
+                self.assertEqual(x.get("resolution"), "exact", x)
+        # SPARKlib is NOT snapshotted: it is resolved from the active Alire
+        # checkout, whose mtime the archived D records cannot control. Only
+        # the portable outcomes are allowed (exact to the right callee, or
+        # an explicit callee-declaration provenance refusal). Fresh E2E-G
+        # requires exact.
+        outcomes = {assert_external_call(self, c[pos], expected)
+                    for pos, expected in external.items()}
+        # both calls resolve to the same SPARKlib file: same verdict
+        self.assertEqual(len(outcomes), 1, {p: c[p] for p in external})
+        m = rep.analysis["semantic"]
+        n_unavail = 2 if outcomes == {"unavailable"} else 0
+        self.assertEqual(m["resolutions"], {
+            "exact": len(c) - n_unavail, "ambiguous": 0, "unresolved": 0,
+            "unavailable": n_unavail}, m)
+
+    def test_external_dependency_mismatch_degrades(self):
+        """The hosted-runner situation, made deterministic: the archived
+        result set records a SPARKlib D timestamp that the active Alire
+        checkout does not have. Simulated by changing that D record in a
+        TEMPORARY COPY of the archived results (the dependency checkout and
+        its mtimes are never touched). The production gate must refuse the
+        external callee declaration -> `unavailable`, no callee/Pre claim,
+        while every project-local check stays exact."""
+        def other_checkout(d):
+            for ali in (d / "results").glob("*.ali"):
+                lines = ali.read_text("utf-8").splitlines(keepends=True)
+                out = []
+                for ln in lines:
+                    f = ln.split()
+                    if f[:2] == ["D", EXTERNAL_DECL_FILE]:
+                        ln = ln.replace(f[2], "19990101000000", 1)
+                    out.append(ln)
+                ali.write_text("".join(out), "utf-8")
+        rep = self.enrich_copy("ring_no_is_empty_post", other_checkout)
+        c = {(x["location"]["line"], x["location"]["column"]): x
+             for d in rep.diagnostics for x in d.semantic["checks"]}
+        for pos, name in {(24, 45): "Ring_Buffer.Sequences.Remove",
+                          (25, 45): "Ring_Buffer.Sequences.Get"}.items():
+            self.assertEqual(assert_external_call(self, c[pos], name),
+                             "unavailable")
+            self.assertIn("timestamp", c[pos]["reason"])
+        for pos in ((7, 22), (11, 7), (16, 22), (25, 7)):
+            self.assertEqual(c[pos]["resolution"], "exact", c[pos])
+        self.assertEqual(rep.analysis["semantic"]["resolutions"],
+                         {"exact": 4, "ambiguous": 0, "unresolved": 0,
+                          "unavailable": 2})
+        self.assertEqual({d.entity: d.confidence.value
+                          for d in rep.diagnostics},
+                         {"Ring_Buffer_Client_Proof.Push_Push_Pop": "low",
+                          "Ring_Buffer_Client_Proof.Rotate": "medium"})
 
     def test_pool_spec_no_count_posts(self):
         c = self.checks("pool_spec_no_count_posts")
@@ -555,6 +727,9 @@ class WithLibadalang(unittest.TestCase):
     # ---- source-position lookup (experiment corpus, real GNATprove) ----
     def test_lookup_shapes(self):
         c = self.checks("conjunct_experiment")
+        for pos in ((29, 7), (31, 12), (31, 15), (31, 23), (40, 10),
+                    (41, 10)):
+            self.call(c[pos])   # exact, else fail with the whole check
         # selected name P.Op: GNATprove anchors at the '.'
         self.assertEqual(self.call(c[(7, 10)])[:3],
                          ("exact", "Ops.Op (X, Y)", "Ops.Op"))
@@ -578,6 +753,7 @@ class WithLibadalang(unittest.TestCase):
         c = self.checks("conjunct_experiment")
 
         def conj(pos):
+            self.call(c[pos])   # exact, else fail with the whole check
             return [x["text"] for x in c[pos]["precondition"]["conjuncts"]]
         self.assertEqual(conj((7, 10)), ["X > 0", "Y > 0"])      # and then
         self.assertEqual(conj((22, 10)), ["X > 0", "Y > 0", "Z > 0"])  # and
@@ -607,6 +783,7 @@ class WithLibadalang(unittest.TestCase):
         # Ops.No_Pre (X) at client.adb:37 is proved (no check), so query
         # the adapter directly at its anchor
         r = be.resolve_precondition("client.adb", 37, 10)
+        self.assertEqual(r.get("resolution"), "exact", r)
         self.assertEqual(r["callee"]["name"], "Ops.No_Pre")
         self.assertEqual(r["precondition"], {"explicit": False, "text": None,
                                              "location": None,
@@ -711,7 +888,7 @@ class WithLibadalang(unittest.TestCase):
         c = {(x["location"]["line"], x["location"]["column"]): x
              for dg in rep.diagnostics for x in dg.semantic["checks"]}
         self.assertEqual(c[(9, 7)]["resolution"], "unresolved")
-        self.assertEqual(c[(10, 7)]["resolution"], "exact")
+        self.assertEqual(c[(10, 7)]["resolution"], "exact", c[(10, 7)])
         self.assertEqual(c[(10, 7)]["call"]["text"], "Push (Q, A)")
 
     def test_parse_error_is_unavailable(self):
@@ -806,6 +983,121 @@ class E2ECheckSemantic(unittest.TestCase):
 
     def test_default_gate_excludes_semantic(self):
         self.assertIn("semantic", self.e2e.CASES)
+        self.assertIn("semantic_external", self.e2e.CASES)
+        self.assertEqual(self.e2e.OPT_IN, {"semantic", "semantic_external"})
+
+
+class E2ECheckSemanticExternal(unittest.TestCase):
+    """scripts/e2e_fresh.py check_semantic_external (E2E-G pass criteria)
+    on the committed ring_no_is_empty_post snapshot, via a backend stub
+    that replays the structural answers E2E-G expects. E2E-G is strict:
+    unlike the archived-fixture test, `unavailable` is NOT accepted."""
+
+    ANSWERS = {
+        ("ring_buffer_client_proof.adb", 11): (
+            "Pop (Q, X)", "Ring_Buffer.Pop",
+            "obj/ablation_src/no_is_empty_post/ring_buffer.ads",
+            "not Is_Empty (B)"),
+        ("ring_buffer_client_proof.adb", 25): (
+            "Push (Q, X)", "Ring_Buffer.Push",
+            "obj/ablation_src/no_is_empty_post/ring_buffer.ads",
+            "not Is_Full (B)"),
+        ("ring_buffer_client_proof.ads", 24): (
+            "Sequences.Remove (Model (Q)'Old, 1)",
+            "Ring_Buffer.Sequences.Remove", EXTERNAL_DECL_FILE,
+            "(SPARKlib_Defensive => ...)"),
+        ("ring_buffer_client_proof.ads", 25): (
+            "Sequences.Get (Model (Q)'Old, 1)", "Ring_Buffer.Sequences.Get",
+            EXTERNAL_DECL_FILE, "(SPARKlib_Defensive => ...)"),
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "e2e_fresh", support.DIAGNOSTICS / "scripts" / "e2e_fresh.py")
+        cls.e2e = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.e2e)
+
+    def good(self, degrade_external=False) -> dict:
+        answers = self.ANSWERS
+
+        class Stub(FakeBackend):
+            def resolve_precondition(self, file, line, column):
+                text, name, decl, pre = answers[(file, line)]
+                if degrade_external and decl == EXTERNAL_DECL_FILE:
+                    return {"resolution": "unavailable", "reason":
+                            f"callee declaration: {decl}: "
+                            f"{_PROVENANCE_MISMATCHES[0]}"}
+                return {"resolution": "exact",
+                        "call": {"text": text, "location": None},
+                        "callee": {"name": name, "kind": "procedure",
+                                   "declaration": {
+                                       "file": decl, "start_line": 1,
+                                       "start_column": 1, "end_line": 1,
+                                       "end_column": 1}},
+                        "precondition": {"explicit": True, "text": pre,
+                                         "location": None, "conjuncts": []}}
+
+            def resolve_assertion(self, file, line, column):
+                return {"resolution": "exact", "assertion": {
+                    "pragma": "Assert", "text": "t", "location": None},
+                    "enclosing_subprogram": None}
+        rep = enrich_report(base_report("ring_no_is_empty_post"),
+                            SEM / "ring_no_is_empty_post" / "results",
+                            SemanticRequest("ring_buffer.gpr"),
+                            factory=fake_factory(Stub()))
+        return as_json(rep)
+
+    def entry(self, doc, file, line):
+        for d in doc["diagnostics"]:
+            for c in d["semantic"]["checks"]:
+                if (c["location"]["file"], c["location"]["line"]) == (
+                        file, line):
+                    return c
+        raise KeyError((file, line))
+
+    def test_accepts_known_good(self):
+        self.assertEqual(self.e2e.check_semantic_external(self.good()), [])
+
+    def test_rejects_degraded_external(self):
+        """The archived-fixture outcome B is a FAILURE in fresh E2E-G."""
+        problems = self.e2e.check_semantic_external(
+            self.good(degrade_external=True))
+        self.assertTrue(any("24, 45" in p and "unavailable" in p
+                            for p in problems), problems)
+        self.assertTrue(any("25, 45" in p for p in problems), problems)
+
+    def test_rejects_wrong_callee_or_decl(self):
+        doc = self.good()
+        self.entry(doc, "ring_buffer_client_proof.ads", 24)["callee"][
+            "name"] = "Ring_Buffer.Sequences.Get"
+        self.assertTrue(self.e2e.check_semantic_external(doc))
+        doc = self.good()
+        self.entry(doc, "ring_buffer_client_proof.ads", 25)["callee"][
+            "declaration"]["file"] = "ring_buffer.ads"
+        self.assertTrue(self.e2e.check_semantic_external(doc))
+        doc = self.good()
+        self.entry(doc, "ring_buffer_client_proof.adb", 11)[
+            "precondition"]["text"] = "True"
+        self.assertTrue(self.e2e.check_semantic_external(doc))
+
+    def test_rejects_conjunct_claim_and_overclaim(self):
+        doc = self.good()
+        self.entry(doc, "ring_buffer_client_proof.ads", 24)[
+            "precondition"]["failed_conjunct"] = 0
+        self.assertTrue(self.e2e.check_semantic_external(doc))
+        doc = self.good()
+        doc["analysis"]["semantic"]["provenance"]["byte_exact"] = True
+        self.assertTrue(self.e2e.check_semantic_external(doc))
+        doc = self.good()
+        doc["analysis"]["semantic"]["evaluated"] = False
+        self.assertTrue(self.e2e.check_semantic_external(doc))
+
+    def test_rejects_missing_srd002(self):
+        doc = self.good()
+        doc["analysis"]["rules"]["SRD002"]["evaluated"] = False
+        self.assertTrue(self.e2e.check_semantic_external(doc))
 
 
 class ProvenanceContract(unittest.TestCase):

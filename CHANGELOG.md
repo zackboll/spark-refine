@@ -27,8 +27,13 @@
   dependencies. Libadalang is not on PyPI:
   `diagnostics/scripts/setup_libadalang.sh` builds a pinned, relocatable
   bundle (libadalang 26.0.0, 166 MB). Adds the new CI job
-  `diagnostics-semantic` and E2E-F, 6 semantic snapshot cases (432 KB),
-  and 46 tests. SRD001–SRD003 are unchanged. There is no new rule.
+  `diagnostics-semantic` with E2E-F (project-local callees) and E2E-G
+  (SPARKlib callees, fresh, same dependency checkout as the proof), 6
+  semantic snapshot cases (432 KB), and 56 tests. The snapshots hold
+  project-local source only. On an archived fixture, SPARKlib callee
+  declarations may degrade to `unavailable` when the active checkout's
+  mtime differs from the captured `D` record; the provenance gate is
+  unchanged. SRD001–SRD003 are unchanged. There is no new rule.
 
 - Task 008: `spark-refine prove -P PROJECT [-- GNATPROVE_ARGS...]`, fresh
   GNATprove orchestration (`diagnostics/spark_refine_diagnostics/orchestration.py`).

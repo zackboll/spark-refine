@@ -43,12 +43,25 @@ scripts/setup_libadalang.sh on PYTHONPATH; not part of the default set):
                  materialised ablated source; every Push precondition
                  failure must resolve exactly to Ring_Buffer.Push with
                  Pre `not Is_Full (B)`, failed_conjunct null
+                 (project-local declarations)
+  E2E-G  SRD002 + semantic, external dependency: fresh no_is_empty_post
+                 ablation, then `explain --semantic` in the SAME `alr exec`
+                 environment (same SPARKlib checkout GNATprove used); Pop
+                 exact to Ring_Buffer.Pop (Pre `not Is_Empty (B)`), and the
+                 client spec's SPARKlib calls exact to
+                 Ring_Buffer.Sequences.Remove / .Get. This, not the archived
+                 semantic snapshots, is the authoritative test of external
+                 dependency enrichment: an archived fixture's proof-time D
+                 timestamps for SPARKlib need not match a fresh dependency
+                 checkout, and then the provenance gate correctly degrades
+                 those checks to `unavailable`.
 
   python3 diagnostics/scripts/e2e_fresh.py [srd001] [srd002] [srd003]
                                            [prove] [prove_negative]
-                                           [semantic]
+                                           [semantic] [semantic_external]
 
-No argument runs all five. Exit 0 only if every selected case passes.
+No argument runs the five non-semantic cases. Exit 0 only if every selected
+case passes.
 Writes diagnostics/obj/e2e/<case>.json (analyzer report) and
 diagnostics/obj/e2e/summary.json (merged across invocations; git-ignored).
 The script never modifies committed sources: the benchmark scripts
@@ -489,22 +502,24 @@ SEMANTIC_PUSH_CALLS = {(9, 7): "Push (Q, A)", (10, 7): "Push (Q, B)",
                        (25, 7): "Push (Q, X)"}
 
 
-def e2e_semantic() -> dict:
-    """Task 009 E2E-F: fresh ablation run, then `explain --semantic` on the
-    fresh result WITH the materialised (ablated) source it was proved from,
-    selected through the same -X scenario values GNATprove used."""
+def _semantic_run(ablation: str, report_name: str) -> dict:
+    """Fresh ring-buffer ablation run (the benchmark's own
+    ablate_proof_support.py), then `explain --semantic` on the fresh result
+    WITH the materialised (ablated) source it was proved from, selected
+    through the same -X scenario values GNATprove used, under the same
+    `alr exec` environment (hence the same SPARKlib checkout)."""
     ex = EXAMPLES / "ring_buffer"
     since = time.time() - 1
-    out = ex / "obj" / f"ablation_{SEMANTIC_ABLATION}" / "gnatprove"
+    out = ex / "obj" / f"ablation_{ablation}" / "gnatprove"
     _run([sys.executable, "scripts/ablate_proof_support.py", "--only",
-          SEMANTIC_ABLATION], ex, [out.parent])
+          ablation], ex, [out.parent])
     _fresh(out, since)
     prefix = shlex.split(os.environ.get("GNATPROVE_EXEC", "alr -n exec --"))
     cmd = [*prefix, sys.executable, "-m", "spark_refine_diagnostics",
            "explain", str(out.relative_to(ex)), "--semantic",
            "-P", "ring_buffer.gpr",
-           f"-XRING_BUFFER_SRC=obj/ablation_src/{SEMANTIC_ABLATION}",
-           f"-XRING_BUFFER_VARIANT=ablation_{SEMANTIC_ABLATION}",
+           f"-XRING_BUFFER_SRC=obj/ablation_src/{ablation}",
+           f"-XRING_BUFFER_VARIANT=ablation_{ablation}",
            "--format", "json"]
     pp = os.pathsep.join(p for p in (str(DIAGNOSTICS),
                                      os.environ.get("PYTHONPATH")) if p)
@@ -515,16 +530,20 @@ def e2e_semantic() -> dict:
         raise E2EError(f"explain --semantic exit {proc.returncode}: "
                        f"{proc.stderr}")
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "semantic.json").write_text(proc.stdout, encoding="utf-8")
+    (OUT / report_name).write_text(proc.stdout, encoding="utf-8")
     return json.loads(proc.stdout)
 
 
-def check_semantic(report: dict) -> list[str]:
-    """E2E-B's SRD002 criteria, plus: Libadalang evaluated, every Push
-    precondition failure resolved exactly to Ring_Buffer.Push with its
-    explicit Pre recovered, failed conjunct not claimed, the VC_ASSERT
-    given assertion context only."""
-    problems = check_srd002(report)
+def e2e_semantic() -> dict:
+    """Task 009 E2E-F: project-local declaration resolution (Push)."""
+    return _semantic_run(SEMANTIC_ABLATION, "semantic.json")
+
+
+def _semantic_checks(report: dict, problems: list[str]) -> dict:
+    """Common E2E-F/E2E-G criteria: Libadalang evaluated, constant
+    provenance block without overclaim, a semantic block on every SRD002,
+    and no failed-conjunct attribution anywhere. Returns the checks keyed
+    by (file, line, column)."""
     meta = report.get("analysis", {}).get("semantic", {})
     _require(meta.get("evaluated") is True and
              meta.get("backend") == "libadalang",
@@ -545,7 +564,24 @@ def check_semantic(report: dict) -> list[str]:
                  "block", problems)
         for c in (sem or {}).get("checks", []):
             loc = c.get("location", {})
-            checks[(loc.get("line"), loc.get("column"))] = c
+            checks[(loc.get("file"), loc.get("line"), loc.get("column"))] = c
+            pre = c.get("precondition")
+            if pre is not None:
+                _require(pre.get("failed_conjunct") is None and
+                         pre.get("attribution") ==
+                         "not_provided_by_gnatprove",
+                         f"{loc}: failed conjunct claimed", problems)
+    return checks
+
+
+def check_semantic(report: dict) -> list[str]:
+    """E2E-B's SRD002 criteria, plus: Libadalang evaluated, every Push
+    precondition failure resolved exactly to Ring_Buffer.Push with its
+    explicit Pre recovered, failed conjunct not claimed, the VC_ASSERT
+    given assertion context only."""
+    problems = check_srd002(report)
+    checks = {(ln, col): c for (_, ln, col), c
+              in _semantic_checks(report, problems).items()}
     for pos, text in SEMANTIC_PUSH_CALLS.items():
         c = checks.get(pos)
         if c is None:
@@ -575,6 +611,65 @@ def check_semantic(report: dict) -> list[str]:
     return problems
 
 
+EXTERNAL_ABLATION = "no_is_empty_post"
+EXTERNAL_CLIENT = "ring_buffer_client_proof"
+# (file, line, column) -> expected callee. The .adb Pop call resolves to a
+# project-local declaration (the materialised ablated spec); the two .ads
+# calls resolve to SPARKlib's Functional.Vectors instance, i.e. to source
+# in the active Alire dependency checkout GNATprove used for this run.
+EXTERNAL_CALLS = {
+    (f"{EXTERNAL_CLIENT}.adb", 11, 7): "Ring_Buffer.Pop",
+    (f"{EXTERNAL_CLIENT}.ads", 24, 45): "Ring_Buffer.Sequences.Remove",
+    (f"{EXTERNAL_CLIENT}.ads", 25, 45): "Ring_Buffer.Sequences.Get",
+}
+EXTERNAL_DECL_FILE = "spark-containers-functional-vectors.ads"
+
+
+def e2e_semantic_external() -> dict:
+    """Task 009 E2E-G: external-dependency declaration resolution
+    (SPARKlib Remove/Get), with GNATprove and Libadalang sharing the same
+    dependency checkout in the same environment."""
+    return _semantic_run(EXTERNAL_ABLATION, "semantic_external.json")
+
+
+def check_semantic_external(report: dict) -> list[str]:
+    """E2E-B's SRD002 criteria, plus: Libadalang evaluated; the Pop call
+    exact to Ring_Buffer.Pop with Pre `not Is_Empty (B)`; the SPARKlib
+    Remove/Get calls exact to Ring_Buffer.Sequences.Remove/.Get declared in
+    SPARKlib's functional vectors spec; no failed-conjunct attribution; no
+    provenance overclaim."""
+    problems = check_srd002(report)
+    checks = _semantic_checks(report, problems)
+    for pos, name in EXTERNAL_CALLS.items():
+        c = checks.get(pos)
+        if c is None:
+            problems.append(f"no semantic entry for {pos}")
+            continue
+        callee = c.get("callee") or {}
+        _require(c.get("resolution") == "exact", f"{pos}: resolution "
+                 f"{c.get('resolution')!r} ({c.get('reason')})", problems)
+        _require(callee.get("name") == name,
+                 f"{pos}: callee {callee.get('name')!r}, expected {name!r}",
+                 problems)
+        _require(isinstance(c.get("precondition"), dict),
+                 f"{pos}: no precondition block", problems)
+    pop = checks.get((f"{EXTERNAL_CLIENT}.adb", 11, 7)) or {}
+    decl = (pop.get("callee") or {}).get("declaration") or {}
+    pre = pop.get("precondition") or {}
+    _require(decl.get("file") == f"obj/ablation_src/{EXTERNAL_ABLATION}"
+             "/ring_buffer.ads",
+             f"Pop: declaration {decl!r}", problems)
+    _require(pre.get("text") == "not Is_Empty (B)",
+             f"Pop: Pre {pre.get('text')!r}", problems)
+    for pos in list(EXTERNAL_CALLS)[1:]:
+        d = ((checks.get(pos) or {}).get("callee") or {}).get(
+            "declaration") or {}
+        _require(d.get("file") == EXTERNAL_DECL_FILE,
+                 f"{pos}: declaration {d!r}, expected SPARKlib "
+                 f"{EXTERNAL_DECL_FILE}", problems)
+    return problems
+
+
 def _load_script(path: Path):
     spec = importlib.util.spec_from_file_location(path.stem, path)
     mod = importlib.util.module_from_spec(spec)
@@ -596,11 +691,16 @@ CASES = {
     "semantic": ("E2E-F SRD002 + Libadalang semantic enrichment, "
                  "ring buffer no_is_full_post",
                  e2e_semantic, check_semantic),
+    "semantic_external": ("E2E-G SRD002 + Libadalang semantic enrichment, "
+                          "ring buffer no_is_empty_post (SPARKlib callees)",
+                          e2e_semantic_external, check_semantic_external),
 }
+# need an importable libadalang: opt-in only
+OPT_IN = {"semantic", "semantic_external"}
 
 
 def main(argv: list[str]) -> int:
-    selected = argv or [k for k in CASES if k != "semantic"]
+    selected = argv or [k for k in CASES if k not in OPT_IN]
     unknown = [a for a in selected if a not in CASES]
     if unknown:
         print(__doc__)

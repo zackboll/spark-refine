@@ -129,7 +129,16 @@ jobs:
   #   - the full diagnostics suite INCLUDING the Libadalang tests on the
   #     committed semantic snapshots (tests/semantic_fixtures), under
   #     `alr exec` of the ring buffer (SPARKlib project for the snapshots);
-  #   - E2E-F: fresh no_is_full_post ablation + explain --semantic.
+  #   - E2E-F: fresh no_is_full_post ablation + explain --semantic
+  #     (project-local callee declarations);
+  #   - E2E-G: fresh no_is_empty_post ablation + explain --semantic in the
+  #     same `alr exec` environment (SPARKlib callee declarations, i.e. the
+  #     same dependency checkout GNATprove used). The archived snapshots do
+  #     not copy SPARKlib, so their external calls may conservatively
+  #     degrade to `unavailable`; E2E-G is where exact external resolution
+  #     is required.
+  # First hosted cold build (run 36357368341): Libadalang build 759.75 s,
+  # setup script / bundle ready ~825 s (13m45.8s).
   diagnostics-semantic:
     runs-on: ubuntu-latest
     steps:
@@ -147,10 +156,14 @@ jobs:
         with:
           path: ~/lal-bundle/python
           key: libadalang-26.0.0-${{ runner.os }}-${{ hashFiles('diagnostics/scripts/setup_libadalang.sh') }}
+      - name: Report Libadalang bundle cache status
+        run: echo "libadalang bundle cache-hit=${{ steps.lal-cache.outputs.cache-hit == 'true' && 'true' || 'false' }}"
       - name: Build the Libadalang bundle (cache miss only)
         if: steps.lal-cache.outputs.cache-hit != 'true'
         run: |
+          start=$(date +%s)
           time bash diagnostics/scripts/setup_libadalang.sh ~/lal-bundle
+          echo "libadalang setup (cold build) wall seconds: $(( $(date +%s) - start ))"
           rm -rf ~/lal-bundle/build
       - name: Enable the bundle
         run: |
@@ -170,12 +183,17 @@ jobs:
           ! grep -E "\.\.\. skipped|^OK \(skipped" /tmp/semantic-tests.log
       - name: "E2E-F: SRD002 + Libadalang semantic enrichment (fresh)"
         run: python3 diagnostics/scripts/e2e_fresh.py semantic
-      - name: Upload semantic report
+      - name: "E2E-G: SRD002 + Libadalang, external SPARKlib callees (fresh)"
+        run: python3 diagnostics/scripts/e2e_fresh.py semantic_external
+      - name: Upload semantic reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: diagnostics-semantic-report
-          path: diagnostics/obj/e2e/semantic.json
+          path: |
+            diagnostics/obj/e2e/semantic.json
+            diagnostics/obj/e2e/semantic_external.json
+            diagnostics/obj/e2e/summary.json
           if-no-files-found: warn
 
   # Ring-buffer proof benchmarks, one toolchain setup for both

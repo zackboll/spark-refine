@@ -345,7 +345,14 @@ source identity metadata, not byte identity: a layout/comment-only edit
 within the same second is undetectable, and `analysis.semantic.provenance`
 reports `layout_exact: false`. `resolution: "exact"` means one call was
 found at the reported location and resolved. It is not a source-identity
-claim. Any failure only sets
+claim. The committed semantic snapshots (`tests/semantic_fixtures`) contain
+the project-local source needed for regression. External library sources
+such as SPARKlib are not copied; they are resolved from the active project
+environment. Their archived proof-time `D` timestamps may therefore differ
+from a fresh dependency checkout. When that happens, the gate correctly
+degrades those external callee declarations to `unavailable`, and the
+archived tests accept only that or `exact`. The fresh E2E-G run below is the
+authoritative test of external-dependency enrichment. Any failure only sets
 `analysis.semantic.evaluated = false` or a per-check `unavailable`. See
 `docs/tasks/009-libadalang-srd002-enrichment.md`.
 
@@ -575,6 +582,7 @@ unsanitized SARIF / `.spark` / `.ali`. Three per-rule cases, plus two
 | E2E-B SRD002 | ring buffer A, ablation `no_is_full_post` (`ablate_proof_support.py --only no_is_full_post`) | SRD002 on `Ring_Buffer_Client_Proof.Push_Push_Pop` (`VC_PRECONDITION` + `VC_ASSERT`) and `…Rotate` (`VC_PRECONDITION`); client unit `ring_buffer_client_proof`; implementation units `[ring_buffer]` with > 0 checks and 0 failures; `dependency_source = ali`, `ali_status = ok`, `ali_versions = ["GNAT Lib v16"]` |
 | E2E-C SRD003 | library-backed fixed pool, `--prover=cvc5` / `z3` / `altergo` (`prover_matrix.py --variant library_backed`), then `compare-provers` | the known SRD003 `VC_POSTCONDITION` `Fixed_Pool.Free_Prefix.Model` at `spark_refine_prefix_sets.ads:93`, `match_quality` `exact` or `unique_entity`, Z3 `unproved`, Alt-Ergo `proved`. The total SRD003 count is **not** gated |
 | E2E-F semantic (Task 009, opt-in: `e2e_fresh.py semantic`, CI job `diagnostics-semantic`) | ring buffer A, ablation `no_is_full_post`, then `explain --semantic -P ring_buffer.gpr -XRING_BUFFER_SRC=obj/ablation_src/no_is_full_post ...` under `alr exec`, with Libadalang | E2E-B criteria, plus `analysis.semantic.evaluated`, backend `libadalang`; the three Push failures (9:7, 10:7, 25:7) `exact`, call text, callee `Ring_Buffer.Push` declared at `obj/ablation_src/no_is_full_post/ring_buffer.ads:36`, Pre `not Is_Full (B)` at line 37, `failed_conjunct` null with `attribution` `not_provided_by_gnatprove`; the VC_ASSERT at 16:43 has assertion context and no callee/Pre |
+| E2E-G semantic, external dependency (Task 009, opt-in: `e2e_fresh.py semantic_external`, CI job `diagnostics-semantic`) | ring buffer A, ablation `no_is_empty_post`, then `explain --semantic -P ring_buffer.gpr -XRING_BUFFER_SRC=obj/ablation_src/no_is_empty_post ...` under the same `alr exec` (same SPARKlib checkout GNATprove used), with Libadalang | E2E-B criteria, plus semantic evaluated with backend `libadalang`; `ring_buffer_client_proof.adb` 11:7 `exact`, callee `Ring_Buffer.Pop`, Pre `not Is_Empty (B)`; `ring_buffer_client_proof.ads` 24:45 `exact` → `Ring_Buffer.Sequences.Remove` and 25:45 `exact` → `Ring_Buffer.Sequences.Get`, both declared in SPARKlib `spark-containers-functional-vectors.ads`; no `failed_conjunct`; `layout_exact` / `byte_exact` false. This is the authoritative external-dependency test: the archived snapshots may legitimately degrade these two calls to `unavailable` |
 | E2E-D prove | ring buffer A baseline via `spark-refine prove -P ring_buffer.gpr --format json -- -j0` (no `--results`), after E2E-A/B and with a stale decoy result set placed | `analysis.orchestration`: command exact, `gnatprove_exit_code` 0, `fresh` true, `result_selection` `fresh_discovery`, `result_path` `obj/baseline/gnatprove`, decoy listed as ignored; 0 unproved / 0 justified / 0 pragma Assume; no diagnostics |
 | E2E-E prove | ring buffer B3 (materialized by the benchmark's `apply_fault`) via `prove ... -- -j0 -XRING_BUFFER_SRC=... -XRING_BUFFER_VARIANT=e2e_prove_b3` | GNATprove exit 1 preserved as `prove`'s exit; fresh `obj/e2e_prove_b3/gnatprove` selected; the E2E-A SRD001 criteria |
 

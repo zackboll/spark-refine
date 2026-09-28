@@ -11,8 +11,14 @@ annotated by Libadalang. A `VC_PRECONDITION` gets the exact call, the resolved
 callee (fully qualified name and declaration range), the callee's explicit
 `Pre` (text and range), and its top-level `and` / `and then` conjuncts. A
 `VC_ASSERT` gets the asserted expression and the subprogram that encloses it.
-All 15 client failures (9 `VC_PRECONDITION`, 6 `VC_ASSERT`) of the five
-SRD002 benchmark cases resolve `exact`.
+In the original capture/local environment, all 15 client failures
+(9 `VC_PRECONDITION`, 6 `VC_ASSERT`) of the five SRD002 benchmark cases
+resolved `exact`. The committed project-local snapshots reproduce the
+project-owned calls exactly on any machine. The two SPARKlib calls
+(`Sequences.Remove` / `.Get`) may conservatively degrade to `unavailable`
+on the archived fixture when the active dependency checkout does not match
+its captured `D`-record timestamp. Fresh CI E2E-G requires exact Remove/Get
+resolution against the same dependency checkout the proof used (§9a).
 The pre-registered experiment shows that FSF GNATprove 16.1.0 output is
 **NOT ATTRIBUTABLE** to a Pre conjunct. `failed_conjunct` is therefore always
 `null`, with attribution `not_provided_by_gnatprove`. SRD002's trigger,
@@ -179,7 +185,11 @@ Therefore `failed_conjunct: null`, `attribution:
 "not_provided_by_gnatprove"`, always. A test fails if the semantic modules
 touch message text, call `eval`/`exec`/`re`, or evaluate expressions.
 
-## 6. Benchmark cases (all `exact`)
+## 6. Benchmark cases (all `exact` at capture time / in fresh runs)
+
+The two SPARKlib rows (`ads 24:45, 25:45`) are `exact` in fresh runs (E2E-G)
+and in the capture environment. On the archived fixture elsewhere they may be
+`unavailable` (callee-declaration provenance mismatch, §9a).
 
 | case | check | call | callee | explicit Pre |
 |---|---|---|---|---|
@@ -262,8 +272,8 @@ timestamps and no Libadalang object representations.
   under `alr -n exec` of the example crate.
 - CI: new isolated job `diagnostics-semantic`. It caches the bundle keyed on
   the setup script, runs the full suite under `alr exec` with **no skips
-  allowed**, and runs E2E-F. Other jobs are unchanged and do not install
-  Libadalang. Without Libadalang, the 12 Libadalang tests skip (structural
+  allowed**, and runs E2E-F and E2E-G. Other jobs are unchanged and do not install
+  Libadalang. Without Libadalang, the 14 Libadalang tests skip (structural
   job).
 - Fixtures: `diagnostics/tests/semantic_fixtures/` = 6 cases, 432 KB
   (sanitized results keeping `D` records, 19 verified source files,
@@ -271,6 +281,60 @@ timestamps and no Libadalang object representations.
   tree is copied; SPARKlib comes from the Alire environment. Captured by
   `diagnostics/scripts/capture_semantic_fixtures.py`, which refuses any
   source whose checksum/mtime do not match the result set.
+
+### 9a. Fixture portability: project-local vs external declarations
+
+- Project-local source required for semantic regression is snapshotted.
+  The archived tests require `exact` for every project-owned call and
+  assertion.
+- External library sources such as SPARKlib are resolved from the active
+  project environment. They are not copied, not vendored, and their mtimes
+  are never changed.
+- Archived fixture proof-time `D`-record timestamps may therefore differ
+  from a fresh dependency checkout. When that happens, the production
+  provenance gate (checksum AND second-resolution timestamp, unchanged)
+  correctly degrades external declaration enrichment to `unavailable`, with
+  reason `callee declaration: spark-containers-functional-vectors.ads:
+  GNAT checksum matches but the second-resolution timestamp does not
+  match ...` and no callee or Pre claim.
+- The archived test uses `assert_external_call` for `ring_no_is_empty_post`
+  24:45 / 25:45. It accepts only (A) `exact` with callee
+  `Ring_Buffer.Sequences.Remove` / `.Get` declared in SPARKlib, or (B) that
+  provenance `unavailable`. `ambiguous`, `unresolved` and any other reason
+  fail. `test_external_dependency_mismatch_degrades` makes outcome B
+  deterministic by editing the SPARKlib `D` timestamp in a temporary copy
+  of the archived results.
+- Fresh E2E-G is the authoritative portability test for external
+  dependency enrichment.
+- Root cause (CI run 36357368341): `test_other_ring_cases` indexed
+  `["callee"]` unconditionally. On the hosted runner, the Alire SPARKlib
+  checkout's mtime differed from the capture machine's, so the gate
+  returned `unavailable` → `KeyError: 'callee'`. Locally it passed only
+  because the local checkout happened to carry the captured timestamp.
+  Assertions now check `resolution` first and print the whole check on
+  failure.
+
+| fresh case | ablation | required (machine-checked) |
+|---|---|---|
+| E2E-F | `no_is_full_post` | project-local: Push 9:7/10:7/25:7 `exact` → `Ring_Buffer.Push`, Pre `not Is_Full (B)` |
+| E2E-G | `no_is_empty_post` | SRD002 evaluated; semantic evaluated, backend `libadalang`; `.adb` 11:7 `exact` → `Ring_Buffer.Pop`, Pre `not Is_Empty (B)`; `.ads` 24:45 `exact` → `Ring_Buffer.Sequences.Remove`, 25:45 `exact` → `Ring_Buffer.Sequences.Get`, both declared in `spark-containers-functional-vectors.ads`; no `failed_conjunct`; `layout_exact`/`byte_exact` false |
+
+Both run `explain --semantic -P ring_buffer.gpr -XRING_BUFFER_SRC=...
+-XRING_BUFFER_VARIANT=...` under the same `alr exec` that ran GNATprove
+through the benchmark's `ablate_proof_support.py`. Locally both PASS (about
+10 s each), and E2E-G gives 6/6 `exact`.
+
+### 9b. Hosted-runner Libadalang build measurement
+
+| run | cache | Libadalang build | setup / bundle ready |
+|---|---|---|---|
+| 36357368341 (first hosted, failed on the test above) | cold build | 759.75 s (~12m39.8s) | ~825 s (13m45.8s) |
+| next run (this corrective) | see final report / CI log line `libadalang bundle cache-hit=` | | |
+
+That is about 3.5× the 32-core local build (215–217 s). The job now logs
+the cache status and the cold setup wall time explicitly. `actions/cache`
+saves only when the job succeeds, so a run after a failed cold build is
+expected to rebuild.
 
 ## 10. Tests
 
@@ -280,6 +344,13 @@ run without Libadalang, 13 need it; the provenance corrective added the
 same-second layout test, the provenance-contract tests and the E2E
 overclaim check). Total 234; with Libadalang, 0 skipped. E2E-F (fresh
 `no_is_full_post` ablation + `explain --semantic`): PASS locally.
+
+The fixture-portability corrective (§9a) adds 10 tests to `test_semantic.py`,
+bringing it to 55: 41 run without Libadalang and 14 need it. The additions are
+the `assert_external_call` helper (4), the deterministic external-mismatch
+degradation (1, needs Libadalang) and the E2E-G checker (5). Total 244;
+without Libadalang, 14 skipped; with Libadalang under `alr exec`, 0 skipped.
+E2E-F and E2E-G: PASS locally.
 
 ## 11. Recommendation for Task 010
 

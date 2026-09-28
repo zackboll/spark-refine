@@ -26,8 +26,27 @@ collect  needs an importable libadalang. For each case it copies the result
 
 Git does not preserve mtimes, so the tests re-check each snapshot's sha256
 and only then restore the recorded D timestamp (tests/test_semantic.py).
-SPARKlib sources are not copied; the snapshot projects `with "sparklib"`
-(run under `alr exec` of the example crate).
+
+Scope of the snapshots (they are NOT self-contained for every callee):
+
+  * Project-local source required for semantic regression is snapshotted
+    (sha256-verified, D timestamp restored), so project-owned calls
+    reproduce exactly on any machine.
+  * External library sources such as SPARKlib are NOT copied: the snapshot
+    projects `with "sparklib"` and resolve it from the ACTIVE project
+    environment (`alr exec` of the example crate).
+  * The archived .ali D records keep the proof-time second-resolution
+    timestamps of those external files, which a fresh dependency checkout
+    (e.g. a hosted CI runner) generally does not have. When they differ,
+    the production provenance gate correctly refuses the external callee
+    declaration and degrades that check to `unavailable` (reason:
+    "callee declaration: <file>: ... timestamp does not match ..."). The
+    archived-fixture tests accept exactly that or `exact`
+    (tests/test_semantic.py assert_external_call); nothing is faked.
+  * Fresh E2E-G (scripts/e2e_fresh.py semantic_external) is the
+    authoritative portability test for external-dependency enrichment:
+    GNATprove and Libadalang see the same dependency checkout, and exact
+    resolution of the SPARKlib calls is required there.
 """
 
 from __future__ import annotations
