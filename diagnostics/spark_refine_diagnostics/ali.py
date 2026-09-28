@@ -135,6 +135,62 @@ def read_ali(path: Path) -> AliFile:
     return parse_ali_text(text)
 
 
+_D_RECORD = re.compile(r"^D (\S+)\s+(\d{14}) ([0-9a-f]{8})(?:\s|$)")
+
+
+@dataclass
+class AliSources:
+    """Task 009: the source files a result set was produced from, per the
+    `D <file> <YYYYMMDDHHMMSS> <checksum> ...` records of its .ali files
+    (GNAT's own source dependency list; timestamp = file mtime in UTC,
+    checksum = GNAT source checksum, see gnat_checksum.py).
+
+    records: basename -> {(timestamp, checksum), ...} over all .ali files.
+    Used only by the semantic enrichment's provenance gate (source must
+    match this GNAT source identity metadata; checksum + second-resolution
+    timestamp, not byte identity). Never used by SRD001-SRD003."""
+
+    records: dict[str, set[tuple[str, str]]] = field(default_factory=dict)
+    problems: list[str] = field(default_factory=list)
+
+    @property
+    def ok(self) -> bool:
+        return bool(self.records)
+
+
+def load_ali_sources(directory: Path) -> AliSources:
+    out = AliSources()
+    try:
+        paths = sorted(directory.glob("*.ali"))
+    except OSError as exc:
+        out.problems.append(f"cannot list {directory}: {exc}")
+        return out
+    for path in paths:
+        try:
+            lines = path.read_text("utf-8", errors="replace").splitlines()
+        except OSError as exc:
+            out.problems.append(f"{path.name}: {exc}")
+            continue
+        m = _VERSION.match(lines[0]) if lines else None
+        if not m or m.group(1) not in SUPPORTED_ALI_VERSIONS:
+            out.problems.append(f"{path.name}: unsupported or missing ALI "
+                                "version header")
+            continue
+        for n, line in enumerate(lines, start=1):
+            if not line.startswith("D "):
+                continue
+            d = _D_RECORD.match(line)
+            if not d:
+                out.problems.append(f"{path.name}: line {n}: malformed D "
+                                    "record")
+                continue
+            out.records.setdefault(d.group(1), set()).add(
+                (d.group(2), d.group(3)))
+    if not out.records and not out.problems:
+        out.problems.append("no .ali source (D) records")
+    return out
+
+
 def load_ali_deps(directory: Path,
                   units: list[str] | None = None) -> AliDeps:
     """Dependencies of `units` (default: every <unit>.ali in `directory`).

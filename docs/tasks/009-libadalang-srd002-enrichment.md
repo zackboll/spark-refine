@@ -1,0 +1,376 @@
+# Task 009 — Libadalang semantic enrichment of SRD002
+
+Status: implemented (experimental, opt-in `--semantic`). Base: `origin/main`
+`d3d8be13f520e4a3c8f7857920ff03de3c71efb5` (contains the reviewed Task 008 head
+`336c8e5b`).
+
+## Result in one paragraph
+
+With `--semantic -P PROJECT [-X NAME=VALUE ...]`, each SRD002 client failure is
+annotated by Libadalang. A `VC_PRECONDITION` gets the exact call, the resolved
+callee (fully qualified name and declaration range), the callee's explicit
+`Pre` (text and range), and its top-level `and` / `and then` conjuncts. A
+`VC_ASSERT` gets the asserted expression and the subprogram that encloses it.
+In the original capture/local environment, all 15 client failures
+(9 `VC_PRECONDITION`, 6 `VC_ASSERT`) of the five SRD002 benchmark cases
+resolved `exact`. The committed project-local snapshots reproduce the
+project-owned calls exactly on any machine. The two SPARKlib calls
+(`Sequences.Remove` / `.Get`) may conservatively degrade to `unavailable`
+on the archived fixture when the active dependency checkout does not match
+its captured `D`-record timestamp. Fresh CI E2E-G requires exact Remove/Get
+resolution against the same dependency checkout the proof used (§9a).
+The pre-registered experiment shows that FSF GNATprove 16.1.0 output is
+**NOT ATTRIBUTABLE** to a Pre conjunct. `failed_conjunct` is therefore always
+`null`, with attribution `not_provided_by_gnatprove`. SRD002's trigger,
+confidence, title, causes and recommendation are unchanged. Without
+`--semantic`, the output is byte-identical to Task 008. The core package
+still has no runtime dependencies.
+
+## 1. Evidence gate: Libadalang in this repository
+
+| question | finding |
+|---|---|
+| PyPI | `libadalang` is **not published** (`pypi.org/pypi/libadalang` → 404) |
+| apt | no package |
+| Alire | crate `libadalang=26.0.0` (current release); source build |
+| build | `alr get` + `alr build` with `LIBRARY_TYPE=relocatable`: 215–217 s wall (32 cores, cold, twice); Alire picks GNAT 15.3.1 (`gnat_native`) for it, separate from the proof toolchain (GNAT 16.1.0) |
+| Python binding | `python/libadalang/__init__.py` loads `libadalang.so` from its own directory if present |
+| bundle | 21 shared objects (Libadalang, Langkit, GNATcoll, GPR/GPR2, XML/Ada, VSS, AdaSAT, Prettier-Ada, GNAT 15 runtime) copied next to the binding with `DT_RPATH=$ORIGIN` → **166 MB**, relocatable, cacheable; works from `env -i` and inside `alr exec` of the GNAT 16 crates |
+| version string | `libadalang.version` is `"undefined"` in Alire builds; the setup script records the crate version (`SPARK_REFINE_CRATE_VERSION`) |
+
+Spike (all passed): `import libadalang`; `GPRProject("ring_buffer.gpr",
+scenario_vars=...)` loads (SPARKlib `with` resolved under `alr exec`);
+`create_context()` gives project-aware resolution; `ring_buffer_client_proof.adb`
+has no parse diagnostics; `no_is_full_post` 9:7 → `Push (Q, A)` →
+`p_referenced_decl()` = `Ring_Buffer.Push` in
+`obj/ablation_src/no_is_full_post/ring_buffer.ads`.
+
+Reproducibility: `diagnostics/scripts/setup_libadalang.sh` pins the whole
+observed dependency solution (`alr pin`: adasat, gnatcoll*, gprconfig_kb,
+langkit_support, libgpr, libgpr2, prettier_ada, xmlada = 26.0.0, vss_text =
+26.2.0) and the build tools (`gnat_native=15.3.1`, `gprbuild=26.0.1`). It
+bundles with `patchelf==0.17.2.1` from PyPI and smoke-tests the result.
+Verified from scratch into a new directory: 215 s, identical solution.
+
+Decision: **separately documented environment dependency**, not a pip extra.
+There is no installable distribution, so a `[semantic]` extra would be
+hypothetical. The wheel stays pure Python with `dependencies = []`.
+
+## 2. Architecture
+
+```
+cli.py  --semantic, -P/--project, -X NAME=VALUE   (explain, analyze, prove)
+  └─ semantic.py      policy, provenance gate, JSON shape, never fatal
+       └─ semantic_lal.py   ONLY module importing libadalang (lazily):
+                            GPRProject + AnalysisContext, unit lookup,
+                            call discovery, p_referenced_decl, Pre aspect,
+                            conjunct decomposition, assertion context
+  ali.py              + load_ali_sources: .ali D records
+  gnat_checksum.py    GNAT source checksum over Libadalang tokens
+```
+
+`semantic` is a new optional `Diagnostic` field (`compare=False`), rendered
+only when set. `prove` reuses its own `-P`; `explain`/`analyze` take `-P` or
+`--project`. No project is ever inferred: without `-P`, enrichment reports
+`no project supplied`. `-X` values are handed to Libadalang's
+`GPRProject(scenario_vars=...)` and are **not** passed to GNATprove. For
+`prove`, GNATprove pass-through `-X` arguments are not reinterpreted, so the
+user repeats them before `--`. The benchmarks need `RING_BUFFER_SRC` /
+`FIXED_POOL_SRC` (and the `*_VARIANT` values) to select the ablated source
+directory GNATprove analysed.
+
+## 3. Call-site resolution rule
+
+Observed for FSF GNATprove 16.1.0: a `VC_PRECONDITION` is reported at the
+first column of the called name, or for a selected name `P.Op (...)` at the
+`.` before the selector (`client.adb:7:10` for `Ops.Op (X, Y)` at column 7).
+The adapter enumerates every Libadalang `Name` with `p_is_call` (outermost
+name of each call) and computes that anchor from the tree and tokens. A
+check is `exact` only if exactly one call is anchored at its line:column.
+Otherwise it is `ambiguous` (>1) or `unresolved` (0, or `p_referenced_decl`
+fails). Identifier text is never matched. `unavailable` covers the file not
+being in the project, a parse diagnostic, or a failed provenance check.
+
+For `VC_ASSERT`, the location must lie inside the expression argument of a
+`pragma Assert` / `Assert_And_Cut` / `Loop_Invariant` / `Check`. The result
+is the expression and the enclosing subprogram, with no callee and no Pre.
+
+## 4. Source/result provenance
+
+The ablation fixtures are proved from materialised copies under
+`obj/ablation_src/<case>/`. A source file is used only if it **matches
+GNAT's `.ali` source identity metadata**: its GNAT source checksum AND its
+modification time, at the one-second resolution GNAT records, equal a `D`
+record in the analysed result set's `.ali` files. Those records are GNAT's
+own list of analysed sources:
+`D ring_buffer.ads 20260927180831 baec7707`. The checksum is recomputed in
+`gnat_checksum.py` from Libadalang's token stream, following GNAT's
+documented algorithm (`sinput.ads`, "Checksum Handling", `scng.adb`):
+CRC-32 without the final XOR, lower-cased identifiers and keywords each
+followed by `Tok_Identifier`'s position (5), numeric literals by 0/1,
+underscores dropped from decimal literals, and `[ ] { }` not accumulated.
+Validated against GNAT: **28/28** source dependencies of the
+`no_is_full_post` result set (client, spec, SPARKlib, GNAT runtime), and
+all 19 committed snapshot sources. The checksum ignores layout, so the
+mtime match is also required.
+
+**Limitation: this is not byte identity.** The GNAT checksum ignores
+layout and comments, and the `D` timestamp has one-second resolution. A
+layout/comment-only change made within the same timestamp second therefore
+cannot be distinguished from the proof-time source by the available
+GNATprove 16.1.0 artifacts. `.spark` records no stronger content digest.
+spark-refine does not work around this: there is no raw-content hash GNAT
+did not record, no sub-second mtime comparison and no text heuristic. The
+limitation is reported machine-readably in every `--semantic` report:
+
+```json
+"analysis": {"semantic": {"provenance": {
+  "basis": "gnat_ali_checksum_and_timestamp",
+  "checksum": "gnat_source_checksum",
+  "timestamp_resolution": "seconds",
+  "layout_exact": false,
+  "byte_exact": false}}}
+```
+
+This block is constant (deterministic, no current-run values). It is
+present whether or not enrichment was evaluated, and it describes source
+identity strength. That is independent of per-check `resolution`.
+`resolution: "exact"` means *exactly one call/assertion was found at the
+GNATprove-reported location and name resolution succeeded*. It does **not**
+mean the proof-time source bytes were proven identical to the current
+source. Stronger provenance, e.g. raw source hashes captured by
+`spark-refine prove` at proof time, is possible future work and not part
+of Task 009.
+
+Measured failure modes (tests):
+
+| situation | result |
+|---|---|
+| positive `ring_buffer.ads` used for an ablation result (no `-X`) | callee `unavailable`: checksum differs |
+| same tokens, one line inserted, mtime in a later second | `unavailable`: timestamp differs |
+| same tokens, one comment line inserted, mtime in the **same** second as the D record | **accepted** (documented limitation; test `test_same_second_layout_change_is_undetectable`). Checks shift by one line: 9:7 becomes `unresolved`, and 10:7 resolves `exact` to `Push (Q, A)`, the proof-time call of line 9. This shows that `exact` is lookup quality, not source identity |
+| Task 005 fixtures (sanitized .ali without D records) | `evaluated: false`, provenance unavailable |
+
+## 5. Pre-registered failed-conjunct experiment — NOT ATTRIBUTABLE
+
+`diagnostics/tests/semantic_fixtures/conjunct_experiment/` (4 Ada files,
+real GNATprove 16.1.0, `--level=2`, cvc5/z3/altergo):
+
+| line | call | ground truth |
+|---|---|---|
+| 7 | `Ops.Op (X, Y)`, `Pre => X > 0 and then Y > 0` | only conjunct 1 fails |
+| 12 | same | only conjunct 0 fails |
+| 17 | same | both fail |
+| 22 | `Ops.Op3`, `X > 0 and Y > 0 and Z > 0` | only conjunct 1 fails |
+
+Evidence (committed, `evidence.json`, tests `ConjunctExperiment`):
+
+- SARIF: one `VC_PRECONDITION` result per call, keys exactly
+  `kind, level, locations, message, ruleId`; one location, at the call
+  anchor, whichever conjunct fails. The four results are structurally
+  identical except for the line.
+- `.spark`: entry keys `check_col, check_file, check_line, check_tree,
+  cntexmp, cntexmp_value, col, entity, file, how_proved, line, message,
+  msg_id, rule, severity, unproved_status`. None of them names a conjunct.
+- `check_tree` (undocumented Why3 goal tree after `split_goal_wp_conj`):
+  "first conjunct fails" (12) and "both fail" (17) have **identical** goal
+  outcomes (`[{}, {CVC5/Z3/altergo: Unknown}]`), so no structural rule
+  over it can distinguish them. It also counts Why3 goals, including
+  parameter/range goals, not source conjuncts.
+- The English message sometimes says "cannot prove X > 10". That is
+  message parsing and is forbidden, and it is absent in all four cases
+  above.
+
+Therefore `failed_conjunct: null`, `attribution:
+"not_provided_by_gnatprove"`, always. A test fails if the semantic modules
+touch message text, call `eval`/`exec`/`re`, or evaluate expressions.
+
+## 6. Benchmark cases (all `exact` at capture time / in fresh runs)
+
+The two SPARKlib rows (`ads 24:45, 25:45`) are `exact` in fresh runs (E2E-G)
+and in the capture environment. On the archived fixture elsewhere they may be
+`unavailable` (callee-declaration provenance mismatch, §9a).
+
+| case | check | call | callee | explicit Pre |
+|---|---|---|---|---|
+| ring `no_is_full_post` | 9:7, 10:7, 25:7 | `Push (Q, A)` / `(Q, B)` / `(Q, X)` | `Ring_Buffer.Push` (`ring_buffer.ads:36`) | `not Is_Full (B)` |
+| | 16:43 VC_ASSERT | — | — | assertion `not Is_Empty (Q) and not Is_Full (Q)` |
+| ring `no_public_model_bound` | 25:7 | `Push (Q, X)` | `Ring_Buffer.Push` | `not Is_Full (B)` |
+| ring `no_is_empty_post` | 11:7 | `Pop (Q, X)` | `Ring_Buffer.Pop` | `not Is_Empty (B)` |
+| | 25:7 | `Push (Q, X)` | `Ring_Buffer.Push` | `not Is_Full (B)` |
+| | ads 24:45, 25:45 | `Sequences.Remove (...)` / `Sequences.Get (...)` | `Ring_Buffer.Sequences.Remove` / `.Get` (SPARKlib instance) | `(SPARKlib_Defensive => Position in ...)` |
+| | 7:22, 16:22 VC_ASSERT | — | — | assertions |
+| pool `spec_no_count_posts` | 35:7 | `Allocate (P, X)` | `Fixed_Pool.Allocate` (`fixed_pool.ads:43`) | `Free_Count (P) > 0` |
+| | 15:22, 20:22 VC_ASSERT | — | — | assertions |
+| pool `false_client_assert` | 9:22 VC_ASSERT | — | **no callee, no Pre** | assertion `Free_Count (P) = 0` in `Fixed_Pool_False_Client.Initialize_Then_Claim_Empty`; SRD002 stays LOW |
+
+None of this says which contract is missing. The ablations removed
+`Is_Full`'s / `Free_Count`'s postconditions (benchmark ground truth); the
+enrichment shows only the call and the Pre that GNATprove could not
+establish.
+
+Experiment corpus (lookup/extraction unit tests): statement-start call,
+multi-line call, nested `F (F (X))`, three calls on one line, selected
+name `Ops.Op`, use-clause `Op`, overloaded `Over (Integer)` /
+`Over (Boolean)` resolved to different declarations, no Pre, multi-line
+Pre, `and`, `and then`, `(A or else B) and then (C)`, and nested calls with a
+parenthesised inner `and` kept whole.
+
+## 7. JSON (format_version stays 1; additive, only with --semantic)
+
+```json
+"analysis": {"semantic": {"requested": true, "evaluated": true,
+  "backend": "libadalang", "version": "26.0.0", "project": "ring_buffer.gpr",
+  "scenario": {"RING_BUFFER_SRC": "..."},
+  "resolutions": {"exact": 4, "ambiguous": 0, "unresolved": 0, "unavailable": 0}}}
+"diagnostics": [{"code": "SRD002", ..., "semantic": {"backend": "libadalang",
+  "checks": [{"rule": "VC_PRECONDITION",
+    "location": {"file": "ring_buffer_client_proof.adb", "line": 9, "column": 7},
+    "resolution": "exact",
+    "call": {"text": "Push (Q, A)", "location": {SPAN}},
+    "callee": {"name": "Ring_Buffer.Push", "kind": "procedure", "declaration": {SPAN}},
+    "precondition": {"explicit": true, "text": "not Is_Full (B)", "location": {SPAN},
+      "conjuncts": [{"index": 0, "text": "not Is_Full (B)", "location": {SPAN}}],
+      "failed_conjunct": null, "attribution": "not_provided_by_gnatprove"}}]}}]
+```
+
+`analysis.semantic` also always carries the constant `provenance` block of
+§4 (`layout_exact: false`, `byte_exact: false`).
+
+`SPAN` = `{file, start_line, start_column, end_line, end_column}`. `file` is
+relative to the project directory, or the base name outside it (SPARKlib).
+Non-exact entries carry `resolution` + `reason`. If enrichment is not
+evaluated, `analysis.semantic` has `evaluated: false` + `reason` and no
+diagnostic gets a `semantic` key. `analysis.rules.SRD002` is untouched:
+"SRD002 evaluated" and "semantic evaluated" are independent. There are no
+timestamps and no Libadalang object representations.
+
+## 8. Degradation (never fatal; exit status unchanged)
+
+| situation | outcome |
+|---|---|
+| no `--semantic` | byte-identical Task 008 output (202 comparisons: explain/analyze × 49 fixtures × text/json, compare-provers, rules, prove --dry-run) |
+| libadalang not importable / native load error | `evaluated: false`, reason `libadalang not importable (...)` |
+| no `-P` | `evaluated: false`, `no project supplied` |
+| project load failure | `evaluated: false`, `project ... could not be loaded` |
+| no SRD002 | `evaluated: false`, `no SRD002 diagnostic to enrich` (backend not opened) |
+| no .ali D records | `evaluated: false`, provenance unavailable |
+| file missing/not in project, parse diagnostics, provenance mismatch | per check `unavailable` |
+| 0 / >1 anchored calls, resolution failure | per check `unresolved` / `ambiguous` |
+| unexpected backend exception | per check `unavailable` |
+
+## 9. Installation, size, CI
+
+- Core: `pip install ./diagnostics`; wheel 56 426 → 66 529 bytes (three
+  new pure-Python modules), `dependencies = []`, `libadalang` imported only
+  lazily inside `semantic_lal.py` (test-enforced). The packaging smoke test
+  checks `--semantic` without Libadalang in the installed wheel and in
+  editable mode.
+- Semantic: `diagnostics/scripts/setup_libadalang.sh [DIR]` (~3.6 min cold
+  on 32 cores, 166 MB bundle; build tree ~1.4 GB of Alire cache), then
+  `source DIR/env.sh`. The benchmark projects `with "sparklib"`, so run
+  under `alr -n exec` of the example crate.
+- CI: new isolated job `diagnostics-semantic`. It caches the bundle keyed on
+  the setup script, runs the full suite under `alr exec` with **no skips
+  allowed**, and runs E2E-F and E2E-G. Other jobs are unchanged and do not install
+  Libadalang. Without Libadalang, the 14 Libadalang tests skip (structural
+  job).
+- Fixtures: `diagnostics/tests/semantic_fixtures/` = 6 cases, 432 KB
+  (sanitized results keeping `D` records, 19 verified source files,
+  snapshots with sha256 + D timestamp, restored by the tests). No benchmark
+  tree is copied; SPARKlib comes from the Alire environment. Captured by
+  `diagnostics/scripts/capture_semantic_fixtures.py`, which refuses any
+  source whose checksum/mtime do not match the result set.
+
+### 9a. Fixture portability: project-local vs external declarations
+
+- Project-local source required for semantic regression is snapshotted.
+  The archived tests require `exact` for every project-owned call and
+  assertion.
+- External library sources such as SPARKlib are resolved from the active
+  project environment. They are not copied, not vendored, and their mtimes
+  are never changed.
+- Archived fixture proof-time `D`-record timestamps may therefore differ
+  from a fresh dependency checkout. When that happens, the production
+  provenance gate (checksum AND second-resolution timestamp, unchanged)
+  correctly degrades external declaration enrichment to `unavailable`, with
+  reason `callee declaration: spark-containers-functional-vectors.ads:
+  GNAT checksum matches but the second-resolution timestamp does not
+  match ...` and no callee or Pre claim.
+- The archived test uses `assert_external_call` for `ring_no_is_empty_post`
+  24:45 / 25:45. It accepts only (A) `exact` with callee
+  `Ring_Buffer.Sequences.Remove` / `.Get` declared in SPARKlib, or (B) that
+  provenance `unavailable`. `ambiguous`, `unresolved` and any other reason
+  fail. `test_external_dependency_mismatch_degrades` makes outcome B
+  deterministic by editing the SPARKlib `D` timestamp in a temporary copy
+  of the archived results.
+- Fresh E2E-G is the authoritative portability test for external
+  dependency enrichment.
+- Root cause (CI run 36357368341): `test_other_ring_cases` indexed
+  `["callee"]` unconditionally. On the hosted runner, the Alire SPARKlib
+  checkout's mtime differed from the capture machine's, so the gate
+  returned `unavailable` → `KeyError: 'callee'`. Locally it passed only
+  because the local checkout happened to carry the captured timestamp.
+  Assertions now check `resolution` first and print the whole check on
+  failure.
+
+| fresh case | ablation | required (machine-checked) |
+|---|---|---|
+| E2E-F | `no_is_full_post` | project-local: Push 9:7/10:7/25:7 `exact` → `Ring_Buffer.Push`, Pre `not Is_Full (B)` |
+| E2E-G | `no_is_empty_post` | SRD002 evaluated; semantic evaluated, backend `libadalang`; `.adb` 11:7 `exact` → `Ring_Buffer.Pop`, Pre `not Is_Empty (B)`; `.ads` 24:45 `exact` → `Ring_Buffer.Sequences.Remove`, 25:45 `exact` → `Ring_Buffer.Sequences.Get`, both declared in `spark-containers-functional-vectors.ads`; no `failed_conjunct`; `layout_exact`/`byte_exact` false |
+
+Both run `explain --semantic -P ring_buffer.gpr -XRING_BUFFER_SRC=...
+-XRING_BUFFER_VARIANT=...` under the same `alr exec` that ran GNATprove
+through the benchmark's `ablate_proof_support.py`. Locally both PASS (about
+10 s each), and E2E-G gives 6/6 `exact`.
+
+### 9b. Hosted-runner Libadalang build measurement
+
+| run | cache | Libadalang build | setup / bundle ready |
+|---|---|---|---|
+| 36357368341 (first hosted, failed on the test above) | cold build | 759.75 s (~12m39.8s) | ~825 s (13m45.8s) |
+| next run (this corrective) | see final report / CI log line `libadalang bundle cache-hit=` | | |
+
+That is about 3.5× the 32-core local build (215–217 s). The job now logs
+the cache status and the cold setup wall time explicitly. `actions/cache`
+saves only when the job succeeds, so a run after a failed cold build is
+expected to rebuild.
+
+## 10. Tests
+
+Existing diagnostics suite: 188 tests at Task 008 (189 with the new
+Libadalang-isolation packaging test). New `test_semantic.py`: 45 tests (32
+run without Libadalang, 13 need it; the provenance corrective added the
+same-second layout test, the provenance-contract tests and the E2E
+overclaim check). Total 234; with Libadalang, 0 skipped. E2E-F (fresh
+`no_is_full_post` ablation + `explain --semantic`): PASS locally.
+
+The fixture-portability corrective (§9a) adds 10 tests to `test_semantic.py`,
+bringing it to 55: 41 run without Libadalang and 14 need it. The additions are
+the `assert_external_call` helper (4), the deterministic external-mismatch
+degradation (1, needs Libadalang) and the E2E-G checker (5). Total 244;
+without Libadalang, 14 skipped; with Libadalang under `alr exec`, 0 skipped.
+E2E-F and E2E-G: PASS locally.
+
+## 11. Recommendation for Task 010
+
+Conjunct attribution cannot come from GNATprove 16.1.0 output. Candidates,
+in order of evidence value:
+
+1. Keep enrichment opt-in until the CI job has run on hosted runners, and
+   measure the cold-build time there.
+2. A separately named, pre-registered experiment that re-proves each
+   top-level conjunct as its own check (e.g. a generated scratch client with
+   one `pragma Assert` per conjunct, in `obj/` only). This would be *new
+   proof evidence*, not an inference from existing output, and needs its own
+   trust review.
+3. Otherwise use the recovered callee/Pre to *group* SRD002 failures by
+   callee, which is purely descriptive, before any new rule.
+
+## 12. Non-goals honoured
+
+There is no new SRD rule and no SRD001–003 change. Nothing rewrites source,
+repairs proofs, changes contracts or generates source. There is no Ada
+parser (all structure comes from Libadalang; the checksum only consumes
+Libadalang tokens), no English message parsing, and no heuristic conjunct
+choice. GNATprove remains the proof authority.

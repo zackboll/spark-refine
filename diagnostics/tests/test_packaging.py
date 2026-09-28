@@ -75,7 +75,31 @@ class PackagingConfig(unittest.TestCase):
                     names = [node.module]
                 for n in names:
                     with self.subTest(file=src.name, module=n):
+                        if (src.name == "semantic_lal.py"
+                                and n == "libadalang"):
+                            continue  # Task 009 optional backend (lazy)
                         self.assertIn(n.split(".")[0], allowed)
+
+    def test_libadalang_is_isolated_and_lazy(self):
+        """Task 009: only semantic_lal.py imports libadalang, only inside a
+        function, and nothing imports semantic_lal at module level."""
+        pkg = support.DIAGNOSTICS / "spark_refine_diagnostics"
+        for src in sorted(pkg.glob("*.py")):
+            tree = ast.parse(src.read_text("utf-8"))
+            for node in tree.body:   # module-level statements only
+                if isinstance(node, ast.Import):
+                    mods = [a.name for a in node.names]
+                elif isinstance(node, ast.ImportFrom):
+                    mods = [node.module or ""]
+                else:
+                    continue
+                with self.subTest(file=src.name):
+                    self.assertFalse(any("libadalang" in m
+                                         or m.endswith("semantic_lal")
+                                         for m in mods), mods)
+            if src.name != "semantic_lal.py":
+                self.assertNotIn("import libadalang",
+                                 src.read_text("utf-8"), src.name)
 
     def test_wheel_allow_list(self):
         bad = _smoke().wheel_disallowed

@@ -1,0 +1,6 @@
+V "GNAT Lib v16"
+U ops%b			ops.adb			44ce1297 OO PK
+U ops%s			ops.ads			6c7016c6 OO PK
+D ops.ads		20260927223600 6c7016c6 ops%s
+D ops.adb		20260927223451 28be0451 ops%b
+D system.ads		20260430083320 e2b7c99d system%s

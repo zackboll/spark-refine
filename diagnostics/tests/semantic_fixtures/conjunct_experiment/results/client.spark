@@ -1,0 +1,29 @@
+{
+"entities": {"1": {"name": "Client.First_Fails"}, "10": {"name": "Ops.Nested_Calls"}, "11": {"name": "Ops.No_Pre"}, "12": {"name": "Ops.Over"}, "13": {"name": "Ops.Over"}, "14": {"name": "Ops.Paren_Or"}, "2": {"name": "Client.Shapes"}, "3": {"name": "Client.Shapes2"}, "4": {"name": "Client.Both_Fail"}, "5": {"name": "Client.Middle_Fails"}, "6": {"name": "Client.Second_Fails"}, "7": {"name": "Client"}, "8": {"name": "Ops.Op3"}, "9": {"name": "Ops.Op"}},
+"flow": [
+{"col": 23, "entity": 1, "file": "client.ads", "line": 7, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 7, "entity": 2, "file": "client.adb", "line": 27, "rule": "UNINITIALIZED", "severity": "info"},
+{"col": 9, "entity": 2, "file": "client.ads", "line": 16, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 3, "file": "client.ads", "line": 19, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 9, "entity": 4, "file": "client.ads", "line": 10, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 33, "entity": 5, "file": "client.ads", "line": 13, "rule": "GLOBAL_WRONG", "severity": "info"},
+{"col": 23, "entity": 6, "file": "client.ads", "line": 4, "rule": "GLOBAL_WRONG", "severity": "info"}
+],
+"pragma_assume": [],
+"proof": [
+{"col": 10, "entity": 4, "file": "client.adb", "line": 17, "rule": "VC_PRECONDITION", "severity": "high"},
+{"col": 10, "entity": 6, "file": "client.adb", "line": 7, "rule": "VC_PRECONDITION", "severity": "high"},
+{"col": 10, "entity": 1, "file": "client.adb", "line": 12, "rule": "VC_PRECONDITION", "severity": "high"},
+{"col": 10, "entity": 5, "file": "client.adb", "line": 22, "rule": "VC_PRECONDITION", "severity": "high"},
+{"col": 7, "entity": 2, "file": "client.adb", "line": 29, "rule": "VC_PRECONDITION", "severity": "high"},
+{"col": 15, "entity": 2, "file": "client.adb", "line": 31, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 12, "entity": 2, "file": "client.adb", "line": 31, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 23, "entity": 2, "file": "client.adb", "line": 31, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 22, "entity": 2, "file": "client.adb", "line": 32, "rule": "VC_ASSERT", "severity": "medium"},
+{"col": 10, "entity": 3, "file": "client.adb", "line": 38, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 10, "entity": 3, "file": "client.adb", "line": 39, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 10, "entity": 3, "file": "client.adb", "line": 40, "rule": "VC_PRECONDITION", "severity": "medium"},
+{"col": 10, "entity": 3, "file": "client.adb", "line": 41, "rule": "VC_PRECONDITION", "severity": "medium"}
+],
+"stop_reason": "STOP_REASON_NONE"
+}

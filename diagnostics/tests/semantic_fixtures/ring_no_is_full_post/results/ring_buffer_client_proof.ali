@@ -1,0 +1,30 @@
+V "GNAT Lib v16"
+U ring_buffer_client_proof%b  ring_buffer_client_proof.adb  03dc5732 OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+U ring_buffer_client_proof%s  ring_buffer_client_proof.ads  88a79689 OO PK
+W ring_buffer%s		ring_buffer.adb		ring_buffer.ali
+D ada.ads		20260430083320 76789da1 ada%s
+D a-contai.ads		20260430083320 61e5e089 ada.containers%s
+D a-finali.ads		20260430083320 099c16e4 ada.finalization%s
+D a-numeri.ads		20260430083320 84bea7a3 ada.numerics%s
+D a-nubinu.ads		20260430083320 93f1f3d1 ada.numerics.big_numbers%s
+D a-nbnbin.ads		20260430083320 b754d391 ada.numerics.big_numbers.big_integers%s
+D a-string.ads		20260430083320 90ac6797 ada.strings%s
+D a-sttebu.ads		20260430083320 f1ad67a2 ada.strings.text_buffers%s
+D a-stuten.ads		20260430083320 c6ced0ae ada.strings.utf_encoding%s
+D a-unccon.ads		20260430083320 0e9b276f ada.unchecked_conversion%s
+D interfac.ads		20260430083320 9111f9c1 interfaces%s
+D ring_buffer.ads	20260927180831 baec7707 ring_buffer%s
+D ring_buffer_client_proof.ads  20260926081800 324be18e ring_buffer_client_proof%s
+D ring_buffer_client_proof.adb  20260926081800 3197b6bc ring_buffer_client_proof%b
+D spark.ads		20260926075858 05bc62fb spark%s
+D spark-big_integers.ads  20260926075858 de2ace04 spark.big_integers%s
+D spark-containers.ads	20260926075858 b9eeaae6 spark.containers%s
+D spark-containers-functional.ads  20260926075858 3a6db2a9 spark.containers.functional%s
+D spark-containers-functional-base.ads  20260926075858 1d31f847 spark.containers.functional.base%s
+D spark-containers-functional-holder.ads  20260926075858 502cfd76 spark.containers.functional.holder%s
+D spark-containers-functional-vectors.ads  20260926075858 f2cfac87 spark.containers.functional.vectors%s
+D spark-containers-parameter_checks.ads  20260926075858 8077323d spark.containers.parameter_checks%s
+D spark-containers-types.ads  20260926075858 3efe423a spark.containers.types%s
+D system.ads		20260430083320 e2b7c99d system%s
+D s-finroo.ads		20260430083320 0a7c3ed4 system.finalization_root%s

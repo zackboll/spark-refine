@@ -1,0 +1,28 @@
+{
+  "name": "conjunct_experiment",
+  "needs_sparklib": false,
+  "origin": "capture_semantic_fixtures.py produce",
+  "project": "experiment.gpr",
+  "sources": {
+    "src/client.adb": {
+      "d_timestamp": "20260927223451",
+      "gnat_checksum": "7916f5df",
+      "sha256": "6c033a9b019f70a1768fae0820e9555f9865448c9be02d3ead58fcfe2e33c51e"
+    },
+    "src/client.ads": {
+      "d_timestamp": "20260927223451",
+      "gnat_checksum": "c03247c5",
+      "sha256": "738db3c34770fd711104e0602794890d4b20c56542e582d0d175dd53f1650656"
+    },
+    "src/ops.adb": {
+      "d_timestamp": "20260927223451",
+      "gnat_checksum": "28be0451",
+      "sha256": "4be7470978852f55a16a9a6512af9a77e4637e392873c91811e07ace475dd4b0"
+    },
+    "src/ops.ads": {
+      "d_timestamp": "20260927223600",
+      "gnat_checksum": "6c7016c6",
+      "sha256": "8ceb30a3a18e075ab308e0565c1f428b38424cd6e30901c2aff348ff0a69939a"
+    }
+  }
+}

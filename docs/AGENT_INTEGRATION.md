@@ -217,6 +217,41 @@ Only then consider whether the public contracts expose too little.
 Strengthening a public `Post` is an authoritative change: propose it for
 review. SRD002 does not identify a callee or a specific contract.
 
+**Optional semantic context (Task 009, experimental).** With `--semantic
+-P PROJECT [-X NAME=VALUE ...]` and an importable Libadalang
+(`diagnostics/scripts/setup_libadalang.sh`), each SRD002 diagnostic may carry
+a `semantic` block. For each client `VC_PRECONDITION` it can hold the exact
+call (`Push (Q, A)`), the resolved callee (`Ring_Buffer.Push`, declaration
+range), the callee's explicit `Pre` and its top-level conjuncts. For a
+`VC_ASSERT` it holds only the asserted expression. Read it as follows:
+
+* Use it only when `resolution == "exact"`. `ambiguous`, `unresolved` and
+  `unavailable` carry a `reason` and no callee. Never fall back to guessing.
+* `exact` means one call was found at the reported location and
+  resolved. It does **not** mean the current source is byte-identical to
+  the proved source. Sources are matched with GNAT's `.ali` checksum and a
+  one-second timestamp (`analysis.semantic.provenance.layout_exact ==
+  false`), and a same-second layout/comment edit cannot be detected. If
+  you edited sources since the proof, re-run GNATprove (`spark-refine
+  prove`) before relying on locations.
+* `precondition.failed_conjunct` is always `null`
+  (`attribution: "not_provided_by_gnatprove"`). GNATprove 16.1.0 does not
+  say which conjunct failed. Do not pick one, and do not parse the English
+  message to pick one.
+* It tells you *which* public contract the client could not satisfy. It
+  does **not** tell you *why*. In the `no_is_full_post` benchmark, the
+  failure at `Push (Q, A)` with Pre `not Is_Full (B)` is caused by a
+  removed `Is_Full` postcondition, but nothing in the output establishes
+  that. The same shape appears when the client itself is wrong. Work
+  through steps 1–3 above first. A missing contract is a hypothesis to
+  review, never a conclusion.
+* A `VC_ASSERT` entry never has a callee or a Pre. A false client assertion
+  (`pool_false_client_assert`) stays a LOW-confidence SRD002 with
+  assertion context only.
+* `analysis.semantic.evaluated == false` (reason given) is not a proof
+  result and does not change SRD002. It means only that no enrichment was
+  produced.
+
 ### SRD003: `preserve_portfolio_or_strengthen_proof` (category `prover_portfolio`)
 
 A check is proved by some single provers and not by others. The proof is

@@ -4,6 +4,37 @@
 
 ### Added
 
+- Task 009 (experimental, opt-in): Libadalang semantic enrichment of
+  SRD002. `--semantic` for `explain`/`analyze`/`prove`, with `-P/--project`
+  for `explain`/`analyze` and `-X NAME=VALUE` scenario values for the
+  Libadalang project loader. Each SRD002 client failure gets a
+  `resolution` (`exact`/`ambiguous`/`unresolved`/`unavailable`). An exact
+  `VC_PRECONDITION` adds the call, the callee (qualified name,
+  declaration), and the explicit `Pre` with top-level `and`/`and then`
+  conjuncts. A `VC_ASSERT` adds the asserted expression only. The
+  pre-registered experiment shows GNATprove 16.1.0 output is NOT
+  ATTRIBUTABLE to a Pre conjunct, so `failed_conjunct` is always `null`.
+  Source/result provenance gate: sources must match the result set's
+  `.ali` `D` records (GNAT checksum, `gnat_checksum.py`, + second-resolution
+  mtime). This is GNAT's source identity metadata, not byte identity:
+  same-second layout/comment edits are undetectable. Reported as
+  `analysis.semantic.provenance` (`layout_exact: false`, `byte_exact:
+  false`). New modules
+  `semantic.py` and `semantic_lal.py` (the only Libadalang import, lazy).
+  `analysis.semantic` and `diagnostics[].semantic` are added only with
+  `--semantic`, and `format_version` stays 1. Without the flag, output is
+  byte-identical to Task 008. The core package still has no runtime
+  dependencies. Libadalang is not on PyPI:
+  `diagnostics/scripts/setup_libadalang.sh` builds a pinned, relocatable
+  bundle (libadalang 26.0.0, 166 MB). Adds the new CI job
+  `diagnostics-semantic` with E2E-F (project-local callees) and E2E-G
+  (SPARKlib callees, fresh, same dependency checkout as the proof), 6
+  semantic snapshot cases (432 KB), and 56 tests. The snapshots hold
+  project-local source only. On an archived fixture, SPARKlib callee
+  declarations may degrade to `unavailable` when the active checkout's
+  mtime differs from the captured `D` record; the provenance gate is
+  unchanged. SRD001–SRD003 are unchanged. There is no new rule.
+
 - Task 008: `spark-refine prove -P PROJECT [-- GNATPROVE_ARGS...]`, fresh
   GNATprove orchestration (`diagnostics/spark_refine_diagnostics/orchestration.py`).
   It runs GNATprove as an argv (`shell=False`) after printing the exact

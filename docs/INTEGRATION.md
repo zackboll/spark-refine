@@ -67,34 +67,48 @@ Functional containers are particularly appropriate for ghost models because they
 
 The project should investigate each pattern against current SPARKlib capabilities and prefer library models where they produce stable proofs.
 
-## Libadalang (future)
+## Libadalang (optional, Task 009)
 
-**Libadalang is not used, and not required, for current operation.**
-Diagnostics work purely from GNATprove output.
+**Libadalang is optional.** Every command works without it, and
+SRD001–SRD003 never use it. It is used only by the experimental
+`--semantic` flag (`explain`, `analyze`, `prove`), which adds source
+context to SRD002:
 
-When source semantics become necessary, they should come from
-Libadalang, not a home-grown parser:
+```sh
+diagnostics/scripts/setup_libadalang.sh ~/lal     # Alire source build of
+source ~/lal/env.sh                               # libadalang=26.0.0, ~4 min,
+                                                  # 166 MB relocatable bundle
+cd examples/ring_buffer                           # SPARKlib projects: run in
+alr -n exec -- spark-refine explain obj/ablation_no_is_full_post/gnatprove \
+    --semantic -P ring_buffer.gpr \
+    -XRING_BUFFER_SRC=obj/ablation_src/no_is_full_post \
+    -XRING_BUFFER_VARIANT=ablation_no_is_full_post  # the crate's environment
+```
 
-- Ada parsing is complex;
-- name resolution matters;
-- source locations matter;
-- semantic type compatibility matters;
-- a home-grown parser would become a maintenance liability.
+Libadalang is not on PyPI, so no pip extra exists. `-P` is never guessed,
+and `-X` values go only to Libadalang's project loader. For `prove`, repeat
+them after `--` for GNATprove.
 
-The concrete motivation is now diagnostic, not generative. Libadalang
-could provide:
+What it provides: the exact client call, the resolved callee and its
+declaration, the callee's explicit `Pre` and its top-level `and` /
+`and then` conjuncts. For assertions, the asserted expression. What it
+does **not** provide: which conjunct failed. GNATprove 16.1.0 output
+carries no such mapping (measured, `docs/tasks/009-libadalang-srd002-enrichment.md`).
 
-- **call → callee mapping**, to name the call whose precondition a client
-  cannot prove;
-- **contract conjunct resolution**, to name which conjunct of a
-  `Pre`/`Post` is involved;
-- **a source semantic graph**, to map a failed check to a source
-  abstraction (model, invariant, adapter, library instance);
-- **a stronger SRD002 explanation**, since SRD002 today cannot identify
-  a callee or a contract.
+Provenance: a source file is used only if it matches GNAT's `.ali` source
+identity metadata, i.e. its GNAT checksum and second-resolution mtime equal
+a `D` record of the result set. Otherwise the check is `unavailable`. This
+is **not** byte identity. The checksum ignores layout and comments, so a
+layout/comment-only change made within the same timestamp second cannot be
+distinguished from the proof-time source by the available GNATprove 16.1.0
+artifacts. Every report says so in `analysis.semantic.provenance`
+(`basis: "gnat_ali_checksum_and_timestamp"`, `layout_exact: false`,
+`byte_exact: false`). Every failure degrades, and the base report and exit
+status are unchanged.
 
-It could also later help separate authoritative specification from
-mechanical proof support.
+Still open: mapping failures to source abstractions (model, invariant,
+adapter, library instance), and separating authoritative specification
+from mechanical proof support.
 
 *Historical note:* the original plan was for the first generator to
 bootstrap with explicit manifest names and to add semantic integration
