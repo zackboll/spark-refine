@@ -95,6 +95,101 @@ def ring_full_post():
              [pre_check(25, 7, text="Push (Q, X)")], Confidence.MEDIUM)]
 
 
+NO_PRE = {"explicit": False, "text": None, "location": None,
+          "conjuncts": [], "failed_conjunct": None,
+          "attribution": "not_provided_by_gnatprove"}
+
+
+def _at(path):
+    """(parent dict, last key) of a dotted path in a check entry;
+    integers index lists (conjuncts)."""
+    def get(c):
+        keys = [int(k) if k.isdigit() else k for k in path.split(".")]
+        for k in keys[:-1]:
+            c = c[k]
+        return c, keys[-1]
+    return get
+
+
+def _drop(path):
+    def f(c):
+        parent, key = _at(path)(c)
+        del parent[key]
+    return f
+
+
+def _set(path, value):
+    def f(c):
+        parent, key = _at(path)(c)
+        parent[key] = value
+    return f
+
+
+# Task 010 corrective: one structural corruption per case (removed or
+# wrong-typed field) of an otherwise complete exact VC_PRECONDITION entry.
+MALFORMED_EXACT = [
+    ("call = {}", _set("call", {})),
+    ("call.text removed", _drop("call.text")),
+    ("call.text not a string", _set("call.text", 7)),
+    ("call.location removed", _drop("call.location")),
+    ("call.location None", _set("call.location", None)),
+    ("call.location.end_line removed", _drop("call.location.end_line")),
+    ("call.location.end_column not int",
+     _set("call.location.end_column", "17")),
+    ("call.location.file not a string", _set("call.location.file", None)),
+    ("callee.name removed", _drop("callee.name")),
+    ("callee.name empty", _set("callee.name", "")),
+    ("callee.kind removed", _drop("callee.kind")),
+    ("callee.kind empty", _set("callee.kind", "")),
+    ("callee.declaration.end_column removed",
+     _drop("callee.declaration.end_column")),
+    ("callee.declaration.start_line bool",
+     _set("callee.declaration.start_line", True)),
+    ("precondition.explicit removed", _drop("precondition.explicit")),
+    ("precondition.explicit truthy non-bool",
+     _set("precondition.explicit", 1)),
+    ("precondition.conjuncts removed", _drop("precondition.conjuncts")),
+    ("precondition.conjuncts not a list",
+     _set("precondition.conjuncts", None)),
+    ("precondition.failed_conjunct removed",
+     _drop("precondition.failed_conjunct")),
+    ("precondition.failed_conjunct claimed",
+     _set("precondition.failed_conjunct", 0)),
+    ("precondition.attribution removed", _drop("precondition.attribution")),
+    ("precondition.attribution other",
+     _set("precondition.attribution", "gnatprove")),
+    ("explicit Pre: text removed", _drop("precondition.text")),
+    ("explicit Pre: text None", _set("precondition.text", None)),
+    ("explicit Pre: location removed", _drop("precondition.location")),
+    ("explicit Pre: location None", _set("precondition.location", None)),
+    ("explicit Pre: location.end_line removed",
+     _drop("precondition.location.end_line")),
+    ("conjunct not a dict", _set("precondition.conjuncts.0", "A")),
+    ("conjunct index removed", _drop("precondition.conjuncts.0.index")),
+    ("conjunct index not int", _set("precondition.conjuncts.0.index", "0")),
+    ("conjunct text removed", _drop("precondition.conjuncts.0.text")),
+    ("conjunct location removed",
+     _drop("precondition.conjuncts.0.location")),
+    ("conjunct location None",
+     _set("precondition.conjuncts.0.location", None)),
+    ("conjunct location.end_column removed",
+     _drop("precondition.conjuncts.0.location.end_column")),
+]
+
+# explicit=False must carry text None and location None, exactly.
+MALFORMED_IMPLICIT = [
+    ("explicit=False with text", _set("precondition.text", "X > 0")),
+    ("explicit=False with empty text", _set("precondition.text", "")),
+    ("explicit=False with location",
+     _set("precondition.location", span("src/ops.ads", 3, 4))),
+    ("explicit=False with empty location", _set("precondition.location", {})),
+    ("explicit=False, text key removed", _drop("precondition.text")),
+    ("explicit=False, location key removed", _drop("precondition.location")),
+    ("explicit=False, malformed conjunct",
+     _set("precondition.conjuncts", [{"index": 0, "text": "X"}])),
+]
+
+
 def build(tc, diags):
     doc = build_srd002_groups(diags)
     tc.assertEqual(coverage_problems(doc, occurrence_ids(diags)), [])
@@ -252,6 +347,51 @@ class Ungrouped(unittest.TestCase):
         self.assertEqual(doc["group_count"], 0)
         self.assertEqual({x for _, x in r}, {"semantic_incomplete"})
         self.assertEqual(len(r), 6)
+
+    def test_malformed_exact_structure_is_semantic_incomplete(self):
+        """Every structurally incomplete Task 009 exact entry, one
+        corruption at a time, beside a valid control check: the corrupt
+        occurrence is never grouped, is kept in `ungrouped` as
+        semantic_incomplete, and the coverage invariant holds."""
+        for name, mutate in MALFORMED_EXACT:
+            with self.subTest(case=name):
+                bad = pre_check(10, 7)
+                mutate(bad)
+                doc = build(self, [diag("C.P", [pre_check(9, 7), bad])])
+                self.assertEqual(doc["group_count"], 1)
+                self.assertEqual([o["location"]["line"]
+                                  for o in doc["groups"][0]["occurrences"]],
+                                 [9])
+                self.assertEqual([(u["location"]["line"], u["reason"],
+                                   u["resolution"], u["detail"])
+                                  for u in doc["ungrouped"]],
+                                 [(10, "semantic_incomplete", "exact",
+                                   "exact entry lacks complete "
+                                   "call/callee/precondition data")])
+                alone = build(self, [diag("C.P", [bad])])
+                self.assertEqual((alone["group_count"],
+                                  alone["ungrouped_check_count"]), (0, 1))
+
+    def test_malformed_no_explicit_pre_is_semantic_incomplete(self):
+        for name, mutate in MALFORMED_IMPLICIT:
+            with self.subTest(case=name):
+                bad = pre_check(10, 7, pre=NO_PRE)
+                mutate(bad)
+                doc, r = self.reasons([bad])
+                self.assertEqual((doc["group_count"], r),
+                                 (0, [(10, "semantic_incomplete")]))
+
+    def test_complete_variants_still_group(self):
+        """Controls: empty conjunct list, no explicit Pre and several
+        conjuncts are structurally complete and stay groupable."""
+        many = dict(PUSH_PRE, conjuncts=[
+            {"index": 0, "text": "A", "location": span("s.ads", 1, 1)},
+            {"index": 1, "text": "B", "location": span("s.ads", 1, 9)}])
+        for pre in (dict(PUSH_PRE, conjuncts=[]), NO_PRE, many):
+            with self.subTest(pre=pre):
+                doc = build(self, [diag("C.P", [pre_check(9, 7, pre=pre)])])
+                self.assertEqual((doc["group_count"],
+                                  doc["ungrouped_check_count"]), (1, 0))
 
     def test_missing_semantic_entry_is_semantic_incomplete(self):
         d = diag("C.P", [pre_check(9, 7)])
@@ -516,6 +656,39 @@ class Text(unittest.TestCase):
         self.assertIn("1 ungrouped check", sec)
         self.assertNotIn("public Pre", sec)
 
+    def test_malformed_exact_state_renders_as_semantic_incomplete(self):
+        """Renderer safety: exact entries with `call = {}` (the grouped
+        renderer would read o["call"]["text"]) or an incomplete callee/Pre
+        are ungrouped before rendering, so the report's triage section
+        renders without raising and shows them as semantic_incomplete.
+        (Rendered through to_text with the groups document only: the
+        per-diagnostic Task 009 block is outside Task 010.)"""
+        empty_call = pre_check(10, 7)
+        empty_call["call"] = {}
+        no_decl_end = pre_check(11, 7)
+        del no_decl_end["callee"]["declaration"]["end_column"]
+        no_conj = pre_check(12, 7)
+        del no_conj["precondition"]["conjuncts"]
+        diags = [diag("C.P", [pre_check(9, 7), empty_call, no_decl_end,
+                              no_conj])]
+        doc = build(self, diags)
+        self.assertEqual((doc["group_count"], doc["grouped_check_count"],
+                          doc["ungrouped_check_count"]), (1, 1, 3))
+        sec = "\n".join(_render({"srd002_groups": doc}))
+        self.assertIn("  1 grouped precondition check -> 1 callee/contract "
+                      "group", sec)
+        for line in (10, 11, 12):
+            self.assertIn(f"    ring_buffer_client_proof.adb:{line}:7 "
+                          "VC_PRECONDITION\n      semantic_incomplete", sec)
+        self.assertNotIn("Traceback", sec)
+        self.assertNotIn("KeyError", sec)
+        # only-malformed report: zero groups, still renders
+        doc = build(self, [diag("C.P", [empty_call])])
+        sec = "\n".join(_render({"srd002_groups": doc}))
+        self.assertIn("0 grouped precondition checks -> 0 callee/contract "
+                      "groups", sec)
+        self.assertIn("semantic_incomplete", sec)
+
     def test_not_rendered_without_groups(self):
         txt = to_text([], [], [], {"semantic": {
             "requested": True, "evaluated": False, "backend": "libadalang",
@@ -626,6 +799,7 @@ class ReportIntegration(unittest.TestCase):
         class Stub(self.ts.FakeBackend):
             def resolve_precondition(self, file, line, column):
                 r = super().resolve_precondition(file, line, column)
+                r["call"]["location"] = span(file, line, column)
                 r["precondition"] = copy.deepcopy(PUSH_PRE)
                 return r
         rep = self.enrich("ring_no_is_empty_post", backend=Stub())

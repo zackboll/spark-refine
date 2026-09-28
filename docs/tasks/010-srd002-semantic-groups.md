@@ -62,9 +62,24 @@ line. No CLI flag was added: grouping is part of semantic mode.
 
 A client failure is grouped only if **all** of these hold: it belongs to an
 SRD002 diagnostic, its rule is `VC_PRECONDITION`, its Task 009 resolution
-is `exact`, and it has a `call`, a `callee` (non-empty name, kind,
-declaration span with file/line/column) and a `precondition` (`explicit`
-false, or explicit with text and span).
+is `exact`, and it carries the complete Task 009 semantic structure
+(checked structurally, never interpreted):
+
+* `call`: a dict with string `text` and a complete `location` span;
+* `callee`: non-empty string `name` and `kind`, complete `declaration` span;
+* `precondition`: a dict with `explicit` exactly `true` or `false`; a
+  `conjuncts` list (may be empty) whose every entry has an integer `index`,
+  string `text` and complete `location` span; `failed_conjunct` present and
+  `null`; `attribution` equal to `not_provided_by_gnatprove`. If `explicit`
+  is `true`: string `text` and complete `location` span; if `false`: `text`
+  and `location` present and both `null`.
+
+A **complete span** has all of `file` (string), `start_line`,
+`start_column`, `end_line`, `end_column` (integers, not booleans); a
+start position alone is not enough. Any absent or malformed field makes the
+check `semantic_incomplete` (detail: `exact entry lacks complete
+call/callee/precondition data`): it is never partially grouped and never
+raises, so the renderer only sees groups whose fields it reads exist.
 
 Otherwise it is `ungrouped`, with a `reason` from this fixed vocabulary:
 
@@ -276,10 +291,10 @@ and are never merged across reports.
 
 | suite | count | notes |
 |---|---|---|
-| existing diagnostics tests (Task 009 main) | 244 | all still pass; one Task 009 E2E-G stub now gets the Pre span that real Libadalang always reports |
-| new pure grouping tests `test_semantic_groups.py` | 41 | no Libadalang: identity, ungrouped reasons, confidence and ordering, coverage invariant (duplicate/drop/counts/forbidden content), duplicates, no mutation, backend neutrality, text wording, JSON shape, report integration |
+| existing diagnostics tests (Task 009 main) | 244 | all still pass; the Task 009 E2E-F/G stubs now get the Pre span and call span that real Libadalang always reports |
+| new pure grouping tests `test_semantic_groups.py` | 45 | no Libadalang: identity, ungrouped reasons, confidence and ordering, coverage invariant (duplicate/drop/counts/forbidden content), duplicates, no mutation, backend neutrality, text wording, JSON shape, report integration; completeness gate: 34 single-field exact corruptions + 7 malformed `explicit=False` subtests, complete-variant controls, renderer safety (`call = {}`) |
 | new tests in `test_semantic.py` | 13 | 6 E2E-F/G grouping-checker tests (no Libadalang), 7 real-Libadalang known-case grouping tests |
-| total | 298 | without Libadalang: 21 skipped; **with Libadalang under `alr -n exec`: 0 skipped, 0 failures** |
+| total | 302 | without Libadalang: 21 skipped; **with Libadalang under `alr -n exec`: 0 skipped, 0 failures** |
 | E2E-F (fresh `no_is_full_post` + `explain --semantic`) | PASS locally | 1 group Push ×3 at 9:7/10:7/25:7; VC_ASSERT 16:43 ungrouped |
 | E2E-G (fresh `no_is_empty_post`, SPARKlib callees) | PASS locally | 4 groups Pop/Push/Remove/Get, 2 assertions ungrouped |
 

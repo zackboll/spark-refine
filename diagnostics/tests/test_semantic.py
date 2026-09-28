@@ -1032,6 +1032,12 @@ class E2ECheckSemantic(unittest.TestCase):
                 r = super().resolve_precondition(file, line, column)
                 r["call"]["text"] = {9: "Push (Q, A)", 10: "Push (Q, B)",
                                      25: "Push (Q, X)"}[line]
+                # Task 010: grouping requires a complete call span (as
+                # real Libadalang always reports)
+                r["call"]["location"] = {
+                    "file": file, "start_line": line,
+                    "start_column": column, "end_line": line,
+                    "end_column": column + 10}
                 r["callee"] = {"name": "Ring_Buffer.Push",
                                "kind": "procedure", "declaration": {
                                    "file": "obj/ablation_src/"
@@ -1182,7 +1188,12 @@ class E2ECheckSemanticExternal(unittest.TestCase):
                             f"callee declaration: {decl}: "
                             f"{_PROVENANCE_MISMATCHES[0]}"}
                 return {"resolution": "exact",
-                        "call": {"text": text, "location": None},
+                        # Task 010: complete call span (as real
+                        # Libadalang always reports)
+                        "call": {"text": text, "location": {
+                            "file": file, "start_line": line,
+                            "start_column": column, "end_line": line,
+                            "end_column": column + 10}},
                         "callee": {"name": name, "kind": "procedure",
                                    "declaration": {
                                        "file": decl, "start_line": 1,

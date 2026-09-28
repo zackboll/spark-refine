@@ -77,26 +77,60 @@ def _occ_key(o: dict) -> tuple:
             _num(loc["line"]), _num(loc["column"]), o["rule"])
 
 
+_SPAN_FIELDS = (("file", str), ("start_line", int), ("start_column", int),
+                ("end_line", int), ("end_column", int))
+ATTRIBUTION = "not_provided_by_gnatprove"   # Task 009 value, verbatim
+
+
+def _int(v) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
 def _span_ok(s) -> bool:
-    return (isinstance(s, dict) and isinstance(s.get("file"), str)
-            and isinstance(s.get("start_line"), int)
-            and isinstance(s.get("start_column"), int))
+    """A complete Task 009 source span: file + start AND end position."""
+    return isinstance(s, dict) and all(
+        (_int(s.get(k)) if t is int else isinstance(s.get(k), t))
+        for k, t in _SPAN_FIELDS)
+
+
+def _nonempty_str(v) -> bool:
+    return isinstance(v, str) and v != ""
 
 
 def _complete(c: dict) -> bool:
-    """An exact precondition entry has everything its identity needs."""
+    """An exact precondition entry carries the complete Task 009 semantic
+    structure (call, callee, precondition) that grouping and rendering
+    read. Structural only: no value is interpreted. Anything absent or
+    malformed -> False (the caller reports semantic_incomplete)."""
     call, callee, pre = c.get("call"), c.get("callee"), c.get("precondition")
     if not (isinstance(call, dict) and isinstance(callee, dict)
             and isinstance(pre, dict)):
         return False
-    if not (isinstance(callee.get("name"), str) and callee["name"]
-            and isinstance(callee.get("kind"), str)
+    if not (isinstance(call.get("text"), str)
+            and _span_ok(call.get("location"))):
+        return False
+    if not (_nonempty_str(callee.get("name"))
+            and _nonempty_str(callee.get("kind"))
             and _span_ok(callee.get("declaration"))):
         return False
-    if pre.get("explicit") is True:
+    conjuncts = pre.get("conjuncts")
+    if not ("failed_conjunct" in pre and pre["failed_conjunct"] is None
+            and pre.get("attribution") == ATTRIBUTION
+            and isinstance(conjuncts, list)):
+        return False
+    for cj in conjuncts:
+        if not (isinstance(cj, dict) and _int(cj.get("index"))
+                and isinstance(cj.get("text"), str)
+                and _span_ok(cj.get("location"))):
+            return False
+    explicit = pre.get("explicit")
+    if explicit is True:
         return (isinstance(pre.get("text"), str)
                 and _span_ok(pre.get("location")))
-    return pre.get("explicit") is False
+    if explicit is False:
+        return ("text" in pre and pre["text"] is None
+                and "location" in pre and pre["location"] is None)
+    return False
 
 
 def _group_sort_key(g: dict) -> tuple:
@@ -143,7 +177,7 @@ def _classify(rule: str, c: dict | None) -> tuple[str | None, str | None]:
         return "semantic_incomplete", f"unknown resolution {res!r}"
     if not _complete(c):
         return ("semantic_incomplete",
-                "exact entry lacks call/callee/precondition data")
+                "exact entry lacks complete call/callee/precondition data")
     return None, None
 
 
