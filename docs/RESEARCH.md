@@ -16,6 +16,18 @@ Research date: 2026-09-26.
 > * "What we did not find" concerns generation tools; the project no
 >   longer depends on that gap.
 
+> **Experimental finding (Tasks 009 and 012).** GNATprove 16.1.0 SARIF and
+> `.spark` output does not say which top-level `Pre` conjunct failed
+> (Task 009). New proof evidence can supply that information. In Task 012,
+> scratch copies of a controlled corpus had a callee's `Pre` replaced by
+> one conjunct, and GNATprove was re-run. On the pre-registered corpus of
+> independent, total integer conjuncts, this matched the ground truth for
+> all 9 occurrence/conjunct observations
+> ([Task 012](tasks/012-per-conjunct-reproof-experiment.md)). The method
+> does not in general preserve the short-circuit guards of `and then`, so
+> the finding is not generalised. Scratch proofs cover only the scratch
+> programs.
+
 This repository was bootstrapped after surveying current SPARK/AdaCore documentation and adjacent tooling to avoid building a project that merely duplicates an existing feature.
 
 ## Key findings

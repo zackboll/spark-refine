@@ -185,6 +185,19 @@ jobs:
         run: python3 diagnostics/scripts/e2e_fresh.py semantic
       - name: "E2E-G: SRD002 + Libadalang, external SPARKlib callees (fresh)"
         run: python3 diagnostics/scripts/e2e_fresh.py semantic_external
+      # Task 012 (experiment, not a product feature): 1 unmodified control +
+      # 5 scratch copies of the Task 009 corpus whose callee Pre is replaced
+      # by ONE top-level conjunct; 6 fresh GNATprove runs. Passes only on
+      # the frozen pre-registered decision rule
+      # (docs/tasks/012-per-conjunct-reproof-experiment.md):
+      # VALIDATED_ON_CONTROLLED_CORPUS. Scratch trees and evidence.json stay
+      # under the gitignored diagnostics/obj/task012-conjunct-reproof/.
+      - name: "Task 012: per-conjunct re-proof experiment"
+        working-directory: examples/ring_buffer
+        run: |
+          start=$(date +%s)
+          alr -n exec -- python3 ../../diagnostics/scripts/conjunct_reproof_experiment.py
+          echo "task 012 experiment wall seconds: $(( $(date +%s) - start ))"
       - name: Upload semantic reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -194,6 +207,8 @@ jobs:
             diagnostics/obj/e2e/semantic.json
             diagnostics/obj/e2e/semantic_external.json
             diagnostics/obj/e2e/summary.json
+            diagnostics/obj/task012-conjunct-reproof/evidence.json
+            diagnostics/obj/task012-conjunct-reproof/timing.json
           if-no-files-found: warn
 
   # Ring-buffer proof benchmarks, one toolchain setup for both
