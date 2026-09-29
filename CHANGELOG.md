@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### Research
+
+- Task 012 (experiment only, no product change): a pre-registered
+  per-conjunct GNATprove re-proof experiment,
+  `diagnostics/scripts/conjunct_reproof_experiment.py`. It is outside the
+  installed package and adds no CLI command or flag.
+  - Method: the unchanged Task 009 corpus is copied into the gitignored
+    `diagnostics/obj/task012-conjunct-reproof/`. In each copy, the
+    callee's `Pre` expression range (located with Libadalang) is replaced
+    by one top-level conjunct, and GNATprove is re-run: 1 unmodified
+    control plus 5 probes. The call `VC_PRECONDITION` is then read
+    structurally.
+  - Verdict: `VALIDATED_ON_CONTROLLED_CORPUS`. The baseline had 4/4
+    unproved. All 9 pre-registered observations matched (4 proved,
+    5 unproved, 0 justified). `First_Fails` [U, P] and `Both_Fail`
+    [U, U] are distinguished; they are identical in the original result.
+  - Gates: source isolation (only `ops.ads`, only the `Pre` range), a
+    Libadalang forbidden-trust scan, and exactly-one-match structural
+    reading.
+  - Scope: independent total conjuncts only. This is scratch proof
+    evidence, not a proof of the original program.
+  - Unchanged: normal command output (byte-identical to Task 011),
+    `failed_conjunct: null`, `attribution: not_provided_by_gnatprove`,
+    SRD001–SRD003 and JSON.
+  - CI: a new step in `diagnostics-semantic`, with `evidence.json`
+    uploaded as an artifact. There is no new job.
+  - See `docs/tasks/012-per-conjunct-reproof-experiment.md`.
+
 ### Fixed
 
 - Task 011: semantic text rendering is fail-safe. A malformed or

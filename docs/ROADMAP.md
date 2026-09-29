@@ -31,6 +31,8 @@ Two pillars, with GNATprove as the proof authority:
 | Semantic SRD002 enrichment (experimental) | 009 | opt-in `--semantic`: Libadalang resolves each SRD002 failure to its exact call, callee, declaration and explicit `Pre` (conjuncts decomposed); sources gated on GNAT `.ali` source identity metadata (checksum + second-resolution timestamp; not byte-exact); failed-conjunct attribution measured **NOT ATTRIBUTABLE** from GNATprove 16.1.0 output, so never claimed; core package unchanged |
 
 | SRD002 semantic triage groups | 010 | report-level `analysis.semantic.srd002_groups` and a text triage section: exact `VC_PRECONDITION` failures grouped by identical callee declaration + explicit `Pre`; everything else is ungrouped with a machine reason; every failure appears exactly once. `ring_no_is_full_post`: 3 Push failures → 1 group. Descriptive only (no cause, no group confidence, no conjunct). Diagnostics unchanged |
+| Defensive semantic rendering | 011 | malformed internal semantic entries render as `semantic entry: incomplete`; one shared completeness contract (`semantic_shape.py`); valid output byte-identical |
+| Per-conjunct re-proof experiment | 012 | pre-registered experiment (script outside the product, `diagnostics/scripts/conjunct_reproof_experiment.py`). Scratch copies of the Task 009 corpus replace a callee's `Pre` by ONE top-level conjunct, then GNATprove is re-run: 1 control + 5 probes. Result: **VALIDATED_ON_CONTROLLED_CORPUS**. Baseline 4/4 unproved; all 9 probe observations match (4 proved / 5 unproved / 0 justified); `First_Fails` [U, P] vs `Both_Fail` [U, U] distinguished. Only independent total conjuncts; no product change, `failed_conjunct` stays `null` |
 
 ## Decisions
 
@@ -44,10 +46,24 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Near term
 
-* **Conjunct attribution needs new evidence.** Existing GNATprove output
-  does not identify a failed `Pre` conjunct (Task 009). Attribution would
-  need a separately pre-registered experiment with its own trust model,
-  for example re-proving each conjunct. It is not started.
+* **Conjunct re-proof: harden before any productization (Task 013,
+  proposed).** Existing GNATprove output does not identify a failed `Pre`
+  conjunct (Task 009). Task 012 showed that scratch per-conjunct
+  re-proofs give the expected per-call evidence, but only for
+  independent, total integer conjuncts. The following questions stay
+  open before any user CLI:
+  A. guard-dependent `and then` conjuncts (null/pointer, index guards);
+  B. selected conjuncts containing calls with their own `Pre`;
+  C. complex actual/formal mappings (named/reordered, defaults,
+     conversions, `in out`/globals);
+  D. dispatching, overloading and generics;
+  E. probe cost on realistic projects;
+  F. how to present new scratch-proof evidence without it being confused
+     with the production proof.
+
+  A Task 010 group never transfers one probe result to all of its
+  occurrences: every call is probed and read separately. Until this
+  work is done, normal reports keep `failed_conjunct: null`.
 
 ## Later
 

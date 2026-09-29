@@ -52,6 +52,8 @@ REQUIRED = [
     "docs/tasks/010-srd002-semantic-groups.md",
     "diagnostics/spark_refine_diagnostics/semantic_shape.py",
     "docs/tasks/011-defensive-semantic-rendering.md",
+    "docs/tasks/012-per-conjunct-reproof-experiment.md",
+    "diagnostics/scripts/conjunct_reproof_experiment.py",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

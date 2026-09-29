@@ -643,3 +643,17 @@ CI: job `diagnostics-e2e` (≈ 30 s of GNATprove). Reports are written to
   (`unsupported_version`) and SRD002 is skipped.
 * Without `.spark` files, units are attributed from the entity's first
   name component, and the report says so.
+
+### Research note: per-conjunct re-proof (Task 012, not a feature)
+
+`scripts/conjunct_reproof_experiment.py` is a pre-registered research
+experiment. It is not part of the installed package and not a CLI
+command. On scratch copies of the Task 009 corpus, it replaces one
+callee's `Pre` with a single top-level conjunct and re-runs GNATprove.
+On that controlled corpus of independent total conjuncts it reproduced
+the expected per-call evidence (`VALIDATED_ON_CONTROLLED_CORPUS`, see
+`docs/tasks/012-per-conjunct-reproof-experiment.md`).
+
+Normal reports do not use this evidence. They still show
+`failed_conjunct: null` and `attribution: not_provided_by_gnatprove`.
+Scratch proofs cover only the scratch programs.
