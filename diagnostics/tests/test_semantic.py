@@ -724,6 +724,105 @@ class WithLibadalang(unittest.TestCase):
         d = self.reports["pool_false_client_assert"].diagnostics[0]
         self.assertEqual(d.confidence.value, "low")
 
+    # ---- Task 010: pre-registered semantic triage groups ----
+    def groups(self, name):
+        from spark_refine_diagnostics.semantic_groups import (
+            coverage_problems, occurrence_ids)
+        rep = self.reports[name]
+        g = rep.analysis["semantic"]["srd002_groups"]
+        self.assertEqual(coverage_problems(g, occurrence_ids(
+            rep.diagnostics)), [])
+        for grp in g["groups"]:
+            self.assertNotIn("confidence", grp)
+            self.assertIsNone(grp["precondition"]["failed_conjunct"])
+        return g, [(x["callee"]["name"], x["precondition"]["text"],
+                    x["check_count"]) for x in g["groups"]], \
+            [(u["rule"], u["reason"]) for u in g["ungrouped"]]
+
+    def test_groups_ring_no_is_full_post(self):
+        g, groups, ung = self.groups("ring_no_is_full_post")
+        self.assertEqual((g["client_failure_count"], g["group_count"],
+                          g["grouped_check_count"],
+                          g["ungrouped_check_count"]), (4, 1, 3, 1))
+        self.assertEqual(groups, [("Ring_Buffer.Push", "not Is_Full (B)", 3)])
+        self.assertEqual([(o["location"]["line"], o["location"]["column"])
+                          for o in g["groups"][0]["occurrences"]],
+                         [(9, 7), (10, 7), (25, 7)])
+        self.assertEqual(g["groups"][0]["diagnostic_confidences"],
+                         ["low", "medium"])
+        self.assertEqual(ung, [("VC_ASSERT", "assertion_has_no_callee")])
+        self.assertEqual((g["ungrouped"][0]["location"]["line"],
+                          g["ungrouped"][0]["location"]["column"]), (16, 43))
+
+    def test_groups_ring_no_public_model_bound(self):
+        g, groups, ung = self.groups("ring_no_public_model_bound")
+        self.assertEqual(groups, [("Ring_Buffer.Push", "not Is_Full (B)", 1)])
+        self.assertEqual(ung, [])
+
+    def test_groups_ring_no_is_empty_post_archived(self):
+        """Archived fixture: SPARKlib Remove/Get are exact (own groups) or,
+        when the active checkout's D timestamp differs, ungrouped
+        semantic_unavailable. Never lost, never forced into a group."""
+        g, groups, ung = self.groups("ring_no_is_empty_post")
+        names = [n for n, _, _ in groups]
+        self.assertEqual(names[:2], ["Ring_Buffer.Pop", "Ring_Buffer.Push"])
+        self.assertIn(names[2:], ([], ["Ring_Buffer.Sequences.Get",
+                                       "Ring_Buffer.Sequences.Remove"]))
+        want = [("VC_ASSERT", "assertion_has_no_callee")] * 2
+        if not names[2:]:
+            want += [("VC_PRECONDITION", "semantic_unavailable")] * 2
+        self.assertEqual(sorted(ung), sorted(want))
+        self.assertEqual(g["client_failure_count"], 6)
+
+    def test_groups_external_mismatch_is_ungrouped_unavailable(self):
+        def other_checkout(d):
+            for ali in (d / "results").glob("*.ali"):
+                text = ali.read_text("utf-8")
+                out = []
+                for ln in text.splitlines(keepends=True):
+                    f = ln.split()
+                    if f[:2] == ["D", EXTERNAL_DECL_FILE]:
+                        ln = ln.replace(f[2], "19990101000000", 1)
+                    out.append(ln)
+                ali.write_text("".join(out), "utf-8")
+        rep = self.enrich_copy("ring_no_is_empty_post", other_checkout)
+        g = rep.analysis["semantic"]["srd002_groups"]
+        self.assertEqual([x["callee"]["name"] for x in g["groups"]],
+                         ["Ring_Buffer.Pop", "Ring_Buffer.Push"])
+        self.assertEqual(sorted(u["reason"] for u in g["ungrouped"]),
+                         ["assertion_has_no_callee"] * 2
+                         + ["semantic_unavailable"] * 2)
+
+    def test_groups_pool_spec_no_count_posts(self):
+        g, groups, ung = self.groups("pool_spec_no_count_posts")
+        self.assertEqual(groups,
+                         [("Fixed_Pool.Allocate", "Free_Count (P) > 0", 1)])
+        self.assertEqual(ung, [("VC_ASSERT", "assertion_has_no_callee")] * 2)
+
+    def test_groups_false_client_control(self):
+        g, groups, ung = self.groups("pool_false_client_assert")
+        self.assertEqual((g["group_count"], g["grouped_check_count"],
+                          g["ungrouped_check_count"]), (0, 0, 1))
+        self.assertEqual(ung, [("VC_ASSERT", "assertion_has_no_callee")])
+        rep = self.reports["pool_false_client_assert"]
+        self.assertEqual([d.confidence.value for d in rep.diagnostics],
+                         ["low"])
+        txt = to_text(rep.runs, rep.diagnostics, rep.notes, rep.analysis)
+        sec = txt[txt.index("SRD002 semantic triage:"):
+                  txt.index("SRD002: ")]
+        self.assertNotIn("public Pre", sec)
+        self.assertIn("0 callee/contract groups", sec)
+
+    def test_groups_overloads_do_not_collapse(self):
+        """conjunct_experiment: Ops.Over has two overloads (decl lines 32
+        and 36) -> two groups sharing the name."""
+        g, groups, _ = self.groups("conjunct_experiment")
+        over = [x for x in g["groups"] if x["callee"]["name"] == "Ops.Over"]
+        self.assertEqual(sorted(x["callee"]["declaration"]["start_line"]
+                                for x in over), [32, 36])
+        self.assertEqual(sorted(x["precondition"]["text"] for x in over),
+                         ["X", "X > 0"])
+
     # ---- source-position lookup (experiment corpus, real GNATprove) ----
     def test_lookup_shapes(self):
         c = self.checks("conjunct_experiment")
@@ -925,11 +1024,20 @@ class E2ECheckSemantic(unittest.TestCase):
         spec.loader.exec_module(cls.e2e)
 
     def good(self) -> dict:
+        return as_json(self._good_report())
+
+    def _good_report(self):
         class Stub(FakeBackend):
             def resolve_precondition(self, file, line, column):
                 r = super().resolve_precondition(file, line, column)
                 r["call"]["text"] = {9: "Push (Q, A)", 10: "Push (Q, B)",
                                      25: "Push (Q, X)"}[line]
+                # Task 010: grouping requires a complete call span (as
+                # real Libadalang always reports)
+                r["call"]["location"] = {
+                    "file": file, "start_line": line,
+                    "start_column": column, "end_line": line,
+                    "end_column": column + 10}
                 r["callee"] = {"name": "Ring_Buffer.Push",
                                "kind": "procedure", "declaration": {
                                    "file": "obj/ablation_src/"
@@ -947,11 +1055,10 @@ class E2ECheckSemantic(unittest.TestCase):
                 return {"resolution": "exact", "assertion": {
                     "pragma": "Assert", "text": "t", "location": None},
                     "enclosing_subprogram": None}
-        rep = enrich_report(base_report("ring_no_is_full_post"),
-                            SEM / "ring_no_is_full_post" / "results",
-                            SemanticRequest("ring_buffer.gpr"),
-                            factory=fake_factory(Stub()))
-        return as_json(rep)
+        return enrich_report(base_report("ring_no_is_full_post"),
+                             SEM / "ring_no_is_full_post" / "results",
+                             SemanticRequest("ring_buffer.gpr"),
+                             factory=fake_factory(Stub()))
 
     def test_accepts_known_good(self):
         self.assertEqual(self.e2e.check_semantic(self.good()), [])
@@ -980,6 +1087,57 @@ class E2ECheckSemantic(unittest.TestCase):
         doc = self.good()
         del doc["analysis"]["semantic"]["provenance"]
         self.assertTrue(self.e2e.check_semantic(doc))
+
+    # ---- Task 010: E2E-F grouping criteria ----
+    def test_known_good_groups(self):
+        g = self.good()["analysis"]["semantic"]["srd002_groups"]
+        self.assertEqual((g["group_count"], g["grouped_check_count"],
+                          g["ungrouped_check_count"]), (1, 3, 1))
+        self.assertEqual(g["groups"][0]["callee"]["name"],
+                         "Ring_Buffer.Push")
+        self.assertNotIn("confidence", g["groups"][0])
+
+    def test_rejects_wrong_groups(self):
+        doc = self.good()
+        del doc["analysis"]["semantic"]["srd002_groups"]
+        self.assertIn("analysis.semantic.srd002_groups missing",
+                      self.e2e.check_semantic(doc))
+        doc = self.good()
+        g = doc["analysis"]["semantic"]["srd002_groups"]
+        g["groups"][0]["occurrences"].pop()
+        g["groups"][0]["check_count"] = 2
+        g["grouped_check_count"] = 2
+        self.assertTrue(self.e2e.check_semantic(doc))
+        doc = self.good()
+        g = doc["analysis"]["semantic"]["srd002_groups"]
+        g["groups"][0]["confidence"] = "medium"
+        self.assertTrue(self.e2e.check_semantic(doc))
+        doc = self.good()
+        g = doc["analysis"]["semantic"]["srd002_groups"]
+        g["groups"][0]["precondition"]["failed_conjunct"] = 0
+        self.assertTrue(self.e2e.check_semantic(doc))
+        doc = self.good()
+        g = doc["analysis"]["semantic"]["srd002_groups"]
+        g["ungrouped"][0]["reason"] = "semantic_unavailable"
+        self.assertTrue(self.e2e.check_semantic(doc))
+
+    def test_split_push_group_fails(self):
+        """A second Push declaration (different span) must not be merged,
+        and E2E-F then fails: 2 groups instead of 1."""
+        from spark_refine_diagnostics.semantic_groups import (
+            build_srd002_groups)
+        rep = self._good_report()
+        for d in rep.diagnostics:
+            for c in d.semantic["checks"]:
+                if c["location"]["line"] == 25:
+                    c["callee"]["declaration"]["start_line"] = 99
+        rep.analysis["semantic"]["srd002_groups"] = build_srd002_groups(
+            rep.diagnostics)
+        doc = as_json(rep)
+        self.assertEqual(
+            doc["analysis"]["semantic"]["srd002_groups"]["group_count"], 2)
+        self.assertTrue(any("(2, 3, 1)" in p
+                            for p in self.e2e.check_semantic(doc)))
 
     def test_default_gate_excludes_semantic(self):
         self.assertIn("semantic", self.e2e.CASES)
@@ -1030,14 +1188,27 @@ class E2ECheckSemanticExternal(unittest.TestCase):
                             f"callee declaration: {decl}: "
                             f"{_PROVENANCE_MISMATCHES[0]}"}
                 return {"resolution": "exact",
-                        "call": {"text": text, "location": None},
+                        # Task 010: complete call span (as real
+                        # Libadalang always reports)
+                        "call": {"text": text, "location": {
+                            "file": file, "start_line": line,
+                            "start_column": column, "end_line": line,
+                            "end_column": column + 10}},
                         "callee": {"name": name, "kind": "procedure",
                                    "declaration": {
                                        "file": decl, "start_line": 1,
                                        "start_column": 1, "end_line": 1,
                                        "end_column": 1}},
+                        # Task 010: an explicit Pre always has a source
+                        # span (as real Libadalang reports); grouping
+                        # needs it for the contract identity
                         "precondition": {"explicit": True, "text": pre,
-                                         "location": None, "conjuncts": []}}
+                                         "location": {
+                                             "file": decl, "start_line": 2,
+                                             "start_column": 19,
+                                             "end_line": 2,
+                                             "end_column": 40},
+                                         "conjuncts": []}}
 
             def resolve_assertion(self, file, line, column):
                 return {"resolution": "exact", "assertion": {
@@ -1097,6 +1268,42 @@ class E2ECheckSemanticExternal(unittest.TestCase):
     def test_rejects_missing_srd002(self):
         doc = self.good()
         doc["analysis"]["rules"]["SRD002"]["evaluated"] = False
+        self.assertTrue(self.e2e.check_semantic_external(doc))
+
+    # ---- Task 010: E2E-G grouping criteria ----
+    def test_known_good_groups(self):
+        g = self.good()["analysis"]["semantic"]["srd002_groups"]
+        self.assertEqual(sorted(x["callee"]["name"] for x in g["groups"]),
+                         sorted(self.e2e.EXTERNAL_GROUPS))
+        self.assertEqual((g["group_count"], g["grouped_check_count"],
+                          g["ungrouped_check_count"]), (4, 4, 2))
+
+    def test_rejects_degraded_external_groups(self):
+        """Archived outcome B (Remove/Get unavailable) is ungrouped, not
+        lost; but in fresh E2E-G it must fail the grouping criteria."""
+        doc = self.good(degrade_external=True)
+        g = doc["analysis"]["semantic"]["srd002_groups"]
+        self.assertEqual((g["group_count"], g["ungrouped_check_count"]),
+                         (2, 4))
+        self.assertEqual(sorted(u["reason"] for u in g["ungrouped"]),
+                         ["assertion_has_no_callee"] * 2
+                         + ["semantic_unavailable"] * 2)
+        problems = self.e2e.check_semantic_external(doc)
+        self.assertTrue(any("(2, 2, 4)" in p for p in problems), problems)
+
+    def test_rejects_missing_or_broken_groups(self):
+        doc = self.good()
+        del doc["analysis"]["semantic"]["srd002_groups"]
+        self.assertIn("analysis.semantic.srd002_groups missing",
+                      self.e2e.check_semantic_external(doc))
+        doc = self.good()
+        g = doc["analysis"]["semantic"]["srd002_groups"]
+        g["ungrouped"].pop()
+        self.assertTrue(any("missing" in p for p in
+                            self.e2e.check_semantic_external(doc)))
+        doc = self.good()
+        doc["analysis"]["semantic"]["srd002_groups"]["groups"][0][
+            "confidence"] = "medium"
         self.assertTrue(self.e2e.check_semantic_external(doc))
 
 

@@ -78,7 +78,13 @@ For an Alire crate: `alr exec -- spark-refine prove -P my_project.gpr`.
 SRD002 precondition failure then shows the exact call, the resolved
 callee and its explicit public `Pre`. It never names a "failed conjunct"
 (GNATprove does not report one), and without Libadalang the report is
-unchanged. See `docs/INTEGRATION.md`.
+unchanged. See `docs/INTEGRATION.md`. When enrichment runs, the report
+also starts with an **SRD002 semantic triage** section (Task 010). It
+groups precondition failures that call the same resolved declaration with
+the same explicit `Pre`, for example three `Push` calls under one
+`Ring_Buffer.Push` / `not Is_Full (B)` group. Everything else is listed as
+ungrouped with a reason. Groups are descriptive: they do not claim a shared
+cause or a contract defect.
 
 Manual two-step workflow (still fully supported):
 

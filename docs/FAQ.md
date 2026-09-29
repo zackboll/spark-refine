@@ -98,6 +98,16 @@ experiment is in `docs/tasks/009-libadalang-srd002-enrichment.md`.
 spark-refine does not guess one from the message text or from variable
 names.
 
+### Does an SRD002 semantic group mean the calls share a cause?
+
+No. With `--semantic`, the `SRD002 semantic triage` section (Task 010)
+groups unproved precondition checks that call the same resolved
+declaration with the same explicit `Pre`, so you can inspect that call
+boundary once. Sharing a callee and `Pre` does not establish a shared
+cause, a missing contract or a failed conjunct. Each call site still
+needs its own client-side reasoning. A group has no confidence of its
+own, and every underlying check is still reported individually.
+
 ### Which toolchains are supported?
 
 It is validated on FSF GNAT / GNATprove / SPARKlib 16.1.0. `.ali`

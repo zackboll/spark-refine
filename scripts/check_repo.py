@@ -48,6 +48,8 @@ REQUIRED = [
     "diagnostics/spark_refine_diagnostics/semantic_lal.py",
     "diagnostics/scripts/setup_libadalang.sh",
     "docs/tasks/009-libadalang-srd002-enrichment.md",
+    "diagnostics/spark_refine_diagnostics/semantic_groups.py",
+    "docs/tasks/010-srd002-semantic-groups.md",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [
