@@ -480,6 +480,10 @@ class ForbiddenTrust(unittest.TestCase):
                 "annotate_justification_or_skip",
             ("pragma", "Annotate", ("GNATprove", "Intentional", '"x"')):
                 "annotate_justification_or_skip",
+            ("pragma", "Annotate", ("GNATprove", "Axiom", '"reason"')):
+                "annotate_justification_or_skip",
+            ("aspect", "Annotate", ("(GNATprove, Axiom, ...)",)):
+                "annotate_justification_or_skip",
             ("aspect", "Annotate", ("(GNATprove, Skip_Proof)",)):
                 "annotate_justification_or_skip",
             ("pragma", "Suppress", ("All_Checks",)): "suppress",
@@ -492,6 +496,13 @@ class ForbiddenTrust(unittest.TestCase):
         }
         for rec, cat in cases.items():
             self.assertEqual(E.classify_trust(rec), cat, rec)
+
+    def test_axiom_annotation_is_not_allowed(self):
+        for rec in (("pragma", "Annotate",
+                     ("GNATprove", "Axiom", '"reason"')),
+                    ("aspect", "Annotate",
+                     ("(GNATprove, Axiom, ...)",))):
+            self.assertIsNotNone(E.classify_trust(rec), rec)
 
     def test_allowed_records(self):
         for rec in (("aspect", "SPARK_Mode", []),

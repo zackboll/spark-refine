@@ -281,7 +281,7 @@ def probe_isolation_problems(inv: dict) -> list[str]:
 #   ("ghost_decl_without_body", <qualified name>, [])
 # The classification below is over those records only (identifiers are
 # compared case-insensitively, as Ada does); it never reads prover output.
-_ANNOTATE_FORBIDDEN = {"false_positive", "intentional", "skip_proof",
+_ANNOTATE_FORBIDDEN = {"false_positive", "intentional", "axiom", "skip_proof",
                        "skip_flow_and_proof"}
 
 
