@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### Fixed
+
+- Task 011: semantic text rendering is fail-safe. A malformed or
+  incomplete internal Task 009 semantic entry (for example `resolution:
+  "exact"` with `call: {}`) no longer raises `KeyError`/`TypeError`/
+  `AttributeError` from `to_text`/`diagnostic_to_text`/`semantic_text`. It
+  renders as `semantic entry: incomplete` with a reason and claims no
+  call, callee, Pre, conjunct or assertion fact. Completeness is one shared
+  structural contract, used by Task 010 grouping and by the renderer: the
+  new backend-neutral module `semantic_shape.py`, into which Task 010's
+  check moved unchanged. The renderer now dispatches exact entries by
+  rule, not by key presence. JSON still serialises the raw semantic object.
+  Valid text output is byte-identical to Task 010. SRD001–SRD003, semantic
+  resolution, provenance, grouping and the failed-conjunct policy are
+  unchanged. There is no new CI job or E2E case. See
+  `docs/tasks/011-defensive-semantic-rendering.md`.
+
 ### Added
 
 - Task 010: SRD002 semantic triage groups. When `--semantic` enrichment is
