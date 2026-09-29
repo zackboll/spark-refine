@@ -118,7 +118,8 @@ def inspect_wheel(whl: Path) -> None:
     check("spark-refine = spark_refine_diagnostics.cli:main"
           in entry_points, "console script spark-refine declared")
     check("Requires-Dist" not in meta, "no runtime dependencies")
-    for module in ("cli", "discovery", "orchestration", "semantic_groups"):
+    for module in ("cli", "discovery", "orchestration", "semantic_groups",
+                   "semantic_shape"):
         check(f"{PACKAGE}/{module}.py" in names,
               f"{PACKAGE}/{module}.py is in the wheel")
     check(unpacked < 1_000_000,

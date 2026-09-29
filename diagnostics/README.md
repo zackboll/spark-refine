@@ -353,7 +353,12 @@ from a fresh dependency checkout. When that happens, the gate correctly
 degrades those external callee declarations to `unavailable`, and the
 archived tests accept only that or `exact`. The fresh E2E-G run below is the
 authoritative test of external-dependency enrichment. Any failure only sets
-`analysis.semantic.evaluated = false` or a per-check `unavailable`. See
+`analysis.semantic.evaluated = false` or a per-check `unavailable`.
+Degradation is non-fatal through rendering too (Task 011): an internally
+incomplete `exact` entry is shown as `semantic entry: incomplete` in text
+(no call/callee/Pre/assertion facts claimed; same structural contract as
+Task 010 grouping, `semantic_shape.py`) and is serialised unchanged in
+JSON. See
 `docs/tasks/009-libadalang-srd002-enrichment.md`.
 
 **Semantic triage groups (Task 010).** Whenever enrichment is evaluated,

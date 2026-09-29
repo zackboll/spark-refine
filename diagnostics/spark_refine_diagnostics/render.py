@@ -10,8 +10,11 @@ import shlex
 from .model import Diagnostic, ProofRun
 from .model import Confidence
 from .rules import RULES
+from .semantic_shape import (exact_assertion_complete,
+                             exact_precondition_complete)
 
 JSON_FORMAT_VERSION = 1
+PRECONDITION = "VC_PRECONDITION"
 
 
 def wrap(text: str, indent: str, width: int = 76) -> list[str]:
@@ -67,39 +70,89 @@ def _one_line(text: str) -> str:
     return " ".join(text.split())
 
 
-def semantic_text(sem: dict) -> list[str]:
-    """Task 009: concise per-check semantic block (--semantic only)."""
-    out = [f"  semantic ({sem['backend']}):"]
-    for c in sem["checks"]:
-        loc = c["location"]
-        out.append(f"    {loc['file']}:{loc['line']}:{loc['column']} "
-                   f"{c['rule']}: {c['resolution']}")
-        if c["resolution"] != "exact":
+# Task 011: text rendering of semantic enrichment never raises on a
+# malformed or incomplete internal semantic object. Exact entries are
+# rendered only if they satisfy the SAME structural contract Task 010
+# grouping uses (semantic_shape.py); otherwise the entry is shown as
+# incomplete and none of its call/callee/Pre/conjunct/assertion facts are
+# claimed. JSON rendering is unaffected: diagnostic_to_dict() serialises
+# the semantic value exactly as provided.
+INCOMPLETE_PRECONDITION = ("exact semantic entry lacks complete "
+                           "call/callee/Pre data")
+INCOMPLETE_ASSERTION = "exact semantic entry lacks complete assertion data"
+
+
+def _incomplete(reason: str, indent: str) -> list[str]:
+    return [f"{indent}semantic entry: incomplete",
+            *wrap(f"reason: {reason}", indent)]
+
+
+def _check_header(c: dict) -> str:
+    loc = c.get("location")
+    where = (f"{loc.get('file', '-')}:{loc.get('line', '-')}:"
+             f"{loc.get('column', '-')}" if isinstance(loc, dict)
+             else "(no location)")
+    return f"    {where} {c.get('rule', '-')}: {c.get('resolution', '-')}"
+
+
+def _precondition_lines(c: dict) -> list[str]:
+    """Caller guarantees exact_precondition_complete(c)."""
+    pre = c["precondition"]
+    out = [f"      call: {_one_line(c['call']['text'])}",
+           f"      callee: {c['callee']['name']} "
+           f"({_span(c['callee']['declaration'])})"]
+    if not pre["explicit"]:
+        out.append("      public Pre: none (no explicit Pre aspect)")
+        return out
+    out += wrap(f"public Pre: {_one_line(pre['text'])}", "      ")
+    if len(pre["conjuncts"]) > 1:
+        for cj in pre["conjuncts"]:
+            out += wrap(f"[{cj['index']}] {_one_line(cj['text'])}",
+                        "        ")
+    out.append("      failed conjunct: unknown (GNATprove "
+               "result does not identify a specific conjunct)")
+    return out
+
+
+def _assertion_lines(c: dict) -> list[str]:
+    """Caller guarantees exact_assertion_complete(c)."""
+    a = c["assertion"]
+    out = wrap(f"assertion: {_one_line(a['text'])} "
+               f"({_span(a['location'])})", "      ")
+    if c.get("enclosing_subprogram"):
+        out.append(f"      in: {c['enclosing_subprogram']}")
+    return out
+
+
+def semantic_text(sem) -> list[str]:
+    """Task 009: concise per-check semantic block (--semantic only).
+    Task 011: fail-safe on malformed input (see INCOMPLETE_*)."""
+    if not isinstance(sem, dict):
+        return ["  semantic:", *_incomplete("semantic block is not an "
+                                            "object", "    ")]
+    out = [f"  semantic ({sem.get('backend', '-')}):"]
+    checks = sem.get("checks")
+    if not isinstance(checks, list):
+        return out + _incomplete("semantic block has no list of checks",
+                                 "    ")
+    for c in checks:
+        if not isinstance(c, dict):
+            out += _incomplete("semantic check entry is not an object",
+                               "    ")
+            continue
+        out.append(_check_header(c))
+        if c.get("resolution") != "exact":
             out += wrap(f"reason: {c.get('reason', '-')}", "      ")
             continue
-        if "call" in c:
-            pre = c["precondition"]
-            out.append(f"      call: {_one_line(c['call']['text'])}")
-            out.append(f"      callee: {c['callee']['name']} "
-                       f"({_span(c['callee']['declaration'])})")
-            if not pre["explicit"]:
-                out.append("      public Pre: none (no explicit Pre aspect)")
-            else:
-                out += wrap(f"public Pre: {_one_line(pre['text'])}",
-                            "      ")
-                if len(pre["conjuncts"]) > 1:
-                    for cj in pre["conjuncts"]:
-                        out += wrap(f"[{cj['index']}] "
-                                    f"{_one_line(cj['text'])}", "        ")
-                out.append("      failed conjunct: unknown (GNATprove "
-                           "result does not identify a specific conjunct)")
+        # Dispatch on the rule, exactly as semantic.py dispatches to the
+        # backend (VC_PRECONDITION -> call context, anything else ->
+        # assertion context); never on which keys happen to be present.
+        if c.get("rule") == PRECONDITION:
+            out += (_precondition_lines(c) if exact_precondition_complete(c)
+                    else _incomplete(INCOMPLETE_PRECONDITION, "      "))
         else:
-            a = c["assertion"]
-            out += wrap(f"assertion: {_one_line(a['text'])} "
-                        f"({_span(a['location'])})", "      ")
-            if c.get("enclosing_subprogram"):
-                out.append(f"      in: "
-                           f"{c['enclosing_subprogram']}")
+            out += (_assertion_lines(c) if exact_assertion_complete(c)
+                    else _incomplete(INCOMPLETE_ASSERTION, "      "))
     return out
 
 
@@ -107,10 +160,14 @@ def semantic_meta_text(m: dict) -> str:
     if not m.get("evaluated"):
         return (f"semantic enrichment: not evaluated "
                 f"({m.get('reason', '-')})")
-    counts = ", ".join(f"{k}={v}" for k, v in m["resolutions"].items())
-    line = (f"semantic enrichment: {m['backend']} {m['version']}, "
-            f"project {m['project']}; checks: {counts}")
-    if m.get("provenance", {}).get("layout_exact") is False:
+    res = m.get("resolutions")
+    counts = (", ".join(f"{k}={v}" for k, v in res.items())
+              if isinstance(res, dict) else "-")
+    line = (f"semantic enrichment: {m.get('backend', '-')} "
+            f"{m.get('version', '-')}, "
+            f"project {m.get('project', '-')}; checks: {counts}")
+    prov = m.get("provenance")
+    if isinstance(prov, dict) and prov.get("layout_exact") is False:
         line += ("\n  source match: GNAT checksum + second-resolution .ali "
                  "timestamp (not byte-exact)")
     return line
