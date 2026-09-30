@@ -657,3 +657,19 @@ the expected per-call evidence (`VALIDATED_ON_CONTROLLED_CORPUS`, see
 Normal reports do not use this evidence. They still show
 `failed_conjunct: null` and `attribution: not_provided_by_gnatprove`.
 Scratch proofs cover only the scratch programs.
+
+### Research note: guard-sensitive prefix re-proof (Task 013, not a feature)
+
+`scripts/guarded_reproof_experiment.py` is a second pre-registered
+experiment. It is not installed and not a CLI command. For `and then`
+contracts whose later conjunct depends on an earlier guard (null check,
+index range, or a nested call with its own `Pre`), it never probes the
+guarded conjunct alone. It re-proves cumulative source prefixes
+(`C0`, `C0 and then C1`, ...) on scratch copies of
+`tests/experiments/task013_guarded/` and reads the per-call transition:
+`prefix_proved`, `newly_unproved` or `blocked_by_earlier_prefix`.
+Nested-call checks are kept separate. On that controlled corpus it
+produced the pre-registered evidence
+(`PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`, see
+`docs/tasks/013-guard-sensitive-conjunct-reproof.md`). A `newly_unproved`
+transition is not a root cause. Normal reports are unchanged.

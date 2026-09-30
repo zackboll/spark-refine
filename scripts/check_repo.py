@@ -54,6 +54,9 @@ REQUIRED = [
     "docs/tasks/011-defensive-semantic-rendering.md",
     "docs/tasks/012-per-conjunct-reproof-experiment.md",
     "diagnostics/scripts/conjunct_reproof_experiment.py",
+    "docs/tasks/013-guard-sensitive-conjunct-reproof.md",
+    "diagnostics/scripts/guarded_reproof_experiment.py",
+    "diagnostics/tests/experiments/task013_guarded/guarded.gpr",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

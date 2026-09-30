@@ -46,19 +46,26 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Near term
 
-* **Conjunct re-proof: harden before any productization (Task 013,
+* **Conjunct re-proof: harden before any productization (Task 014,
   proposed).** Existing GNATprove output does not identify a failed `Pre`
   conjunct (Task 009). Task 012 showed that scratch per-conjunct
   re-proofs give the expected per-call evidence, but only for
-  independent, total integer conjuncts. The following questions stay
-  open before any user CLI:
-  A. guard-dependent `and then` conjuncts (null/pointer, index guards);
-  B. selected conjuncts containing calls with their own `Pre`;
-  C. complex actual/formal mappings (named/reordered, defaults,
+  independent, total integer conjuncts. Task 013 addressed guard-dependent
+  `and then` conjuncts and nested calls with their own `Pre`. It probes
+  only cumulative source prefixes (`C0`, `C0 and then C1`, ...), never
+  an isolated guarded conjunct, and reads the per-call prefix transition.
+  On a controlled access/null, array-index and nested-call corpus it
+  gave `PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`: 18/18
+  pre-registered observations, with nested `F` checks kept separate from
+  the target VC. After an unproved prefix it makes no claim about later
+  conjuncts. Still open before any user CLI (Task 014):
+  A. complex actual/formal mappings (named/reordered, defaults,
      conversions, `in out`/globals);
-  D. dispatching, overloading and generics;
-  E. probe cost on realistic projects;
-  F. how to present new scratch-proof evidence without it being confused
+  B. dispatching, overloading and generics;
+  C. longer/mixed `and`/`and then` chains and non-top-level guards,
+     exercised by proof runs;
+  D. probe cost on realistic projects (unit restriction, session reuse);
+  E. how to present new scratch-proof evidence without it being confused
      with the production proof.
 
   A Task 010 group never transfers one probe result to all of its

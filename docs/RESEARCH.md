@@ -27,6 +27,18 @@ Research date: 2026-09-26.
 > does not in general preserve the short-circuit guards of `and then`, so
 > the finding is not generalised. Scratch proofs cover only the scratch
 > programs.
+>
+> Task 013 re-proved cumulative source **prefixes** (`C0`,
+> `C0 and then C1`) instead of isolated conjuncts, so each later conjunct
+> is proved only under the guards before it. On a controlled
+> access/null, array-index and nested-call corpus the result was
+> `PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`: 9/9 baseline controls,
+> 18/18 pre-registered prefix statuses and classifications, and nested
+> call checks kept separate from the target VC
+> ([Task 013](tasks/013-guard-sensitive-conjunct-reproof.md)). After an
+> unproved prefix the method says nothing about later conjuncts, and a
+> `newly_unproved` transition is not a root cause. Actual/formal
+> mappings, dispatching, generics and cost remain open.
 
 This repository was bootstrapped after surveying current SPARK/AdaCore documentation and adjacent tooling to avoid building a project that merely duplicates an existing feature.
 

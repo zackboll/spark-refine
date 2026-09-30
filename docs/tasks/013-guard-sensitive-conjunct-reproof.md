@@ -406,3 +406,194 @@ overload selection; generic instances; realistic-project performance and
 GNATprove session reuse; and end-user presentation and CLI
 productization. Reason: guard preservation has to be settled before any
 broader probe mechanism can be trusted.
+
+## Observed results
+
+Appended after the experiment ran. The pre-registration above is
+unchanged: it is byte-identical to preregistration commit `7dcafbb`.
+
+### O1. Verdict
+
+**`PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`**. All twelve P14
+conditions hold and `summary.reasons` is empty.
+
+### O2. Extraction and planning (before any proof run)
+
+The Libadalang extraction matched P4 exactly, and it matched Task 009's
+`LalBackend.conjuncts`. Each callee has one top-level operator,
+`and then`. The planner produced exactly the six P5 prefix texts. Each
+final prefix is the unmodified original `Pre`. For each guarded conjunct 1
+(`P.all > 0`, `A (I) > 0`, `F (F (X)) > 20`), the recorded selected-only
+request was `refused: true` with reason `guarded_and_then_suffix`. No
+isolated guarded conjunct was scheduled, generated or proved.
+
+### O3. Source isolation
+
+Each C0-only run changed only `src/guarded_ops.ads`, and only the Pre
+bytes after `C0`: 1 file, 1 range, length and newlines preserved. The
+three changes, one per run:
+
+```text
+<                   and then P.all > 0,
+>                                     ,
+<                   and then A (I) > 0,
+>                                     ,
+<                   and then F (F (X)) > 20,
+>                                          ,
+```
+
+The baseline and the three full-prefix runs are byte-identical to the
+corpus (0 changed files). Every scratch `Pre` re-extracted, with zero
+diagnostics, to exactly its planned prefix text, conjuncts and operators.
+The other callees' `Pre` text and spans were unchanged. `gate_problems`
+and `reparse_problems` are empty in all 7 runs.
+
+### O4. Baseline (unmodified copy, 9/9 match)
+
+| case | call | required | observed |
+|---|---|---|---|
+| A1 | guarded_client.adb:7:7 | PROVED | PROVED |
+| A2 | guarded_client.adb:12:7 | UNPROVED | UNPROVED |
+| A3 | guarded_client.adb:17:7 | UNPROVED | UNPROVED |
+| B1 | guarded_client.adb:22:7 | PROVED | PROVED |
+| B2 | guarded_client.adb:27:7 | UNPROVED | UNPROVED |
+| B3 | guarded_client.adb:32:7 | UNPROVED | UNPROVED |
+| C1 | guarded_client.adb:37:7 | PROVED | PROVED |
+| C2 | guarded_client.adb:42:7 | UNPROVED | UNPROVED |
+| C3 | guarded_client.adb:47:7 | UNPROVED | UNPROVED |
+
+As in Task 009, the original result shows only a generic
+`VC_PRECONDITION` UNPROVED for A2/A3, B2/B3 and C2/C3.
+
+### O5. Prefix matrix (18/18 status, 18/18 classification)
+
+| case | c0 prefix | c1 prefix | c0 classification | c1 classification |
+|---|---|---|---|---|
+| A1 | PROVED | PROVED | prefix_proved | prefix_proved |
+| A2 | PROVED | UNPROVED | prefix_proved | newly_unproved |
+| A3 | UNPROVED | UNPROVED | newly_unproved | blocked_by_earlier_prefix |
+| B1 | PROVED | PROVED | prefix_proved | prefix_proved |
+| B2 | PROVED | UNPROVED | prefix_proved | newly_unproved |
+| B3 | UNPROVED | UNPROVED | newly_unproved | blocked_by_earlier_prefix |
+| C1 | PROVED | PROVED | prefix_proved | prefix_proved |
+| C2 | PROVED | UNPROVED | prefix_proved | newly_unproved |
+| C3 | UNPROVED | UNPROVED | newly_unproved | blocked_by_earlier_prefix |
+
+Each observed value equals its pre-registered value. Totals: 18
+observations, 9 PROVED, 9 UNPROVED, 0 JUSTIFIED. Classifications:
+`prefix_proved` 9, `newly_unproved` 6, `blocked_by_earlier_prefix` 3,
+`nested_precondition_unproved` 0, `invalid_probe` 0. Each family showed
+`[P,P]`, `[P,U]` and `[U,U]`.
+
+A2, B2 and C2 are distinguished from A3, B3 and C3, although the original
+result gives all six the same generic UNPROVED. For A3, B3 and C3 the
+experiment makes no claim about conjunct 1.
+
+In every prefix run, all six untouched targets had their baseline
+status. All 63 target queries (9 per run × 7 runs) matched exactly one
+structural `VC_PRECONDITION`. There were 0 disputed targets and 0
+JUSTIFIED targets. The loader recorded 0 SARIF/.spark consistency issues
+in any run.
+
+### O6. Nested-call VC inventory (critical gate)
+
+| run | `Guarded_Ops.Use_Nested` `VC_PRECONDITION` checks |
+|---|---|
+| baseline, use_access_p0/p1, use_index_p0/p1, use_nested_p1 | `guarded_ops.ads:29:28` PROVED, `guarded_ops.ads:29:31` PROVED |
+| use_nested_p0 | none (the nested calls are not in the C0-only `Pre`) |
+
+The nested `F` checks have entity `Guarded_Ops.Use_Nested` and locations
+inside the callee's `Pre`. The target calls have `Guarded_Client.*`
+entities and locations in `guarded_client.adb`. No nested check matched a
+target key, so none was folded into a target. None was UNPROVED or
+JUSTIFIED, so no probe was `nested_precondition_unproved`.
+
+Guard well-definedness: `VC_NULL_POINTER_DEREFERENCE` at
+`guarded_ops.ads:12:30` and `VC_INDEX_CHECK` at `guarded_ops.ads:18:31`
+were PROVED in every run whose `Pre` contains them. They were absent in
+`use_access_p0` and `use_index_p0` respectively. All 19 other non-target
+checks per run were PROVED (flow `GLOBAL_WRONG`, `SUBPROGRAM_TERMINATION`,
+`F`'s postcondition and overflow checks). No leakage.
+
+### O7. Trust and corpus
+
+The committed corpus scan found 0 forbidden-trust hits, and no scratch
+copy introduced one. The committed corpus digest was unchanged after the
+experiment.
+
+### O8. Determinism and runtime (local)
+
+Two full local runs produced a byte-identical `evidence.json`, sha256
+`ce4f354b7a300535b8b987524397566f6cbc30ef35936bddbdb71fc36bb76fe5`.
+There were 7 GNATprove runs, about 6.3 s each and about 44 s in total. The
+whole experiment took about 45 s wall time. Timing is only in
+`timing.json`. The hosted CI time is recorded in the pull request.
+
+### O9. Permitted interpretation
+
+The only permitted conclusion is this: *On the controlled access,
+array-index and nested-call corpus, cumulative source-prefix re-proofs
+preserved preceding short-circuit guards and produced the preregistered
+per-occurrence structural GNATprove evidence.*
+
+It does **not** mean any of the following:
+
+* arbitrary contracts are supported;
+* later conjuncts can be assessed after an unproved prefix (A3, B3 and C3
+  say nothing about conjunct 1);
+* a `newly_unproved` transition is a root cause;
+* `failed_conjunct` may be populated in normal reports (it stays `null`
+  with `attribution: not_provided_by_gnatprove`);
+* production contracts should be changed;
+* dispatching, overloading or generics are handled;
+* any scratch run proves the original program.
+
+The corpus uses only two-conjunct `and then` contracts. Longer chains,
+mixed `and` / `and then`, and guards inside nested sub-expressions are
+covered by planner unit tests only, not by proof runs.
+
+### O10. Product boundary (verified)
+
+* Normal command output is byte-identical to `origin/main` `4b58e7c`,
+  checked with a git worktree and `diff -r` of stdout, stderr and exit
+  code. Without Libadalang: 690 files covering `rules`, `explain` and
+  `analyze` on every fixture, `compare-provers`, `prove --dry-run`, and
+  `--semantic` with and without a project, in text and JSON. With
+  Libadalang 26.0.0 under `alr exec`: 72 files covering `explain` with and
+  without `--semantic` on every semantic snapshot, in text and JSON.
+  Everything is identical, including the Task 010 group sections.
+* All 35 precondition entries in the real-Libadalang reports keep
+  `failed_conjunct: null` and `attribution: not_provided_by_gnatprove`.
+* Nothing changed in `diagnostics/spark_refine_diagnostics/`,
+  `pyproject.toml`, `setup_libadalang.sh` or the Task 012 script and
+  corpus. The Task 012 experiment still gives
+  `VALIDATED_ON_CONTROLLED_CORPUS` with the same `evidence.json` sha256,
+  `559ed7e0…`.
+
+### O11. Tests
+
+`diagnostics/tests/test_guarded_reproof.py` has 63 tests: 56 pure and 7
+Libadalang. The Libadalang tests are skipped without Libadalang, and CI
+forbids skips. The CI step `Task 013: guard-sensitive conjunct re-proof
+experiment` in `diagnostics-semantic` runs the seven GNATprove runs. It
+fails unless the verdict is `PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`.
+
+### O12. Recommended Task 014 (not started)
+
+A new pre-registered experiment, still without a user CLI:
+
+* **A.** Actual/formal mapping: named and reordered associations,
+  defaults, conversions, `in out` parameters and globals read by the
+  `Pre`.
+* **B.** Dispatching calls (class-wide `Pre`), overload selection and
+  generic instances. The target callee must be identified by Libadalang
+  resolution, not by name.
+* **C.** Longer and mixed chains (`C0 and then C1 and C2`), and guards
+  that are not top-level conjuncts (for example inside `if` / `case`
+  expressions or quantified expressions), exercised by proof runs.
+* **D.** Cost: probes limited to the needed units, GNATprove session or
+  `--replay` reuse, and a run-count bound per failure on a realistic
+  project (ring buffer / fixed pool).
+* **E.** Presentation only after A–D: how prefix-transition evidence
+  could be labelled as scratch evidence, if it is ever shown.
+
