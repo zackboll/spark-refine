@@ -4,6 +4,32 @@
 
 ### Research
 
+- Task 013 (experiment only, no product change): a pre-registered
+  guard-sensitive conjunct re-proof experiment,
+  `diagnostics/scripts/guarded_reproof_experiment.py`. It is outside the
+  installed package and adds no CLI command or flag.
+  - Corpus: new experimental input
+    `diagnostics/tests/experiments/task013_guarded/` with
+    `P /= null and then P.all > 0`, `I in A'Range and then A (I) > 0` and
+    `X in 12 .. 999 and then F (F (X)) > 20`, plus nine caller states.
+  - Method: cumulative source-prefix re-proof. Libadalang gives the
+    conjuncts, their source ranges and the original operators. The
+    scratch `Pre` is the exact original source slice `C0 .. Ci`, with the
+    remainder blanked and newlines preserved. A guarded later conjunct is
+    never probed in isolation: the planner refuses Task 012's
+    selected-only request. That is 1 control plus 6 prefix runs.
+  - Verdict: `PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`. The baseline
+    matched 9/9. All 18 prefix statuses and classifications matched:
+    `prefix_proved` 9, `newly_unproved` 6, `blocked_by_earlier_prefix` 3.
+    There were 0 justified, 0 disputed and 0 nested-unproved results.
+    Nested `F` precondition checks were recorded separately and were
+    never folded into the target VC.
+  - Unchanged: normal command output (byte-identical to Task 012 main),
+    `failed_conjunct: null`, `attribution: not_provided_by_gnatprove`,
+    and the Task 012 experiment and its corpus.
+  - CI: a new step in `diagnostics-semantic`, with `evidence.json` and
+    `timing.json` uploaded. There is no new job.
+  - See `docs/tasks/013-guard-sensitive-conjunct-reproof.md`.
 - Task 012 (experiment only, no product change): a pre-registered
   per-conjunct GNATprove re-proof experiment,
   `diagnostics/scripts/conjunct_reproof_experiment.py`. It is outside the

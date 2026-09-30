@@ -198,6 +198,22 @@ jobs:
           start=$(date +%s)
           alr -n exec -- python3 ../../diagnostics/scripts/conjunct_reproof_experiment.py
           echo "task 012 experiment wall seconds: $(( $(date +%s) - start ))"
+      # Task 013 (experiment, not a product feature): 1 unmodified control +
+      # 6 cumulative source-PREFIX scratch copies of the committed guarded
+      # corpus (tests/experiments/task013_guarded: access/null, array
+      # index, nested calls with their own Pre); 7 fresh GNATprove runs.
+      # A guarded later conjunct is never probed in isolation. Passes only
+      # on the frozen pre-registered decision rule
+      # (docs/tasks/013-guard-sensitive-conjunct-reproof.md):
+      # PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS. Scratch trees and
+      # evidence.json stay under the gitignored
+      # diagnostics/obj/task013-guarded-reproof/.
+      - name: "Task 013: guard-sensitive conjunct re-proof experiment"
+        working-directory: examples/ring_buffer
+        run: |
+          start=$(date +%s)
+          alr -n exec -- python3 ../../diagnostics/scripts/guarded_reproof_experiment.py
+          echo "task 013 experiment wall seconds: $(( $(date +%s) - start ))"
       - name: Upload semantic reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -209,6 +225,8 @@ jobs:
             diagnostics/obj/e2e/summary.json
             diagnostics/obj/task012-conjunct-reproof/evidence.json
             diagnostics/obj/task012-conjunct-reproof/timing.json
+            diagnostics/obj/task013-guarded-reproof/evidence.json
+            diagnostics/obj/task013-guarded-reproof/timing.json
           if-no-files-found: warn
 
   # Ring-buffer proof benchmarks, one toolchain setup for both
