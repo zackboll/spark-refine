@@ -1,0 +1,25 @@
+# Task 015 — external SPARK validation pilot
+
+## Preregistration (frozen before functional proof)
+
+Starting `origin/main`: `de7e740dee2d17b1a5eec699048e86b224f84989`; reviewed Task 014 head `faf1d02bb4afeac445f481af7f8633377be3b992` is an ancestor. This is validation of unchanged product behavior, not a new diagnostic.
+
+Candidates: `https://github.com/codelabs-ch/muen.git`, informational branch `devel`, commit `377335576569839b32fc53a228e71788e0deab43`; `https://github.com/ldm5180/sml-ada.git`, commit `3ccd0e4bf51685ebd832383c12166e795473a037`.
+
+Muen feasibility: exact pinned detached checkout is clean (tree `1ec5402b62f4299d80fb3f47d2e797a952638847`). At this commit `.gitmodules` lists build-cfg/common/rts/tools/contrib but the tree contains **no submodule gitlinks**, so `git submodule update --init build-cfg common rts tools contrib` fails with pathspec errors. The pinned README instead prescribes an external Bob recipe/layer checkout and generated build inputs; `MUEN_BUILD_MODE=prove gnatprove -P kernel/kernel.gpr --mode=check_all --output-header` cannot resolve `common_strings.gpr`, `crash_audit.gpr`, `muen_common.gpr` (nor the required generated policy/configuration). No kernel proof project has been resolved without separate unpinned build layers. This setup is **not reproducible here** under the exact pinned-project requirement; no functional VC was observed. No submodules initialized.
+
+Fallback feasibility: exact detached sml-ada checkout clean (tree `b2df981a0d40b524d319688ed09351f59915b620`), no submodules. `alr show --solve` resolved AUnit 26.0.0; initial check_all reported absent generated `config/sml_config.gpr`; upstream `alr build` generated it and succeeded, without tracked edits. `alr exec -- gnatprove -P proof/proof.gpr --mode=check_all --output-header` then succeeded. No functional proof results inspected. **TARGET = sml-ada**, frozen before proof; no switching based on results.
+
+Planned proof: from pinned sml-ada root, use the upstream `make prove` recipe's unchanged GNATprove options: `alr exec -- gnatprove -P proof/proof.gpr -j0 --level=2 --checks-as-errors=on --warnings=error --output-header`. The last switch adds an invocation audit header only. Remove safely generated `proof/obj/gnatprove` before this run. Planned result directory `proof/obj/gnatprove`. Tool versions discovered: FSF GNATprove 16.1.0 (Why3 1.8.2+git), Alire 2.1.1; Python 3.13.5. No proprietary service or hardware needed for fallback.
+
+### Frozen measurements and decisions
+
+Require fresh SARIF/.spark/.ali inventories and SHA-256 (plus text, core JSON, semantic JSON reports where available); record Git SHA, tree SHA, submodules, clean status before and after. Measure setup, proof, core explain and semantic explain independently. Structural counts only: GNATprove version; total/proved/unproved/justified; SARIF/.spark disputes; by-rule counts, source units, pre/post/assert/invariant/runtime counts. Report core exit, parse state, `analysis.rules`, notes, SRD001 invariant-unproved/post-proved structural evidence, SRD002 confidence and VC-type counts and dependency completeness. A disabled rule is **not** zero diagnostics.
+
+Attempt semantic only after successful core analysis, unchanged pinned source, explicit `proof/proof.gpr`, and Libadalang project loading. Record backend, exact/ambiguous/unresolved/unavailable and provenance; exact preconditions' callee/declaration/explicit Pre/conjuncts. Report Task 010 client failures/groups/grouped/ungrouped and group occurrence counts, comparing repeated calls with unique callee/contract groups as *triage consolidation*, not accuracy. Inventory (never execute) eligible conjunct probes only for SRD002 precondition, exact complete semantic context, explicit Pre, >=2 top-level conjuncts; record operators, prefix-planning feasibility, auxiliary obligations. Cost estimates: occurrence_count × prefix_count; unique programs = prefix_count; additional runs with baseline reuse = max(prefix_count − 1, 0). Descriptively review up to 20 diagnostics as mechanically_supported, insufficient_evidence_to_interpret, or toolchain_or_artifact_limitation; never infer bugs from diagnostic counts.
+
+Primary comparisons: raw unproved checks; SRD001/SRD002 surface; exact callee/Pre contexts; exact precondition occurrences versus contract groups; rules disabled with machine reasons. Outcome vocabulary: `EXTERNAL_VALIDATION_COMPLETED` (fresh proof and core report), `EXTERNAL_VALIDATION_BLOCKED_BY_COMPATIBILITY` (fresh proof but core ingestion impossible without product change), `EXTERNAL_TARGET_NOT_REPRODUCIBLE` (neither candidate can produce fresh artifacts). Independent states: target_selected, proof_reproduced, core_analysis, srd001_evaluated, srd002_evaluated, semantic_evaluated, grouping_available, probe_opportunities. No diagnostic threshold determines selection or verdict. Append observations below without changing this preregistration.
+
+## Observed results
+
+Pending functional proof.
