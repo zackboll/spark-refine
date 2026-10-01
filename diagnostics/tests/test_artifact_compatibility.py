@@ -4,6 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import support  # noqa: F401
+
 from spark_refine_diagnostics import analyze_path_report
 from spark_refine_diagnostics.loader import load_run
 from spark_refine_diagnostics.ali import load_ali_deps
