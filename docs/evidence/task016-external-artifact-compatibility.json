@@ -1,0 +1,869 @@
+{
+  "ali": [
+    {
+      "U": [
+        "bundled_proof%b",
+        "bundled_proof%s"
+      ],
+      "W": [
+        "machine_scaffold%s",
+        "sml%s",
+        "sml.machines%s",
+        "sml.machines.bundled%s"
+      ],
+      "Z": [
+        "machine_scaffold%s",
+        "sml.machines%s",
+        "sml.machines.bundled%s"
+      ],
+      "file": "bundled_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "composite_proof%b",
+        "composite_proof%s"
+      ],
+      "W": [
+        "machine_scaffold%s",
+        "sml%s",
+        "sml.machines%s",
+        "sml.machines.composite%s"
+      ],
+      "Z": [
+        "machine_scaffold%s",
+        "sml.machines%s",
+        "sml.machines.composite%s"
+      ],
+      "file": "composite_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "deferring_proof%b",
+        "deferring_proof%s"
+      ],
+      "W": [
+        "machine_scaffold%s",
+        "sml%s",
+        "sml.machines%s",
+        "sml.machines.deferring%s"
+      ],
+      "Z": [
+        "machine_scaffold%s",
+        "sml.machines%s",
+        "sml.machines.deferring%s"
+      ],
+      "file": "deferring_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "effects_loop_proof%b",
+        "effects_loop_proof%s"
+      ],
+      "W": [
+        "sml%s",
+        "sml.effects_loop%s"
+      ],
+      "Z": [],
+      "file": "effects_loop_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "machine_scaffold%b",
+        "machine_scaffold%s"
+      ],
+      "W": [
+        "sml%s",
+        "sml.machines%s"
+      ],
+      "Z": [],
+      "file": "machine_scaffold.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "reactive_proof%b",
+        "reactive_proof%s"
+      ],
+      "W": [
+        "machine_scaffold%s",
+        "sml%s",
+        "sml.machines%s",
+        "sml.machines.reactive%s"
+      ],
+      "Z": [
+        "machine_scaffold%s",
+        "sml.machines%s",
+        "sml.machines.reactive%s"
+      ],
+      "file": "reactive_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "regions_proof%b",
+        "regions_proof%s"
+      ],
+      "W": [
+        "machine_scaffold%s",
+        "sml%s",
+        "sml.machines%s",
+        "sml.machines.regions%s"
+      ],
+      "Z": [
+        "machine_scaffold%s",
+        "sml.machines%s",
+        "sml.machines.regions%s"
+      ],
+      "file": "regions_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "request_block_proof%s"
+      ],
+      "W": [
+        "sml%s",
+        "sml.request_block%s"
+      ],
+      "Z": [],
+      "file": "request_block_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "simple_proof%b",
+        "simple_proof%s"
+      ],
+      "W": [
+        "sml%s",
+        "sml.simple_machines%s"
+      ],
+      "Z": [
+        "sml.machines%s",
+        "sml.simple_machines%s",
+        "sml.machines%s"
+      ],
+      "file": "simple_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "trace_gate_proof%b",
+        "trace_gate_proof%s"
+      ],
+      "W": [
+        "ada%s",
+        "sml%s",
+        "sml.trace_gate%s"
+      ],
+      "Z": [
+        "sml.trace_gate%s",
+        "sml.tracing%s",
+        "ada.strings.text_buffers%s",
+        "ada.text_io%s",
+        "sml.tracing%s"
+      ],
+      "file": "trace_gate_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "tracing_proof%b",
+        "tracing_proof%s"
+      ],
+      "W": [
+        "ada%s",
+        "machine_scaffold%s",
+        "sml%s",
+        "sml.machines%s",
+        "sml.tracing%s"
+      ],
+      "Z": [
+        "ada.strings.text_buffers%s",
+        "machine_scaffold%s",
+        "sml.machines%s",
+        "sml.tracing%s",
+        "ada.text_io%s"
+      ],
+      "file": "tracing_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    },
+    {
+      "U": [
+        "turnstile_proof%b",
+        "turnstile_proof%s"
+      ],
+      "W": [
+        "machine_scaffold%s",
+        "sml%s",
+        "sml.machines%s",
+        "sml.machines.operators%s"
+      ],
+      "Z": [
+        "ada.strings.text_buffers%s",
+        "machine_scaffold%s",
+        "sml.machines%s",
+        "sml.machines.operators%s"
+      ],
+      "file": "turnstile_proof.ali",
+      "status": "ok",
+      "version": "GNAT Lib v16"
+    }
+  ],
+  "artifact_hashes": {
+    "ali_inventory": {
+      "count": 12,
+      "sha256": "fbd00edfc9e5a72b1a392fc5f663c461e4f996e61cd4199973e2564afaf2766c"
+    },
+    "core_json": "3b970fa4539d827eb7cdfa094c5e868e9b6f55f197d67c6a96f33cc62a4fa166",
+    "core_text": "fa4e66d4631833efdba9dcdde8c69c3c30f629d2572342654d0881330407fd17",
+    "gnatprove_sarif": "c86b55cd42de1b5d35d443a2c3cafc68bab9737dca51702118276d6c44999ec7",
+    "semantic_json": "ac80831573f1d98349467a0c88e25f804b19b908a09402da89284443fc6e976b",
+    "spark_inventory": {
+      "count": 12,
+      "sha256": "0c2af33ab1c45033b666cd7a335f27fae66b46614e42787ad435dfa392076cf9"
+    }
+  },
+  "authority_probe": {
+    "problems": [],
+    "status": "ok"
+  },
+  "before": {
+    "ali_problems": [
+      "sml.ali: missing (sml.ali: no such file)"
+    ],
+    "ali_status": "unavailable",
+    "disputed_units": [
+      "sml"
+    ],
+    "issues": 19,
+    "srd001": {
+      "count": 0,
+      "evaluated": true
+    },
+    "srd002": {
+      "count": null,
+      "evaluated": false,
+      "reason": "sml.ali: missing (sml.ali: no such file)"
+    }
+  },
+  "counts": {
+    "entity": {
+      "": 18,
+      "Sml.Never": 1
+    },
+    "kind": {
+      "pass": 19
+    },
+    "level": {
+      "none": 19
+    },
+    "rule": {
+      "SUBPROGRAM_TERMINATION": 1,
+      "error": 18
+    },
+    "taxonomy": {
+      "unexplained": 19
+    }
+  },
+  "external_commit": "3ccd0e4bf51685ebd832383c12166e795473a037",
+  "gates": {
+    "ali": "passed: all 12 structural UnitResults have supported ALI and U records; sole missing request is fallback-only sml",
+    "mismatch": "failed: no structural proof that any missing counterpart is expected"
+  },
+  "mismatches": [
+    {
+      "column": 13,
+      "entity": "Sml.Never",
+      "fallback_unit": "sml",
+      "file": "sml.ads",
+      "index": 0,
+      "kind": "pass",
+      "level": "none",
+      "line": 7,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "SUBPROGRAM_TERMINATION",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 37,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 34,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines-reactive.adb",
+      "index": 38,
+      "kind": "pass",
+      "level": "none",
+      "line": 13,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 106,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines-regions.adb",
+      "index": 107,
+      "kind": "pass",
+      "level": "none",
+      "line": 8,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 184,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 185,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 217,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 253,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 33,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines-deferring.adb",
+      "index": 254,
+      "kind": "pass",
+      "level": "none",
+      "line": 16,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 281,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 14,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "effects_loop_proof.adb",
+      "index": 294,
+      "kind": "pass",
+      "level": "none",
+      "line": 16,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 14,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "effects_loop_proof.adb",
+      "index": 295,
+      "kind": "pass",
+      "level": "none",
+      "line": 24,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 14,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "effects_loop_proof.adb",
+      "index": 296,
+      "kind": "pass",
+      "level": "none",
+      "line": 34,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 14,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "effects_loop_proof.adb",
+      "index": 297,
+      "kind": "pass",
+      "level": "none",
+      "line": 41,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 14,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "effects_loop_proof.adb",
+      "index": 298,
+      "kind": "pass",
+      "level": "none",
+      "line": 50,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 14,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-effects_loop.adb",
+      "index": 299,
+      "kind": "pass",
+      "level": "none",
+      "line": 6,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 331,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    },
+    {
+      "column": 24,
+      "entity": "",
+      "fallback_unit": null,
+      "file": "sml-machines.adb",
+      "index": 373,
+      "kind": "pass",
+      "level": "none",
+      "line": 64,
+      "one_field_candidates": {
+        "column": [],
+        "entity": [],
+        "file": [],
+        "line": [],
+        "rule": []
+      },
+      "path_candidates": [],
+      "rule": "error",
+      "status": "proved",
+      "suppressions": [],
+      "taxonomy": "unexplained"
+    }
+  ],
+  "proof_rerun": false,
+  "sets": {
+    "ali_units": [
+      "bundled_proof",
+      "composite_proof",
+      "deferring_proof",
+      "effects_loop_proof",
+      "machine_scaffold",
+      "reactive_proof",
+      "regions_proof",
+      "request_block_proof",
+      "simple_proof",
+      "trace_gate_proof",
+      "tracing_proof",
+      "turnstile_proof"
+    ],
+    "fallback_only_units": [
+      "sml"
+    ],
+    "missing_requested_ali_units": [
+      "sml"
+    ],
+    "requested_ali_units": [
+      "bundled_proof",
+      "composite_proof",
+      "deferring_proof",
+      "effects_loop_proof",
+      "machine_scaffold",
+      "reactive_proof",
+      "regions_proof",
+      "request_block_proof",
+      "simple_proof",
+      "sml",
+      "trace_gate_proof",
+      "tracing_proof",
+      "turnstile_proof"
+    ],
+    "run_unit_names": [
+      "bundled_proof",
+      "composite_proof",
+      "deferring_proof",
+      "effects_loop_proof",
+      "machine_scaffold",
+      "reactive_proof",
+      "regions_proof",
+      "request_block_proof",
+      "simple_proof",
+      "sml",
+      "trace_gate_proof",
+      "tracing_proof",
+      "turnstile_proof"
+    ],
+    "spark_units": [
+      "bundled_proof",
+      "composite_proof",
+      "deferring_proof",
+      "effects_loop_proof",
+      "machine_scaffold",
+      "reactive_proof",
+      "regions_proof",
+      "request_block_proof",
+      "simple_proof",
+      "trace_gate_proof",
+      "tracing_proof",
+      "turnstile_proof"
+    ]
+  },
+  "spark": [
+    {
+      "file": "bundled_proof.spark",
+      "flow": 18,
+      "proof": 23,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "bundled_proof"
+    },
+    {
+      "file": "composite_proof.spark",
+      "flow": 16,
+      "proof": 15,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "composite_proof"
+    },
+    {
+      "file": "deferring_proof.spark",
+      "flow": 15,
+      "proof": 20,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "deferring_proof"
+    },
+    {
+      "file": "effects_loop_proof.spark",
+      "flow": 5,
+      "proof": 4,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "effects_loop_proof"
+    },
+    {
+      "file": "machine_scaffold.spark",
+      "flow": 0,
+      "proof": 0,
+      "stop_reason": "STOP_REASON_GENERIC_UNIT",
+      "unit": "machine_scaffold"
+    },
+    {
+      "file": "reactive_proof.spark",
+      "flow": 18,
+      "proof": 18,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "reactive_proof"
+    },
+    {
+      "file": "regions_proof.spark",
+      "flow": 14,
+      "proof": 18,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "regions_proof"
+    },
+    {
+      "file": "request_block_proof.spark",
+      "flow": 2,
+      "proof": 1,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "request_block_proof"
+    },
+    {
+      "file": "simple_proof.spark",
+      "flow": 9,
+      "proof": 17,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "simple_proof"
+    },
+    {
+      "file": "trace_gate_proof.spark",
+      "flow": 2,
+      "proof": 33,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "trace_gate_proof"
+    },
+    {
+      "file": "tracing_proof.spark",
+      "flow": 18,
+      "proof": 58,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "tracing_proof"
+    },
+    {
+      "file": "turnstile_proof.spark",
+      "flow": 18,
+      "proof": 13,
+      "stop_reason": "STOP_REASON_NONE",
+      "unit": "turnstile_proof"
+    }
+  ],
+  "verdicts": {
+    "ALI_CORRECTION": "IMPLEMENTED",
+    "ALI_ROOT_CAUSE": "CONFIRMED",
+    "CAUSAL_RELATIONSHIP": "PARTIAL",
+    "MISMATCH_CORRECTION": "DEFERRED_INSUFFICIENT_EVIDENCE",
+    "MISMATCH_ROOT_CAUSE": "NOT_CONFIRMED"
+  }
+}
