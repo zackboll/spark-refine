@@ -1,0 +1,13 @@
+# Task 016 — external artifact compatibility
+
+## Frozen investigation protocol (before product changes)
+
+Starting origin/main `33d174d8a4b92bc9730468b7f5651ecca08174e8`; Task 015 reviewed head is an ancestor. Task 015 recorded 356/356 proved, 19 SARIF checks without `.spark` entries, and SRD002 unavailable due to missing `sml.ali`. These are historical observations, not proof that either artifact is wrong. Preserve Task 015 evidence and source unchanged. The pinned detached external commit is `3ccd0e4bf51685ebd832383c12166e795473a037`; checkout is tracked-clean. SARIF, 12 `.spark`, 12 `.ali`, core and semantic hashes match Task 015 evidence; no proof rerun is needed.
+
+Hypothesis A: unmatched SARIF checks may receive entity-fallback unit `sml`, enter `ProofRun.unit_names()`, request a nonexistent ALI, and globally disable SRD002. Measure each edge, not just filenames: parsed `.spark` unit results and counts; ALI U/W/Z records and version; fallback-only units; requested and missing ALI units; checks producing `sml`. A dependency-unit correction is permitted only if every authoritative `.spark` unit has supported valid ALI, all missing requests are fallback-only, and excluding them loses no analysed implementation unit. SARIF-only behavior must remain conservative; analyzer and SRD002 graph must share the same authority definition.
+
+Hypothesis B: the 19 mismatches may be structurally SARIF-only categories, matching-key differences, duplicate cardinality differences, or unexplained discrepancies. Inventory each record by index/rule/kind/level/suppressions/location/entity/status/fallback; compare exact keys and one-field-drop candidates, path/basename and multiplicities without consulting message prose. Only suppress matching for a proven structurally identifiable category never represented by proof/flow `.spark` entries, with evidence that this cannot conceal an unproved obligation. Otherwise retain all disputes.
+
+Replay the unchanged raw results before and after: consistency issues, disputed units, requested ALIs, ALI status, SRD001 and SRD002 state, proof statuses. Record inventories, taxonomy, gate decisions and causal relationship in new path-free Task 016 evidence. Synthetic production regressions cannot depend on the ignored checkout; preserve existing fixtures and reports except explicitly targeted cases.
+
+STOP any correction requiring message heuristics, guessed dependencies or units from filename stems alone, hiding unexplained disagreement, altering external source/results, changing SRD002 meaning, or manufacturing failures/probes. No SRD004, no Tasks 012–014 productization. A failed gate is a valid outcome. This protocol is frozen in the first commit; later findings go below in separate commits.
