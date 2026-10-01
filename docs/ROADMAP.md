@@ -19,6 +19,13 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Completed
 
+Task 018: independent upstream qualification across the five proposed projects
+found no committed natural GNATprove-16 failure with sufficient documented
+SRD001/SRD002 structure. No functional external proof was run; the memcp spike
+was rejected as uncommitted. Verdict **NO_NATURAL_POSITIVE_CANDIDATE_QUALIFIED**.
+Defer positive external validation until an upstream case meets the gate;
+do not broaden the rules. See [Task 018](tasks/018-external-positive-candidate.md).
+
 Task 017: Ada_CRDT's independently selected WIP revision reproduces 11 natural
 unproved checks (control: zero). Both SRD001 and ALI-backed SRD002 evaluate
 successfully but emit zero diagnostics: none of the 11 meets their narrow rule

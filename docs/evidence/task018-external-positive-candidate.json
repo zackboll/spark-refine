@@ -1,0 +1,101 @@
+{
+  "branch": "feature/018-external-positive-candidate",
+  "candidates": [
+    {
+      "category": "REJECT_NO_STRUCTURAL_UPSTREAM_EVIDENCE",
+      "control_sha": "35a63ca03bb4888c5f822db3638f280efa3465be",
+      "documented_entity": null,
+      "documented_failed_vc": null,
+      "expected_rule": "unknown",
+      "failing_sha_candidate": "9608db5497999dac6f07a158a9f19308ade99a4f",
+      "gnatprove_constraint": "^16.0.0 (current manifest)",
+      "proof_command": null,
+      "reason": "Proof-work message and diff do not document failed check and same-entity postcondition or client-only boundary structure.",
+      "repository": "docandrew/SPARKTLS",
+      "upstream_references": [
+        "https://github.com/docandrew/SPARKTLS/commit/35a63ca03bb4888c5f822db3638f280efa3465be"
+      ]
+    },
+    {
+      "category": "REJECT_WRONG_VC_SHAPE",
+      "control_sha": "674a81b6d2fee5f9aa550e3a53cc9ab7f2802dbf",
+      "documented_entity": "Build_Certificate_Verify_12 (unit test caller)",
+      "documented_failed_vc": "checked-build precondition; no documented GNATprove failed VC",
+      "expected_rule": "neither",
+      "failing_sha_candidate": "e2264669367b00f6df7d399c539dfa57ac9877bc",
+      "gnatprove_constraint": "^16.0.0 (current manifest)",
+      "proof_command": null,
+      "reason": "Test buffer resizing is not documented client-only contract-boundary proof failure.",
+      "repository": "docandrew/SPARKTLS",
+      "upstream_references": [
+        "https://github.com/docandrew/SPARKTLS/commit/674a81b6d2fee5f9aa550e3a53cc9ab7f2802dbf"
+      ]
+    },
+    {
+      "category": "REJECT_UNCOMMITTED_FAILURE",
+      "control_sha": "bb36d4dc7b90d516bd4bc32e80ef0fddd3061030",
+      "documented_entity": "Memcp_Resources.Open / global caller",
+      "documented_failed_vc": "spike caller cannot discharge Open Pre; throwaway caller assertion fails",
+      "expected_rule": "SRD002-shaped spike only",
+      "failing_sha_candidate": null,
+      "gnatprove_constraint": "GNATprove 16 (upstream)",
+      "proof_command": "make prove (fix only)",
+      "reason": "PR explicitly describes two throwaway experiments; no committed failing spike found.",
+      "repository": "manthonyaiello/memcp",
+      "upstream_references": [
+        "https://github.com/manthonyaiello/memcp/issues/20",
+        "https://github.com/manthonyaiello/memcp/pull/21",
+        "https://github.com/manthonyaiello/memcp/commit/bb36d4dc7b90d516bd4bc32e80ef0fddd3061030"
+      ]
+    },
+    {
+      "category": "REJECT_NO_STRUCTURAL_UPSTREAM_EVIDENCE",
+      "control_sha": "076bb415beb7ae5ae759165550828a39f041eb43",
+      "documented_entity": null,
+      "documented_failed_vc": null,
+      "expected_rule": "unknown",
+      "failing_sha_candidate": "a7fea78bc423a239af4458289dee60832e752a43",
+      "gnatprove_constraint": "not established from root manifest",
+      "proof_command": null,
+      "reason": "Policy extraction does not document an upstream failed SRD001/SRD002 check.",
+      "repository": "flyology-ada/flyology",
+      "upstream_references": [
+        "https://github.com/flyology-ada/flyology/commit/076bb415beb7ae5ae759165550828a39f041eb43"
+      ]
+    },
+    {
+      "category": "REJECT_NO_STRUCTURAL_UPSTREAM_EVIDENCE",
+      "control_sha": "4d939cd5da44da42b62e8ceb01a004bd102f787c",
+      "documented_entity": "MJ.Models layout predicates",
+      "documented_failed_vc": null,
+      "expected_rule": "neither",
+      "failing_sha_candidate": "7ddd6a562816b8481b251b7943f92cb1fba9a901",
+      "gnatprove_constraint": "^16 (root manifest)",
+      "proof_command": null,
+      "reason": "Memory/performance issue does not identify a failed invariant or client VC.",
+      "repository": "MABS3D/SPARKling-MuJoCo",
+      "upstream_references": [
+        "https://github.com/MABS3D/SPARKling-MuJoCo/commit/4d939cd5da44da42b62e8ceb01a004bd102f787c"
+      ]
+    },
+    {
+      "category": "REJECT_ALREADY_TESTED",
+      "control_sha": "aeb809456846935ef126df1b5ec1c3d79a83fab1",
+      "documented_entity": null,
+      "documented_failed_vc": "nine overflow, one postcondition, one aliasing (Task 017)",
+      "expected_rule": "neither",
+      "failing_sha_candidate": "5fa2c0cee62deb86368fcc84a8d3b06726028276",
+      "gnatprove_constraint": "^16.1.0 (development manifest)",
+      "proof_command": "alr exec -- gnatprove -P crdt.gpr -j 30 --steps 10000 --no-loop-unrolling (Task 017)",
+      "reason": "Previously evaluated natural failure is outside both rules.",
+      "repository": "bladeacer/Ada_CRDT",
+      "upstream_references": [
+        "https://github.com/bladeacer/Ada_CRDT/commit/5fa2c0cee62deb86368fcc84a8d3b06726028276"
+      ]
+    }
+  ],
+  "selected": null,
+  "selection_rule_result": "no qualified candidates; tie-break not applied",
+  "starting_main": "3f869f29c028fefd421c14b4190beddf4dd87ce2",
+  "verdict": "NO_NATURAL_POSITIVE_CANDIDATE_QUALIFIED"
+}
