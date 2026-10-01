@@ -37,8 +37,22 @@ Research date: 2026-09-26.
 > call checks kept separate from the target VC
 > ([Task 013](tasks/013-guard-sensitive-conjunct-reproof.md)). After an
 > unproved prefix the method says nothing about later conjuncts, and a
-> `newly_unproved` transition is not a root cause. Actual/formal
-> mappings, dispatching, generics and cost remain open.
+> `newly_unproved` transition is not a root cause. Ada call binding and
+> realistic-project cost remained to be tested at that point.
+>
+> Task 014 tested call binding on a pre-registered controlled corpus:
+> `CALL_BINDING_METHOD_VALIDATED_ON_PREREGISTERED_SUPPORTED_CASES` for 26
+> call occurrences, 7 resolved callee contracts and 60 per-occurrence
+> observations from a baseline plus 15 callee-prefix programs
+> ([Task 014](tasks/014-ada-call-binding-reproof.md)). Libadalang identifies
+> the actual resolved declaration and contract source; GNATprove performs
+> Ada actual/formal binding on unchanged callers. `spark-refine` does not
+> implement an argument-substitution engine. Overloads, one generic
+> instance (template `Pre`) and the preregistered dispatching case (root
+> `Pre'Class`) were handled on this corpus, not arbitrary Ada generics or
+> dispatch. A8's unproved conversion VC was auxiliary, not clean
+> conjunct evidence. Scratch evidence is not proof of the original
+> program; realistic/external validation and cost remain open.
 
 This repository was bootstrapped after surveying current SPARK/AdaCore documentation and adjacent tooling to avoid building a project that merely duplicates an existing feature.
 
