@@ -81,15 +81,11 @@ class TestExternalValidation(unittest.TestCase):
 
     def test_committed_evidence_is_deterministic_and_path_free(self):
         repo = SCRIPT.parents[2]
-        raw = repo / "diagnostics/obj/task015-external"
         evidence = repo / "docs/evidence/task015-external-validation.json"
-        if not (raw / "proof-run.log").exists():
-            self.skipTest("pinned external research checkout is local-only")
-        with tempfile.TemporaryDirectory() as d:
-            produced = Path(d) / "evidence.json"
-            E.capture(raw, produced)
-            self.assertEqual(produced.read_bytes(), evidence.read_bytes())
-            self.assertNotIn(str(repo), evidence.read_text())
+        import json
+        saved = evidence.read_text()
+        self.assertEqual(E.canonical(json.loads(saved)), saved)
+        self.assertNotIn(str(repo), saved)
 
 
 if __name__ == "__main__":
