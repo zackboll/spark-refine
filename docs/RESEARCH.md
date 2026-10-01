@@ -1,5 +1,9 @@
 # Research Notes and References
 
+## Task 017: natural external failure, outside diagnostic scope
+
+Detached Ada_CRDT `5fa2c0c` reproduced 11 unproved VCs under the upstream-compatible GNATprove 16.1.0 procedure; direct child `aeb8094` reproduced zero. The unchanged product ingested both fresh result sets; SRD001 and SRD002 evaluated, with zero diagnostics each and supported ALI dependencies. Nine overflow checks, one postcondition and one aliasing check do not match either rule's masking-risk or client-only structure. No semantic grouping or external conjunct probe occurred. The child is structural context, not proof of a specific fix. [Protocol and results](tasks/017-positive-external-validation.md).
+
 Research date: 2026-09-26.
 
 > **Status (Task 007).** The survey predates the experiments. Its

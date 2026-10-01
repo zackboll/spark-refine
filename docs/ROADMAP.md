@@ -19,6 +19,12 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Completed
 
+Task 017: Ada_CRDT's independently selected WIP revision reproduces 11 natural
+unproved checks (control: zero). Both SRD001 and ALI-backed SRD002 evaluate
+successfully but emit zero diagnostics: none of the 11 meets their narrow rule
+patterns. This is **EXTERNAL_FAILURE_REPRODUCED_NO_MATCHING_DIAGNOSTIC**, not
+positive external validation. See [Task 017](tasks/017-positive-external-validation.md).
+
 | Step | Task(s) | Outcome |
 |---|---|---|
 | Experimental baseline and generator hypothesis | 001, 002 | manual ring buffers A and B: `P = 19` and `21`. Hypothesis weakened twice |
