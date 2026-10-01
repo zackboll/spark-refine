@@ -33,6 +33,7 @@ Two pillars, with GNATprove as the proof authority:
 | SRD002 semantic triage groups | 010 | report-level `analysis.semantic.srd002_groups` and a text triage section: exact `VC_PRECONDITION` failures grouped by identical callee declaration + explicit `Pre`; everything else is ungrouped with a machine reason; every failure appears exactly once. `ring_no_is_full_post`: 3 Push failures → 1 group. Descriptive only (no cause, no group confidence, no conjunct). Diagnostics unchanged |
 | Defensive semantic rendering | 011 | malformed internal semantic entries render as `semantic entry: incomplete`; one shared completeness contract (`semantic_shape.py`); valid output byte-identical |
 | Per-conjunct re-proof experiment | 012 | pre-registered experiment (script outside the product, `diagnostics/scripts/conjunct_reproof_experiment.py`). Scratch copies of the Task 009 corpus replace a callee's `Pre` by ONE top-level conjunct, then GNATprove is re-run: 1 control + 5 probes. Result: **VALIDATED_ON_CONTROLLED_CORPUS**. Baseline 4/4 unproved; all 9 probe observations match (4 proved / 5 unproved / 0 justified); `First_Fails` [U, P] vs `Both_Fail` [U, U] distinguished. Only independent total conjuncts; no product change, `failed_conjunct` stays `null` |
+| Ada call-binding conjunct re-proof experiment | 014 | **CALL_BINDING_METHOD_VALIDATED_ON_PREREGISTERED_SUPPORTED_CASES** on a controlled corpus: 26 Libadalang-resolved call occurrences, 7 resolved callee contracts, baseline + 15 unique callee-prefix programs, 60 per-occurrence prefix observations. Validated positional/named/reordered actuals, defaulted formals, explicit conversion handling, an `in out` formal, package state / `Proof_In` `Pre`, overload resolution by declaration identity, a generic instance → template `Pre` source, and a class-wide dispatching call → root `Pre'Class`. A8's unproved conversion VC remained auxiliary; its call-prefix result was **not** clean conjunct evidence. Scratch evidence only; no product change ([Task 014](tasks/014-ada-call-binding-reproof.md)) |
 
 ## Decisions
 
@@ -46,31 +47,14 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Near term
 
-* **Conjunct re-proof: harden before any productization (Task 014,
-  proposed).** Existing GNATprove output does not identify a failed `Pre`
-  conjunct (Task 009). Task 012 showed that scratch per-conjunct
-  re-proofs give the expected per-call evidence, but only for
-  independent, total integer conjuncts. Task 013 addressed guard-dependent
-  `and then` conjuncts and nested calls with their own `Pre`. It probes
-  only cumulative source prefixes (`C0`, `C0 and then C1`, ...), never
-  an isolated guarded conjunct, and reads the per-call prefix transition.
-  On a controlled access/null, array-index and nested-call corpus it
-  gave `PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`: 18/18
-  pre-registered observations, with nested `F` checks kept separate from
-  the target VC. After an unproved prefix it makes no claim about later
-  conjuncts. Still open before any user CLI (Task 014):
-  A. complex actual/formal mappings (named/reordered, defaults,
-     conversions, `in out`/globals);
-  B. dispatching, overloading and generics;
-  C. longer/mixed `and`/`and then` chains and non-top-level guards,
-     exercised by proof runs;
-  D. probe cost on realistic projects (unit restriction, session reuse);
-  E. how to present new scratch-proof evidence without it being confused
-     with the production proof.
-
-  A Task 010 group never transfers one probe result to all of its
-  occurrences: every call is probed and read separately. Until this
-  work is done, normal reports keep `failed_conjunct: null`.
+* **Realistic/external validation (Task 015 direction, not started).**
+  Tasks 012–014 validated different scratch re-proof methods only on
+  controlled corpora. Next measure whether per-occurrence evidence and
+  proof cost hold on a SPARK codebase not written for these diagnostics;
+  do not infer arbitrary Ada generic/dispatch support or productize a
+  conjunct attribution from the controlled results. After an unproved
+  prefix, later conjuncts remain unassessed. Normal reports still keep
+  `failed_conjunct: null`.
 
 ## Later
 

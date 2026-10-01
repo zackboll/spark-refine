@@ -214,6 +214,14 @@ jobs:
           start=$(date +%s)
           alr -n exec -- python3 ../../diagnostics/scripts/guarded_reproof_experiment.py
           echo "task 013 experiment wall seconds: $(( $(date +%s) - start ))"
+      # Task 014: one baseline and 15 callee-prefix scratch programs.
+      # The frozen call-binding decision rule is in docs/tasks/014-ada-call-binding-reproof.md.
+      - name: "Task 014: Ada call-binding prefix re-proof experiment"
+        working-directory: examples/ring_buffer
+        run: |
+          start=$(date +%s)
+          alr -n exec -- python3 ../../diagnostics/scripts/call_binding_reproof_experiment.py
+          echo "task 014 experiment wall seconds: $(( $(date +%s) - start ))"
       - name: Upload semantic reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -227,6 +235,8 @@ jobs:
             diagnostics/obj/task012-conjunct-reproof/timing.json
             diagnostics/obj/task013-guarded-reproof/evidence.json
             diagnostics/obj/task013-guarded-reproof/timing.json
+            diagnostics/obj/task014-call-binding-reproof/evidence.json
+            diagnostics/obj/task014-call-binding-reproof/timing.json
           if-no-files-found: warn
 
   # Ring-buffer proof benchmarks, one toolchain setup for both

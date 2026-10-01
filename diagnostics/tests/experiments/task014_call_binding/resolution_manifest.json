@@ -1,0 +1,893 @@
+{
+  "callees": {
+    "above": {
+      "conjuncts": [
+        "Threshold > 0",
+        "X > Threshold"
+      ],
+      "contract": {
+        "span": {
+          "end_column": 36,
+          "end_line": 28,
+          "file": "src/binding_ops.ads",
+          "start_column": 19,
+          "start_line": 27
+        },
+        "text": "Threshold > 0\n                  and X > Threshold"
+      },
+      "contract_aspect": "Pre",
+      "declaration": {
+        "end_column": 43,
+        "end_line": 29,
+        "file": "src/binding_ops.ads",
+        "start_column": 4,
+        "start_line": 26
+      },
+      "dispatching_call": false,
+      "family": "C",
+      "fully_qualified_name": "Binding_Ops.Above",
+      "generic_instantiations": [],
+      "kind": "procedure",
+      "label": "above",
+      "mutable_file": "src/binding_ops.ads",
+      "operators": [
+        "and"
+      ],
+      "other_precondition_aspect_present": false,
+      "overriding_declarations": [],
+      "prefix_count": 2,
+      "prefix_texts": [
+        "Threshold > 0",
+        "Threshold > 0\n                  and X > Threshold"
+      ],
+      "uninstantiated_declaration": {
+        "declaration": {
+          "end_column": 43,
+          "end_line": 29,
+          "file": "src/binding_ops.ads",
+          "start_column": 4,
+          "start_line": 26
+        },
+        "fully_qualified_name": "Binding_Ops.Above"
+      },
+      "unique_identifying_name": "binding_ops.above(standard.integer)"
+    },
+    "check_bool": {
+      "conjuncts": [
+        "X",
+        "N > 0"
+      ],
+      "contract": {
+        "span": {
+          "end_column": 33,
+          "end_line": 39,
+          "file": "src/binding_ops.ads",
+          "start_column": 19,
+          "start_line": 38
+        },
+        "text": "X\n                  and then N > 0"
+      },
+      "contract_aspect": "Pre",
+      "declaration": {
+        "end_column": 24,
+        "end_line": 40,
+        "file": "src/binding_ops.ads",
+        "start_column": 4,
+        "start_line": 37
+      },
+      "dispatching_call": false,
+      "family": "D",
+      "fully_qualified_name": "Binding_Ops.Check",
+      "generic_instantiations": [],
+      "kind": "procedure",
+      "label": "check_bool",
+      "mutable_file": "src/binding_ops.ads",
+      "operators": [
+        "and then"
+      ],
+      "other_precondition_aspect_present": false,
+      "overriding_declarations": [],
+      "prefix_count": 2,
+      "prefix_texts": [
+        "X",
+        "X\n                  and then N > 0"
+      ],
+      "uninstantiated_declaration": {
+        "declaration": {
+          "end_column": 24,
+          "end_line": 40,
+          "file": "src/binding_ops.ads",
+          "start_column": 4,
+          "start_line": 37
+        },
+        "fully_qualified_name": "Binding_Ops.Check"
+      },
+      "unique_identifying_name": "binding_ops.check(standard.boolean, standard.integer)"
+    },
+    "check_int": {
+      "conjuncts": [
+        "X > 0",
+        "N > X"
+      ],
+      "contract": {
+        "span": {
+          "end_column": 28,
+          "end_line": 34,
+          "file": "src/binding_ops.ads",
+          "start_column": 19,
+          "start_line": 33
+        },
+        "text": "X > 0\n                  and N > X"
+      },
+      "contract_aspect": "Pre",
+      "declaration": {
+        "end_column": 24,
+        "end_line": 35,
+        "file": "src/binding_ops.ads",
+        "start_column": 4,
+        "start_line": 32
+      },
+      "dispatching_call": false,
+      "family": "D",
+      "fully_qualified_name": "Binding_Ops.Check",
+      "generic_instantiations": [],
+      "kind": "procedure",
+      "label": "check_int",
+      "mutable_file": "src/binding_ops.ads",
+      "operators": [
+        "and"
+      ],
+      "other_precondition_aspect_present": false,
+      "overriding_declarations": [],
+      "prefix_count": 2,
+      "prefix_texts": [
+        "X > 0",
+        "X > 0\n                  and N > X"
+      ],
+      "uninstantiated_declaration": {
+        "declaration": {
+          "end_column": 24,
+          "end_line": 35,
+          "file": "src/binding_ops.ads",
+          "start_column": 4,
+          "start_line": 32
+        },
+        "fully_qualified_name": "Binding_Ops.Check"
+      },
+      "unique_identifying_name": "binding_ops.check(standard.integer, standard.integer)"
+    },
+    "generic_check": {
+      "conjuncts": [
+        "X > 0",
+        "X < 100"
+      ],
+      "contract": {
+        "span": {
+          "end_column": 35,
+          "end_line": 9,
+          "file": "src/binding_generic.ads",
+          "start_column": 19,
+          "start_line": 8
+        },
+        "text": "X > 0\n                  and then X < 100"
+      },
+      "contract_aspect": "Pre",
+      "declaration": {
+        "end_column": 24,
+        "end_line": 10,
+        "file": "src/binding_generic.ads",
+        "start_column": 4,
+        "start_line": 7
+      },
+      "dispatching_call": false,
+      "family": "E",
+      "fully_qualified_name": "Binding_Int_Ops.Check",
+      "generic_instantiations": [
+        {
+          "end_column": 58,
+          "end_line": 4,
+          "file": "src/binding_int_ops.ads",
+          "start_column": 1,
+          "start_line": 4
+        }
+      ],
+      "kind": "procedure",
+      "label": "generic_check",
+      "mutable_file": "src/binding_generic.ads",
+      "operators": [
+        "and then"
+      ],
+      "other_precondition_aspect_present": false,
+      "overriding_declarations": [],
+      "prefix_count": 2,
+      "prefix_texts": [
+        "X > 0",
+        "X > 0\n                  and then X < 100"
+      ],
+      "uninstantiated_declaration": {
+        "declaration": {
+          "end_column": 24,
+          "end_line": 10,
+          "file": "src/binding_generic.ads",
+          "start_column": 4,
+          "start_line": 7
+        },
+        "fully_qualified_name": "Binding_Generic.Check"
+      },
+      "unique_identifying_name": "binding_int_ops.check(standard.integer)"
+    },
+    "map_op": {
+      "conjuncts": [
+        "A > 0",
+        "B > 0",
+        "C > 0"
+      ],
+      "contract": {
+        "span": {
+          "end_column": 33,
+          "end_line": 12,
+          "file": "src/binding_ops.ads",
+          "start_column": 19,
+          "start_line": 10
+        },
+        "text": "A > 0\n                  and then B > 0\n                  and then C > 0"
+      },
+      "contract_aspect": "Pre",
+      "declaration": {
+        "end_column": 24,
+        "end_line": 13,
+        "file": "src/binding_ops.ads",
+        "start_column": 4,
+        "start_line": 6
+      },
+      "dispatching_call": false,
+      "family": "A",
+      "fully_qualified_name": "Binding_Ops.Map_Op",
+      "generic_instantiations": [],
+      "kind": "procedure",
+      "label": "map_op",
+      "mutable_file": "src/binding_ops.ads",
+      "operators": [
+        "and then",
+        "and then"
+      ],
+      "other_precondition_aspect_present": false,
+      "overriding_declarations": [],
+      "prefix_count": 3,
+      "prefix_texts": [
+        "A > 0",
+        "A > 0\n                  and then B > 0",
+        "A > 0\n                  and then B > 0\n                  and then C > 0"
+      ],
+      "uninstantiated_declaration": {
+        "declaration": {
+          "end_column": 24,
+          "end_line": 13,
+          "file": "src/binding_ops.ads",
+          "start_column": 4,
+          "start_line": 6
+        },
+        "fully_qualified_name": "Binding_Ops.Map_Op"
+      },
+      "unique_identifying_name": "binding_ops.map_op(standard.integer, standard.integer, standard.integer)"
+    },
+    "mutate": {
+      "conjuncts": [
+        "X > 0",
+        "Limit > X"
+      ],
+      "contract": {
+        "span": {
+          "end_column": 37,
+          "end_line": 20,
+          "file": "src/binding_ops.ads",
+          "start_column": 19,
+          "start_line": 19
+        },
+        "text": "X > 0\n                  and then Limit > X"
+      },
+      "contract_aspect": "Pre",
+      "declaration": {
+        "end_column": 24,
+        "end_line": 21,
+        "file": "src/binding_ops.ads",
+        "start_column": 4,
+        "start_line": 16
+      },
+      "dispatching_call": false,
+      "family": "B",
+      "fully_qualified_name": "Binding_Ops.Mutate",
+      "generic_instantiations": [],
+      "kind": "procedure",
+      "label": "mutate",
+      "mutable_file": "src/binding_ops.ads",
+      "operators": [
+        "and then"
+      ],
+      "other_precondition_aspect_present": false,
+      "overriding_declarations": [],
+      "prefix_count": 2,
+      "prefix_texts": [
+        "X > 0",
+        "X > 0\n                  and then Limit > X"
+      ],
+      "uninstantiated_declaration": {
+        "declaration": {
+          "end_column": 24,
+          "end_line": 21,
+          "file": "src/binding_ops.ads",
+          "start_column": 4,
+          "start_line": 16
+        },
+        "fully_qualified_name": "Binding_Ops.Mutate"
+      },
+      "unique_identifying_name": "binding_ops.mutate(standard.integer, standard.integer)"
+    },
+    "resize": {
+      "conjuncts": [
+        "N > 0",
+        "N < 100"
+      ],
+      "contract": {
+        "span": {
+          "end_column": 38,
+          "end_line": 12,
+          "file": "src/binding_shapes.ads",
+          "start_column": 22,
+          "start_line": 11
+        },
+        "text": "N > 0\n                     and then N < 100"
+      },
+      "contract_aspect": "Pre'Class",
+      "declaration": {
+        "end_column": 27,
+        "end_line": 13,
+        "file": "src/binding_shapes.ads",
+        "start_column": 4,
+        "start_line": 10
+      },
+      "dispatching_call": true,
+      "family": "F",
+      "fully_qualified_name": "Binding_Shapes.Resize",
+      "generic_instantiations": [],
+      "kind": "procedure",
+      "label": "resize",
+      "mutable_file": "src/binding_shapes.ads",
+      "operators": [
+        "and then"
+      ],
+      "other_precondition_aspect_present": false,
+      "overriding_declarations": [
+        {
+          "aspects": [
+            "Global"
+          ],
+          "declaration": {
+            "end_column": 24,
+            "end_line": 18,
+            "file": "src/binding_shapes.ads",
+            "start_column": 4,
+            "start_line": 17
+          },
+          "fully_qualified_name": "Binding_Shapes.Resize"
+        }
+      ],
+      "prefix_count": 2,
+      "prefix_texts": [
+        "N > 0",
+        "N > 0\n                     and then N < 100"
+      ],
+      "uninstantiated_declaration": {
+        "declaration": {
+          "end_column": 27,
+          "end_line": 13,
+          "file": "src/binding_shapes.ads",
+          "start_column": 4,
+          "start_line": 10
+        },
+        "fully_qualified_name": "Binding_Shapes.Resize"
+      },
+      "unique_identifying_name": "binding_shapes.resize(binding_shapes.shape, standard.integer)"
+    }
+  },
+  "corpus": "diagnostics/tests/experiments/task014_call_binding",
+  "occurrences": [
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 7,
+        "span": {
+          "end_column": 23,
+          "end_line": 7,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 7
+        },
+        "text": "Map_Op (X, Y, Z)"
+      },
+      "callee": "map_op",
+      "case": "A1",
+      "client_entity": "Binding_Client.A1_Positional",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 12,
+        "span": {
+          "end_column": 38,
+          "end_line": 12,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 12
+        },
+        "text": "Map_Op (A => X, B => Y, C => Z)"
+      },
+      "callee": "map_op",
+      "case": "A2",
+      "client_entity": "Binding_Client.A2_Named",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 17,
+        "span": {
+          "end_column": 38,
+          "end_line": 17,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 17
+        },
+        "text": "Map_Op (C => Z, A => X, B => Y)"
+      },
+      "callee": "map_op",
+      "case": "A3",
+      "client_entity": "Binding_Client.A3_Reordered",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 22,
+        "span": {
+          "end_column": 38,
+          "end_line": 22,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 22
+        },
+        "text": "Map_Op (C => Z, B => Y, A => X)"
+      },
+      "callee": "map_op",
+      "case": "A4",
+      "client_entity": "Binding_Client.A4_Reordered_Reversed",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 27,
+        "span": {
+          "end_column": 22,
+          "end_line": 27,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 27
+        },
+        "text": "Map_Op (A => X)"
+      },
+      "callee": "map_op",
+      "case": "A5",
+      "client_entity": "Binding_Client.A5_Defaulted",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 32,
+        "span": {
+          "end_column": 25,
+          "end_line": 32,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 32
+        },
+        "text": "Map_Op (X, C => Z)"
+      },
+      "callee": "map_op",
+      "case": "A6",
+      "client_entity": "Binding_Client.A6_Explicit_And_Default",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 37,
+        "span": {
+          "end_column": 48,
+          "end_line": 37,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 37
+        },
+        "text": "Map_Op (A => Integer (S), B => Y, C => Z)"
+      },
+      "callee": "map_op",
+      "case": "A7",
+      "client_entity": "Binding_Client.A7_Conversion",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 43,
+        "span": {
+          "end_column": 48,
+          "end_line": 43,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 43
+        },
+        "text": "Map_Op (A => Integer (S), B => Y, C => Z)"
+      },
+      "callee": "map_op",
+      "case": "A8",
+      "client_entity": "Binding_Client.A8_Conversion_Unbounded",
+      "family": "A"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 48,
+        "span": {
+          "end_column": 20,
+          "end_line": 48,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 48
+        },
+        "text": "Mutate (V, L)"
+      },
+      "callee": "mutate",
+      "case": "B1",
+      "client_entity": "Binding_Client.B1_In_Out",
+      "family": "B"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 53,
+        "span": {
+          "end_column": 34,
+          "end_line": 53,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 53
+        },
+        "text": "Mutate (Limit => L, X => V)"
+      },
+      "callee": "mutate",
+      "case": "B2",
+      "client_entity": "Binding_Client.B2_In_Out_Named",
+      "family": "B"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 58,
+        "span": {
+          "end_column": 34,
+          "end_line": 58,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 58
+        },
+        "text": "Mutate (X => V, Limit => L)"
+      },
+      "callee": "mutate",
+      "case": "B3",
+      "client_entity": "Binding_Client.B3_In_Out_Unconstrained",
+      "family": "B"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 63,
+        "span": {
+          "end_column": 16,
+          "end_line": 63,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 63
+        },
+        "text": "Above (X)"
+      },
+      "callee": "above",
+      "case": "C1",
+      "client_entity": "Binding_Client.C1_Global",
+      "family": "C"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 68,
+        "span": {
+          "end_column": 21,
+          "end_line": 68,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 68
+        },
+        "text": "Above (X => X)"
+      },
+      "callee": "above",
+      "case": "C2",
+      "client_entity": "Binding_Client.C2_Global_Threshold_Only",
+      "family": "C"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 73,
+        "span": {
+          "end_column": 16,
+          "end_line": 73,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 73
+        },
+        "text": "Above (X)"
+      },
+      "callee": "above",
+      "case": "C3",
+      "client_entity": "Binding_Client.C3_Global_Unconstrained",
+      "family": "C"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 78,
+        "span": {
+          "end_column": 19,
+          "end_line": 78,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 78
+        },
+        "text": "Check (X, N)"
+      },
+      "callee": "check_int",
+      "case": "D1",
+      "client_entity": "Binding_Client.D1_Int_Check",
+      "family": "D"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 83,
+        "span": {
+          "end_column": 29,
+          "end_line": 83,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 83
+        },
+        "text": "Check (N => N, X => X)"
+      },
+      "callee": "check_int",
+      "case": "D2",
+      "client_entity": "Binding_Client.D2_Int_Check",
+      "family": "D"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 88,
+        "span": {
+          "end_column": 19,
+          "end_line": 88,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 88
+        },
+        "text": "Check (X, N)"
+      },
+      "callee": "check_int",
+      "case": "D3",
+      "client_entity": "Binding_Client.D3_Int_Check",
+      "family": "D"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 93,
+        "span": {
+          "end_column": 19,
+          "end_line": 93,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 93
+        },
+        "text": "Check (B, N)"
+      },
+      "callee": "check_bool",
+      "case": "D4",
+      "client_entity": "Binding_Client.D4_Bool_Check",
+      "family": "D"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 98,
+        "span": {
+          "end_column": 29,
+          "end_line": 98,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 98
+        },
+        "text": "Check (N => N, X => B)"
+      },
+      "callee": "check_bool",
+      "case": "D5",
+      "client_entity": "Binding_Client.D5_Bool_Check",
+      "family": "D"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 103,
+        "span": {
+          "end_column": 19,
+          "end_line": 103,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 103
+        },
+        "text": "Check (B, N)"
+      },
+      "callee": "check_bool",
+      "case": "D6",
+      "client_entity": "Binding_Client.D6_Bool_Check",
+      "family": "D"
+    },
+    {
+      "call": {
+        "column": 22,
+        "file": "binding_client.adb",
+        "line": 108,
+        "span": {
+          "end_column": 32,
+          "end_line": 108,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 108
+        },
+        "text": "Binding_Int_Ops.Check (X)"
+      },
+      "callee": "generic_check",
+      "case": "E1",
+      "client_entity": "Binding_Client.E1_Generic",
+      "family": "E"
+    },
+    {
+      "call": {
+        "column": 22,
+        "file": "binding_client.adb",
+        "line": 113,
+        "span": {
+          "end_column": 32,
+          "end_line": 113,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 113
+        },
+        "text": "Binding_Int_Ops.Check (X)"
+      },
+      "callee": "generic_check",
+      "case": "E2",
+      "client_entity": "Binding_Client.E2_Generic",
+      "family": "E"
+    },
+    {
+      "call": {
+        "column": 22,
+        "file": "binding_client.adb",
+        "line": 118,
+        "span": {
+          "end_column": 32,
+          "end_line": 118,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 118
+        },
+        "text": "Binding_Int_Ops.Check (X)"
+      },
+      "callee": "generic_check",
+      "case": "E3",
+      "client_entity": "Binding_Client.E3_Generic",
+      "family": "E"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 123,
+        "span": {
+          "end_column": 20,
+          "end_line": 123,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 123
+        },
+        "text": "Resize (S, N)"
+      },
+      "callee": "resize",
+      "case": "F1",
+      "client_entity": "Binding_Client.F1_Dispatch",
+      "family": "F"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 128,
+        "span": {
+          "end_column": 20,
+          "end_line": 128,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 128
+        },
+        "text": "Resize (S, N)"
+      },
+      "callee": "resize",
+      "case": "F2",
+      "client_entity": "Binding_Client.F2_Dispatch",
+      "family": "F"
+    },
+    {
+      "call": {
+        "column": 7,
+        "file": "binding_client.adb",
+        "line": 133,
+        "span": {
+          "end_column": 20,
+          "end_line": 133,
+          "file": "src/binding_client.adb",
+          "start_column": 7,
+          "start_line": 133
+        },
+        "text": "Resize (S, N)"
+      },
+      "callee": "resize",
+      "case": "F3",
+      "client_entity": "Binding_Client.F3_Dispatch",
+      "family": "F"
+    }
+  ],
+  "project": "call_binding.gpr",
+  "resolver": "libadalang 26.0.0",
+  "schema": "task014_resolution_manifest/1"
+}

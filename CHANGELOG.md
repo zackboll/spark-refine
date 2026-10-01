@@ -4,6 +4,14 @@
 
 ### Research
 
+- Task 014 (experiment only, no product change): cumulative callee-contract
+  prefix re-proofs on a controlled Ada call-binding corpus produced
+  `CALL_BINDING_METHOD_VALIDATED_ON_PREREGISTERED_SUPPORTED_CASES`: 26
+  resolved calls, 7 contracts, one baseline + 15 prefix programs and 60
+  per-occurrence observations. A8's unproved conversion VC was kept
+  auxiliary, not clean conjunct evidence. This is scratch evidence, not
+  proof of the original program; normal output and CLI are unchanged.
+  See `docs/tasks/014-ada-call-binding-reproof.md`.
 - Task 013 (experiment only, no product change): a pre-registered
   guard-sensitive conjunct re-proof experiment,
   `diagnostics/scripts/guarded_reproof_experiment.py`. It is outside the

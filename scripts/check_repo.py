@@ -57,6 +57,8 @@ REQUIRED = [
     "docs/tasks/013-guard-sensitive-conjunct-reproof.md",
     "diagnostics/scripts/guarded_reproof_experiment.py",
     "diagnostics/tests/experiments/task013_guarded/guarded.gpr",
+    "docs/tasks/014-ada-call-binding-reproof.md",
+    "diagnostics/tests/experiments/task014_call_binding/call_binding.gpr",
 ]
 
 FORBIDDEN_GENERATED_TRUST = [

@@ -673,3 +673,17 @@ produced the pre-registered evidence
 (`PREFIX_METHOD_VALIDATED_ON_GUARDED_CORPUS`, see
 `docs/tasks/013-guard-sensitive-conjunct-reproof.md`). A `newly_unproved`
 transition is not a root cause. Normal reports are unchanged.
+
+### Research note: Ada call-binding prefix re-proof (Task 014, not a feature)
+
+`scripts/call_binding_reproof_experiment.py` re-proves resolved callee
+contract prefixes on scratch copies of a controlled Ada corpus. Libadalang
+locates the called declaration and its contract; GNATprove binds actuals to
+formals. No argument-substitution engine or user CLI is added. The
+pre-registered call-binding verdict was
+`CALL_BINDING_METHOD_VALIDATED_ON_PREREGISTERED_SUPPORTED_CASES` (see
+`docs/tasks/014-ada-call-binding-reproof.md`). A8's unproved conversion
+check remains auxiliary rather than clean call-prefix evidence. Scratch
+evidence proves only scratch programs, not the original program. Normal
+reports still have `failed_conjunct: null` and
+`attribution: not_provided_by_gnatprove`.
