@@ -4,6 +4,8 @@
 
 ### Research
 
+- Task 017: preregistered two upstream Ada_CRDT revisions and an unchanged proof policy. Fresh GNATprove 16.1.0 results reproduce 11 unproved VCs in the selected WIP revision and zero in its child. Both SRD001/SRD002 evaluate with supported ALI but produce no findings; no product or external source changes. Research-only deterministic evidence and pure tests added. Outcome: `EXTERNAL_FAILURE_REPRODUCED_NO_MATCHING_DIAGNOSTIC`.
+
 - Task 016: structural investigation of the unchanged Task 015 artifacts confirms
   that a disputed entity-fallback `sml` unit caused an unnecessary ALI request.
   Dependency completeness now uses analysed `.spark` units when present;

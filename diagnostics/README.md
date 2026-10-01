@@ -700,3 +700,14 @@ sml-ada, GNATprove proved 356/356 checks and the unchanged core explain
 ingested the fresh output. SRD002 did not evaluate because `sml.ali` was
 missing; this is **not** zero SRD002 findings under a complete rule. See
 `../docs/tasks/015-external-validation-pilot.md` for scope and limitations.
+
+### Research note: natural external failures (Task 017)
+
+Task 017 independently reproduced a naturally failing Ada_CRDT revision:
+11 unproved VCs (nine overflow, one postcondition, one aliasing); its direct
+child had zero. Both SRD001 and SRD002 evaluated using supported GNAT Lib v16
+ALI, and neither emitted a diagnostic: these checks do not meet the rules'
+specific structural conditions. Semantic grouping was not evaluated; no
+conjunct probe or source patch was run. This is not positive validation of
+either rule. See `../docs/tasks/017-positive-external-validation.md` and the
+research-only `scripts/positive_external_validation.py`.

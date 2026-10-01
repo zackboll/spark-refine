@@ -1,0 +1,1012 @@
+{
+  "alire": "2.1.1",
+  "comparison": {
+    "diagnostic_comparisons": [],
+    "limitation": "child changes multiple source regions; no edit is assigned as a VC cause",
+    "raw_failure_pairs": [
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.Coef",
+          "location": {
+            "column": 67,
+            "file": "crdt-security-lms.adb",
+            "line": 43
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 25,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 31,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 37,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 43,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 49,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 24,
+            "file": "crdt-security-lms.adb",
+            "line": 178
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 71,
+            "file": "crdt-security-lms.adb",
+            "line": 131
+          },
+          "rule": "VC_POSTCONDITION",
+          "status": "proved"
+        },
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 17,
+            "file": "crdt-security-lms.adb",
+            "line": 181
+          },
+          "rule": "VC_POSTCONDITION",
+          "status": "unproved"
+        },
+        "pairing": "unique_entity_rule"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.SHA256.Update",
+          "location": {
+            "column": 23,
+            "file": "crdt-security-sha256.adb",
+            "line": 125
+          },
+          "rule": "ALIASING",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.SHA256.Update",
+          "location": {
+            "column": 44,
+            "file": "crdt-security-sha256.adb",
+            "line": 112
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      },
+      {
+        "control": null,
+        "failing": {
+          "disputed": false,
+          "entity": "CRDT.Security.SHA256.Update",
+          "location": {
+            "column": 79,
+            "file": "crdt-security-sha256.adb",
+            "line": 112
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        "pairing": "not_comparable"
+      }
+    ],
+    "review_categories": {
+      "artifact_or_toolchain_limitation": 0,
+      "control_pattern_persists": 0,
+      "externally_corroborated_structure": 0,
+      "mechanically_supported_only": 0,
+      "not_comparable": 0
+    },
+    "source_change_near_diagnostics": []
+  },
+  "control": {
+    "core": {
+      "confidence_distribution": {
+        "high": 0,
+        "low": 0,
+        "medium": 0
+      },
+      "diagnostics": [],
+      "json_exit": 0,
+      "notes": [
+        "consistency: SARIF check without .spark entry: error  crdt-security-lms.adb:144:14",
+        "consistency: SARIF check without .spark entry: error  crdt-security-sha256.adb:105:14",
+        "consistency: SARIF check without .spark entry: error  crdt-security-hmac.adb:14:13",
+        "unit crdt-clocks-matrix: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-clocks-vector: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-lww_element_sets: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-lww_sets: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-rga: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-rgas: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sequences-fugue: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sequences-naive: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sequences-yjs: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sync-state_based-clocked: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial"
+      ],
+      "parsed": true,
+      "rules": {
+        "SRD001": {
+          "count": 0,
+          "evaluated": true,
+          "reason": null
+        },
+        "SRD002": {
+          "count": 0,
+          "evaluated": true,
+          "reason": null
+        }
+      },
+      "text_exit": 0
+    },
+    "hashes": {
+      ".ali": {
+        "files": {
+          "crdt-clocks-lamport.ali": "8771c06a562746b6193c891535e728cc5b11369c80d4bd400cdd777a2699f297",
+          "crdt-clocks-matrix.ali": "5d76445165b5eb59e02517a38f6be24c890a9aae4503134d47e33788096b4522",
+          "crdt-clocks-vector.ali": "ae51bbf6e2bb09c0d3e2404e37864dc4e731513a8210e46dd555ea97ea262073",
+          "crdt-clocks.ali": "00a935536bc2be49d732f5c718fce85f37712e2063d856a04c1b140ef2e831ae",
+          "crdt-core-leb128.ali": "f11140a26885b768120e3e09df06df585291c3bb98734075f629d171e0b310f4",
+          "crdt-core.ali": "e87a0bb5dd190638b21be3f60c983042b90447b6e9a0bedb08b367d27f3fbba8",
+          "crdt-hlc.ali": "94d2041984c8928d1f0f1541d661073e443181da95b241279857129be8dc68a2",
+          "crdt-lww_element_sets.ali": "112e6a06db2cfc1761d8411b7559e1c18d9fe404cbf868304bb8969ae8782186",
+          "crdt-lww_sets.ali": "70e017be9f500f18505f16b1c5872f6d0cd00b9601830f00d451904b51b558d8",
+          "crdt-pn_counters.ali": "be7af0fa89879058109da7b33ecde2e4509b881a3a24eea5e1b2f4bfa18b33af",
+          "crdt-rga.ali": "540d832e40bfe8d01c2834c97c0c94d52a86c148e93b2ccbfaa2bcf4a608914f",
+          "crdt-rgas.ali": "4e5c8c0e4e5dcefadf712fdf1e90876bf2f089bbcea91b5244e87a16c3d5c532",
+          "crdt-security-hmac.ali": "dbd352446093d05db6a231a8d3e4a2438500957901e1e32f60a11cace5a245b2",
+          "crdt-security-lms.ali": "101458feaccb4f5a1467c30465f13737bd6ab00fbb1eae77a299cd9d4a9aa375",
+          "crdt-security-sha256.ali": "79d8e56407b5ffe76c8cb1ce76d29f80ac9139887c0241b45f3788d612bf8468",
+          "crdt-security.ali": "e0291fea9c94b795ab4e473d05cfb3c0f78933dc0083eef07c8e9a2ba6f3df6a",
+          "crdt-sequences-fugue.ali": "6c6f3a463cefb1a2b4d3e18e5b89e8260b8248ae688b860dd6b2a471dc6f41f4",
+          "crdt-sequences-naive.ali": "88282cd8c004c0309f3c1e9ec5b6a3dd09593035d3c7dd9ff39b267819f52fec",
+          "crdt-sequences-yjs.ali": "38c12f521bafe1383c1ff8ad5d8476f5357eecdef285a29539643b1e6275940d",
+          "crdt-sequences.ali": "3678e56e9273e0892d671b54e4cc269ca910d15b6f6e2e8870a2717a2f824a36",
+          "crdt-serialization.ali": "6121c3e6f9d449aa0c42f01cdaa880721520e19191a22511726d9e29e81c7104",
+          "crdt-sync-op_based.ali": "bbe841d5d36339c93ad871c53dd87d3c5a2ba5b6009fc2b99c693eeb05508969",
+          "crdt-sync-state_based-clocked.ali": "887628f1c5b6dd273d3bb986d58208716b97ed03d3f7d99e511e3fb7a87305fe",
+          "crdt-sync-state_based.ali": "5c668806efeb213f4cffb52c3547d96835a346574cb88023ee831f1e8d2226c5",
+          "crdt-sync.ali": "b8b00ff739200dcd4c97a562bdd5d5804fc74691d9ac76d5b7a1779e4923a5a0",
+          "crdt-test_support.ali": "84c4bd28c07c110b1a1a9dfe7fbcea55a5db35b960cb4da3b833b1895763a6d4",
+          "crdt.ali": "a81464e465e1e2ef434436053463522dd382ea8ba82de38e8bcd86fc1bd4aede",
+          "proof_instantiations.ali": "088d5f33d8d21aa0c6211394418658dfeacb003b2f14667fb96ce51d9bfb275d",
+          "test_basic.ali": "76c4f6f3e4e0dda34eb96fa668401485d2e865823e0916d9df26d3cf23933381",
+          "test_clocks.ali": "7651151acdaebc8c4be5aaf6c2eea6e8df55012cf42feab8053f667ae5bdd589",
+          "test_convergence.ali": "c299207ecfa5c3dca94f5290248841fe6187d189eabeff5ad02cda92cd29ecd6",
+          "test_crdt.ali": "5c2dfdd2f38d5d9c80d5b0e96467c5ccea96382cd61ffabd131f3a70238e3582",
+          "test_engines.ali": "b278ccaa34a866d9f2f10d8386b28be8c7ab822e5559c6b03fd126c324b32847",
+          "test_fuzz.ali": "a1225bb1631cf3a39ea37b605440606b8f3e93ef9eb57d65d53179f5f087f10b",
+          "test_gol.ali": "60e28421ef319f86da06cf1c680b92a0a978b828b504b60c9c9252200ea6d5aa",
+          "test_lattice.ali": "a9595a27bc8b6bd8d6c09063169e0385df6e1613ac1d4f8728aecccc119183c5",
+          "test_rga_features.ali": "3b160e96ad2bfff8526235fb2912cd996c9f5c5136eac11954b0187a6a589435",
+          "test_security.ali": "f88125a876bc447a67bfdcfaae180b14c74fcc0a3a52837881d20301280e94ea",
+          "test_serialization.ali": "d502c5467c83a337696901ef92337f78465373df3e0c8c27c5509861a938bdfc"
+        },
+        "inventory": {
+          "count": 39,
+          "sha256": "6eaec82025172d0b99421750902a53578b04b3b98802fe1154405e4c10d2931c"
+        }
+      },
+      ".sarif": {
+        "files": {
+          "gnatprove.sarif": "418265c549a65107bd9e84b5be58381d648dbf2d3a98ee426dc1505d17385bc6"
+        },
+        "inventory": {
+          "count": 1,
+          "sha256": "9e3ad8fa1aef284c4e290964c9e9be23ccdf66af9eb05a42a3c3659ea29827d7"
+        }
+      },
+      ".spark": {
+        "files": {
+          "crdt-clocks-lamport.spark": "3c9126052142919dd791a3a4cf13141023791a503b1b03bd9a8541cda21dea84",
+          "crdt-clocks-matrix.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-clocks-vector.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-clocks.spark": "27db41a3a742f9a9c6d857c1ac58bf04e8e8df6dd3fd460217c70113521cf164",
+          "crdt-core-leb128.spark": "2bf7e41098c6ed307d7e9cefb86477a5f5b3a5676f6f7b9b2173129fcb69960f",
+          "crdt-core.spark": "0cd2be252b6e6cbc76613d5a0c29d4b392ac3fbaa150ef17e360fbc8fb047a2a",
+          "crdt-hlc.spark": "e62a02d24a4927756056bfc3358c3fc4fc9e1924c303edde41e656a9d85ff4e5",
+          "crdt-lww_element_sets.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-lww_sets.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-pn_counters.spark": "72731d712a0db65f15cff2a9a7d6024922813bfbe2399c202c5a285d28b0155a",
+          "crdt-rga.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-rgas.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-security-hmac.spark": "fb92899623245ed1fca6e1e8e73ec4117abc607bdb521608548d4f66b8e6126c",
+          "crdt-security-lms.spark": "4f95cfd08dce3458ec63900aaba15899f9c50c08b16e79f7b6a7dc1be6c74382",
+          "crdt-security-sha256.spark": "688a78082a3c84774e771e1033a2c29a84cadc24b489c265a5fcb00f2b10debc",
+          "crdt-security.spark": "341980ef02cff08c9c9b2cfcc9c51b4505dfd67f643fc87af571b6bfe9116eb3",
+          "crdt-sequences-fugue.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sequences-naive.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sequences-yjs.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sequences.spark": "868f42c48fc8f4492584f4b512df989d5c62bf290a21a2fee76a6b4db8ad3177",
+          "crdt-serialization.spark": "64f7d48518bda8d1aa8f3e44a79ef9fd196a279812ffd180f5777df30149eb63",
+          "crdt-sync-op_based.spark": "f95a0861973e69e8ec8ae9c82d4e20453bda21cff58c2e37b4da11d530ac8a8e",
+          "crdt-sync-state_based-clocked.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sync-state_based.spark": "f89b369902fc2e2bfffbad51531c7b3c90e9ee092d990e1d205c11715a812dc2",
+          "crdt-sync.spark": "9e1993898e7e27301cacda118ecbd89d03ef1ec4ef5b7413d95675df84fbc8fd",
+          "crdt-test_support.spark": "d024dfbd0821d84e47ab4d671120c6e4231a857e218c68a81fc8103a17caeeae",
+          "crdt.spark": "eb4dfad76beced17a0193e851bd0b65c60892cb1f2c00765fd3ad4a00839f6ae",
+          "proof_instantiations.spark": "a21d136fcffba699ab46dd885c3346abe27a43972a78db42bf1ce70a38a72ca1",
+          "test_basic.spark": "c26551aceecf8d64744d9623c69385f6e37b0c0005b5db56690fe0114c5904b3",
+          "test_clocks.spark": "31e87106330bbd9f7a79b20fb10813ba62b7f4a09caee4cc1486531fe6e5bb04",
+          "test_convergence.spark": "2c2ee017886745406d2e1e40445a8288a6c98b60d7e0b70213a7a1a5a93ad5a2",
+          "test_crdt.spark": "c2cc9d2aa982e02bdaa643f67d1ccf72be8d5ed2f5d488993ef100f1bdd070fe",
+          "test_engines.spark": "17184d4bb7247be25f0531e957fe672326c2fbeadd54e41326d1abde7142ad30",
+          "test_fuzz.spark": "cef759e693e95e500995d822c2e020ea56370163cd05225429350a5e7213493b",
+          "test_gol.spark": "159f1f6eec8a10249235e24d59a06efa384a7d69eadd2d392bbc15daf2105662",
+          "test_lattice.spark": "623061d1056e4687f0fd5c8eb7c65f717ec4de2999852d45094ecca340c87d11",
+          "test_rga_features.spark": "847ab6dd6494b24cf2b05593459a918d8160265600f27b92a6be9b39b286b44f",
+          "test_security.spark": "fb66b422b66818587667b0c9ffc88e0b3e0f2eb00bbb7718dc8504a360855dae",
+          "test_serialization.spark": "b33d9707ab9e3d6744d28f9280ba1772b0450bc9f8264a156e40ffa449c39a21"
+        },
+        "inventory": {
+          "count": 39,
+          "sha256": "289bbe144ff9708421a20e59ae70c23c69ad6e5dbd0790f3b18610df0471cd33"
+        }
+      }
+    },
+    "identity": {
+      "commit": "aeb809456846935ef126df1b5ec1c3d79a83fab1",
+      "status_porcelain": "",
+      "tree": "157d9dd32602a4d9d11870b561249f6eb664c67a"
+    },
+    "proof": {
+      "command": "alr exec -- gnatprove -P crdt.gpr -j 30 --steps 10000 --no-loop-unrolling",
+      "exit": 0,
+      "gnatprove": "FSF 16.1.0",
+      "gnatprove_command_line": "gnatprove -P crdt.gpr -j 30 --steps 10000 --no-loop-unrolling",
+      "result_directory": "obj/gnatprove",
+      "upstream": {
+        "checks": 972,
+        "justified": 0,
+        "proved": 972,
+        "unproved": 0
+      }
+    },
+    "sarif": {
+      "by_rule": {
+        "DEPENDS_WRONG": {
+          "proved": 17
+        },
+        "SUBPROGRAM_TERMINATION": {
+          "proved": 91
+        },
+        "UNINITIALIZED": {
+          "proved": 97
+        },
+        "VC_ASSERT": {
+          "proved": 12
+        },
+        "VC_DISCRIMINANT_CHECK": {
+          "proved": 3
+        },
+        "VC_DIVISION_CHECK": {
+          "proved": 75
+        },
+        "VC_INDEX_CHECK": {
+          "proved": 187
+        },
+        "VC_INVARIANT_CHECK": {
+          "proved": 37
+        },
+        "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE": {
+          "proved": 4
+        },
+        "VC_LENGTH_CHECK": {
+          "proved": 14
+        },
+        "VC_LOOP_INVARIANT_INIT": {
+          "proved": 37
+        },
+        "VC_LOOP_INVARIANT_PRESERV": {
+          "proved": 37
+        },
+        "VC_LOOP_VARIANT": {
+          "proved": 8
+        },
+        "VC_OVERFLOW_CHECK": {
+          "proved": 122
+        },
+        "VC_POSTCONDITION": {
+          "proved": 56
+        },
+        "VC_PRECONDITION": {
+          "proved": 47
+        },
+        "VC_RANGE_CHECK": {
+          "proved": 128
+        },
+        "error": {
+          "proved": 3
+        }
+      },
+      "consistency_issues": [
+        "SARIF check without .spark entry: error  crdt-security-lms.adb:144:14",
+        "SARIF check without .spark entry: error  crdt-security-sha256.adb:105:14",
+        "SARIF check without .spark entry: error  crdt-security-hmac.adb:14:13"
+      ],
+      "disputed_units": [],
+      "summary": {
+        "allowed_foundation_warnings": 0,
+        "checks": 975,
+        "justified": 0,
+        "pragma_assume": 0,
+        "proved": 975,
+        "unproved": 0,
+        "warnings": 36
+      },
+      "unproved": []
+    },
+    "task016": {
+      "ali_problems": [],
+      "ali_status": "ok",
+      "ali_versions": [
+        "GNAT Lib v16"
+      ],
+      "authoritative_dependency_units": [
+        "crdt",
+        "crdt-clocks",
+        "crdt-clocks-lamport",
+        "crdt-clocks-matrix",
+        "crdt-clocks-vector",
+        "crdt-core",
+        "crdt-core-leb128",
+        "crdt-hlc",
+        "crdt-lww_element_sets",
+        "crdt-lww_sets",
+        "crdt-pn_counters",
+        "crdt-rga",
+        "crdt-rgas",
+        "crdt-security",
+        "crdt-security-hmac",
+        "crdt-security-lms",
+        "crdt-security-sha256",
+        "crdt-sequences",
+        "crdt-sequences-fugue",
+        "crdt-sequences-naive",
+        "crdt-sequences-yjs",
+        "crdt-serialization",
+        "crdt-sync",
+        "crdt-sync-op_based",
+        "crdt-sync-state_based",
+        "crdt-sync-state_based-clocked",
+        "crdt-test_support",
+        "proof_instantiations",
+        "test_basic",
+        "test_clocks",
+        "test_convergence",
+        "test_crdt",
+        "test_engines",
+        "test_fuzz",
+        "test_gol",
+        "test_lattice",
+        "test_rga_features",
+        "test_security",
+        "test_serialization"
+      ],
+      "fallback_only_units": [],
+      "requested_ali_units": [
+        "crdt",
+        "crdt-clocks",
+        "crdt-clocks-lamport",
+        "crdt-clocks-matrix",
+        "crdt-clocks-vector",
+        "crdt-core",
+        "crdt-core-leb128",
+        "crdt-hlc",
+        "crdt-lww_element_sets",
+        "crdt-lww_sets",
+        "crdt-pn_counters",
+        "crdt-rga",
+        "crdt-rgas",
+        "crdt-security",
+        "crdt-security-hmac",
+        "crdt-security-lms",
+        "crdt-security-sha256",
+        "crdt-sequences",
+        "crdt-sequences-fugue",
+        "crdt-sequences-naive",
+        "crdt-sequences-yjs",
+        "crdt-serialization",
+        "crdt-sync",
+        "crdt-sync-op_based",
+        "crdt-sync-state_based",
+        "crdt-sync-state_based-clocked",
+        "crdt-test_support",
+        "proof_instantiations",
+        "test_basic",
+        "test_clocks",
+        "test_convergence",
+        "test_crdt",
+        "test_engines",
+        "test_fuzz",
+        "test_gol",
+        "test_lattice",
+        "test_rga_features",
+        "test_security",
+        "test_serialization"
+      ]
+    }
+  },
+  "covex_procedure_version": "1.48.0",
+  "external_repository": "https://github.com/bladeacer/Ada_CRDT.git",
+  "failing": {
+    "core": {
+      "confidence_distribution": {
+        "high": 0,
+        "low": 0,
+        "medium": 0
+      },
+      "diagnostics": [],
+      "json_exit": 0,
+      "notes": [
+        "consistency: SARIF check without .spark entry: error  crdt-security-lms.adb:193:14",
+        "consistency: SARIF check without .spark entry: error  crdt-security-sha256.adb:62:14",
+        "consistency: SARIF check without .spark entry: error  crdt-security-hmac.adb:14:13",
+        "unit crdt-clocks-matrix: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-clocks-vector: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-lww_element_sets: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-lww_sets: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-rga: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-rgas: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sequences-fugue: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sequences-naive: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sequences-yjs: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+        "unit crdt-sync-state_based-clocked: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial"
+      ],
+      "parsed": true,
+      "rules": {
+        "SRD001": {
+          "count": 0,
+          "evaluated": true,
+          "reason": null
+        },
+        "SRD002": {
+          "count": 0,
+          "evaluated": true,
+          "reason": null
+        }
+      },
+      "text_exit": 0
+    },
+    "hashes": {
+      ".ali": {
+        "files": {
+          "crdt-clocks-lamport.ali": "96b1b8064ef84b25ef7cec018ead3fe9fd71d1cf606af0b3aa2b2b00fa1ca514",
+          "crdt-clocks-matrix.ali": "b355faf5eb57012a798b9b97ad83a54f5f2d35d97e02940a2ca68132db6cf701",
+          "crdt-clocks-vector.ali": "ffc6f3c679e5173c1a408b59c290437c286cd7d3c97aa0942fb1e52cbd88a309",
+          "crdt-clocks.ali": "c6f4668b3fce0792e7ffd4aecb7d3e01b7c97b216531b761fa93723ad4ad23c9",
+          "crdt-core-leb128.ali": "248da3400165a45e2db502b3d90c3203588ef93f6717830c9156436531f706e1",
+          "crdt-core.ali": "209ef840e1ca659dd9aad9ca48b9fe3860ffb8563612d8a33bb5c2e8c860f8a5",
+          "crdt-hlc.ali": "a3efe9d8abae0c66bd750e087fbfb52b7713afd709e621ce4511a4065e68a420",
+          "crdt-lww_element_sets.ali": "12c5fcfae0fa9d3d2817f8c914e4d2fb9f56ce48b7d4e243d1a35e238809df94",
+          "crdt-lww_sets.ali": "e435478fe51d5e7762dc677327639e71023286a0368dc5292fb17644c64e37d6",
+          "crdt-pn_counters.ali": "6beda5afd2a879746d9ea01554a2ac0126fefda3011fbb85af7cb770df4c8c7e",
+          "crdt-rga.ali": "73efb2ec6b2a4d75bc2a9bfe2cb31b258f317b9ab0f3240e17a2e36c585f0bb4",
+          "crdt-rgas.ali": "d76ec556bf2ed777f685b8c062cc5d8e456bf549a24d675fd9742c7b3bfb7b09",
+          "crdt-security-hmac.ali": "15f7ad5533e60bdb32e293a695e32ef9eab9afdad02684b8910297f892450adf",
+          "crdt-security-lms.ali": "9e09b8c4069ded8339184dc44f7ae299c3d06c337cdc5bbc9f4a373674e6807d",
+          "crdt-security-sha256.ali": "ed5b5d898ebfa1ce5aa3bcdaceb97780375fd5273f049b5ad593c1011faf4a08",
+          "crdt-security.ali": "c3940148b602a7ff17fca4d2764005d9292ef51dbb22136297c05f32fcda4603",
+          "crdt-sequences-fugue.ali": "ffa0f53413654ae44c0b31776960f6987683a5dbeb0c0a2b5b8edb146839fb14",
+          "crdt-sequences-naive.ali": "a4b93a1d5a71b5d394e5ce3387bd6e113495e72a782b30e39079fca47cb07b76",
+          "crdt-sequences-yjs.ali": "fbc31ffb118c09854ca7d4604eb92995ab0ee05e234d17ba5c015f63a7dea731",
+          "crdt-sequences.ali": "6aed7efc9d342134dc4ab420de2c04728e6e640559b885f3cd38206c9c97e32a",
+          "crdt-serialization.ali": "0b3fb8948e821b71294bc7ec5edf68fb763bcc2b1b858e0b45791a0ad4c99e35",
+          "crdt-sync-op_based.ali": "43cf418eec5a532571308deae940f8506770fd29ab7876bf9c2cea0a7ef269d8",
+          "crdt-sync-state_based-clocked.ali": "be7f4ad47313d167ecb48bc2e378c7caec693ba957409ae0caca7d645b37e6d4",
+          "crdt-sync-state_based.ali": "8c21c1bc7002f816c28f97361048a2228ef56c773fcaf0c4db2640bea706ce73",
+          "crdt-sync.ali": "865e3b8163aba1b94d6adacd5d37fe8ec0e3381887bc3865eb55896d04b1820d",
+          "crdt-test_support.ali": "498fe304f6768313eb07a40b78536b1d9696163bc9249bbfc62adac9c53754a5",
+          "crdt.ali": "2c608baf07326e00edc1e05a2424f346c3e211eec3577878e99f2ea38f2afd42",
+          "proof_instantiations.ali": "9c5bb5b4fc915025fd48accb2aaa4097100b0c080a36d110182ff603a07e7b57",
+          "test_basic.ali": "a965c6e61bee9fc773f0402cf76de51dd3febbe2bca71c80844d3f4c7e50ef51",
+          "test_clocks.ali": "22f289b57333ebc85ca53200ba442aefd64707d99ac7842f640948e711d1add5",
+          "test_convergence.ali": "f92c18e28e2179f0487bad17ee85ca9baf64af34e13b125b777af0eea2430af9",
+          "test_crdt.ali": "05bf7dd55f1fcd75f4cd9c881ec9c937daee9a104c1a61fde7ff3b770a7f5606",
+          "test_engines.ali": "86eaf10d2157c02cd0dabe2e948f6081fef31da9674fd90fa10972272158928d",
+          "test_fuzz.ali": "4aad4bab24754b6f89febd908d043628a10c3fe0c4f1ed574e3091a694e023ae",
+          "test_gol.ali": "eb1136189b280eaf7a0d6d6587b99bda8fd1dcb544cf56b984974fafd9ca0ce7",
+          "test_lattice.ali": "7d7db610c7e084e77da31a34bb149a6b322825e63c60bb4307f2a8aafde2d635",
+          "test_rga_features.ali": "5c50e3655611c7ae17e8091ecedb6d274f7a5bc393c23565ba9345c36f28bced",
+          "test_security.ali": "626f949ac68d3cf6f5ee4f2071b31dbd0e33f12bb7b663ca1e509037c3408f01",
+          "test_serialization.ali": "b1397f30ab7134dfc9fdedf38807daafd442aef4884bfc72839215098864c534"
+        },
+        "inventory": {
+          "count": 39,
+          "sha256": "0cdd85b74be497001725ab766b7b729ba6213d9c38a4e516efa7b9aaf769a203"
+        }
+      },
+      ".sarif": {
+        "files": {
+          "gnatprove.sarif": "0cdbe86e119db285c836b0ba9c3070a45b97c9e3fb5122b9db899beebb6ff0f3"
+        },
+        "inventory": {
+          "count": 1,
+          "sha256": "83cd0e9b4e055fa39cb69155e1b195a130a39eb819f46ba11493e84d65934f23"
+        }
+      },
+      ".spark": {
+        "files": {
+          "crdt-clocks-lamport.spark": "f2c70f8112d0c5d5aa79e51970131574226a214c85f0e6a2f1d79c30ba87e052",
+          "crdt-clocks-matrix.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-clocks-vector.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-clocks.spark": "5a7aff6f2471614128b967b7b71e19e0bb8d94e37a0b24d21773d4ae027c04cc",
+          "crdt-core-leb128.spark": "50debcc5dae7ae10abf142c76581d389db538a25d2afdf6e442c366a9fdc0743",
+          "crdt-core.spark": "519e1756940b54a0a6a2eace0d770c620eba5bd734e30ea8cb2cb228148e5714",
+          "crdt-hlc.spark": "191acf932135f51007a4cc2c6bbe8d018fbb72df110132a30d701620d94e03e9",
+          "crdt-lww_element_sets.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-lww_sets.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-pn_counters.spark": "62bbbcb5675ca1d0bcbb53c0cf0d8b663ed21f768172e0b5c7c68061c095b187",
+          "crdt-rga.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-rgas.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-security-hmac.spark": "8ff5013d7d75ce301117b36a0258cbc9568ae8040a9513088b1cd4f2446d8b63",
+          "crdt-security-lms.spark": "6b8f9664c7d7fca9c86c8f9dd3fdcd33b868e1c100aaeb5094b2f3725250cf14",
+          "crdt-security-sha256.spark": "57112066c25d7f0e9fc0ef994bebf75947e9acdafa8047ae9a1ebe8c6006da12",
+          "crdt-security.spark": "3531c531d54262f1c378ade0450ac8ac36958367f4f5bc012117d3bd303bfc4c",
+          "crdt-sequences-fugue.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sequences-naive.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sequences-yjs.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sequences.spark": "478a1ddd2e1c200fcb03b14bd561b73d70414bfd15029ee3c75251f8b7de7795",
+          "crdt-serialization.spark": "69f082c6d9334116ad99fe3fc827ec9454136ebb049d08fd511209056c620b6b",
+          "crdt-sync-op_based.spark": "ab7567e623007d6aed3f93e494f546c66c694347c9e7d99d70133cfd5f4d2269",
+          "crdt-sync-state_based-clocked.spark": "3dd23e199f6b2642cc90a778709b49cbdb7df8d284802a6bd36e6fd0210d2140",
+          "crdt-sync-state_based.spark": "fc5b107674e383846b4a7f3d1d371dd648238c64e88d7d09ecfa9e4c0b9b30fd",
+          "crdt-sync.spark": "8119165112267daeacec428d85a93a921e14a3f1678b00c19e3a2b1d6c1a5920",
+          "crdt-test_support.spark": "f4bd5da7509e988f37ea687a2a68342c9b4a54a714918fd94ce996a8c8942bb4",
+          "crdt.spark": "0bdfebb0d57ca5c4b9f6cb383bb243ce12e8e4b79531fab4cc7cfa2c0637c8b5",
+          "proof_instantiations.spark": "6f7bc93b8bc42863aca2df2bc47f97f1fa0fd44b936c17fc286b5029bc339fcf",
+          "test_basic.spark": "ec3b10ab14686a8381c41b3bb13791c13b2589c12487a5422afaa219bdfdd97e",
+          "test_clocks.spark": "bcfbe27b90a43fe09377bf2d9c74196f2d6b7c1670458b12a3d988b6f3484104",
+          "test_convergence.spark": "83ed9a30993f4a27865373eceb9066fb25e9a242ae0e3715c360fb4725a36a92",
+          "test_crdt.spark": "6bda23e0b9cdbee1c4f6823e643238c0d6c959de597364df946bd24acc3c99f1",
+          "test_engines.spark": "7b9903c479f0aad229fbb9923ad1f74ea7d8366f31bba2df39491cf42d7eefe4",
+          "test_fuzz.spark": "a346b136b5a6d3f0d503733ef7873bbeaf817ad208ab7052094d1f96b8bac9a5",
+          "test_gol.spark": "a10e3af499ba0cae9a5027e4d4f4fa4f4690d064aff9ec867d6235b9d5f1366d",
+          "test_lattice.spark": "08eb5198379a88a093b28f03fd3814f22ec9ba4fd9256e7622dfc3d9ea12d38d",
+          "test_rga_features.spark": "bed08f0f78e7591ccc6048ba112bb4f95a2ba8a5283c039a14737dcc2857869b",
+          "test_security.spark": "f3cf2dd27ac8b3f3ab56522c7e463420aa94db7b363a0c040ee2554313f984b5",
+          "test_serialization.spark": "bfea5df2b11e94d0be5cca2059075fb1116879b7aa02fa602611988bc71faae5"
+        },
+        "inventory": {
+          "count": 39,
+          "sha256": "11c0a01912e02f0b14a09183dcf06832501670617fe94b451caf571afb3d20a6"
+        }
+      }
+    },
+    "identity": {
+      "commit": "5fa2c0cee62deb86368fcc84a8d3b06726028276",
+      "status_porcelain": "",
+      "tree": "1d85fadb5c0efeb4b39e72a345341b05847a25ac"
+    },
+    "proof": {
+      "command": "alr exec -- gnatprove -P crdt.gpr -j 30 --steps 10000 --no-loop-unrolling",
+      "exit": 0,
+      "gnatprove": "FSF 16.1.0",
+      "gnatprove_command_line": "gnatprove -P crdt.gpr -j 30 --steps 10000 --no-loop-unrolling",
+      "result_directory": "obj/gnatprove",
+      "upstream": {
+        "checks": 1006,
+        "justified": 0,
+        "proved": 995,
+        "unproved": 11
+      }
+    },
+    "sarif": {
+      "by_rule": {
+        "ALIASING": {
+          "unproved": 1
+        },
+        "DEPENDS_WRONG": {
+          "proved": 17
+        },
+        "SUBPROGRAM_TERMINATION": {
+          "proved": 91
+        },
+        "UNINITIALIZED": {
+          "proved": 97
+        },
+        "VC_ASSERT": {
+          "proved": 12
+        },
+        "VC_DISCRIMINANT_CHECK": {
+          "proved": 3
+        },
+        "VC_DIVISION_CHECK": {
+          "proved": 75
+        },
+        "VC_INDEX_CHECK": {
+          "proved": 189
+        },
+        "VC_INVARIANT_CHECK": {
+          "proved": 37
+        },
+        "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE": {
+          "proved": 4
+        },
+        "VC_LENGTH_CHECK": {
+          "proved": 14
+        },
+        "VC_LOOP_INVARIANT_INIT": {
+          "proved": 37
+        },
+        "VC_LOOP_INVARIANT_PRESERV": {
+          "proved": 37
+        },
+        "VC_LOOP_VARIANT": {
+          "proved": 8
+        },
+        "VC_OVERFLOW_CHECK": {
+          "proved": 130,
+          "unproved": 9
+        },
+        "VC_POSTCONDITION": {
+          "proved": 55,
+          "unproved": 1
+        },
+        "VC_PRECONDITION": {
+          "proved": 53
+        },
+        "VC_RANGE_CHECK": {
+          "proved": 136
+        },
+        "error": {
+          "proved": 3
+        }
+      },
+      "consistency_issues": [
+        "SARIF check without .spark entry: error  crdt-security-lms.adb:193:14",
+        "SARIF check without .spark entry: error  crdt-security-sha256.adb:62:14",
+        "SARIF check without .spark entry: error  crdt-security-hmac.adb:14:13"
+      ],
+      "disputed_units": [],
+      "summary": {
+        "allowed_foundation_warnings": 0,
+        "checks": 1009,
+        "justified": 0,
+        "pragma_assume": 0,
+        "proved": 998,
+        "unproved": 11,
+        "warnings": 36
+      },
+      "unproved": [
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.Coef",
+          "location": {
+            "column": 67,
+            "file": "crdt-security-lms.adb",
+            "line": 43
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 25,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 31,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 37,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 43,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 49,
+            "file": "crdt-security-lms.adb",
+            "line": 190
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 24,
+            "file": "crdt-security-lms.adb",
+            "line": 178
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.LMS.U32_At",
+          "location": {
+            "column": 17,
+            "file": "crdt-security-lms.adb",
+            "line": 181
+          },
+          "rule": "VC_POSTCONDITION",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.SHA256.Update",
+          "location": {
+            "column": 23,
+            "file": "crdt-security-sha256.adb",
+            "line": 125
+          },
+          "rule": "ALIASING",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.SHA256.Update",
+          "location": {
+            "column": 44,
+            "file": "crdt-security-sha256.adb",
+            "line": 112
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        },
+        {
+          "disputed": false,
+          "entity": "CRDT.Security.SHA256.Update",
+          "location": {
+            "column": 79,
+            "file": "crdt-security-sha256.adb",
+            "line": 112
+          },
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved"
+        }
+      ]
+    },
+    "task016": {
+      "ali_problems": [],
+      "ali_status": "ok",
+      "ali_versions": [
+        "GNAT Lib v16"
+      ],
+      "authoritative_dependency_units": [
+        "crdt",
+        "crdt-clocks",
+        "crdt-clocks-lamport",
+        "crdt-clocks-matrix",
+        "crdt-clocks-vector",
+        "crdt-core",
+        "crdt-core-leb128",
+        "crdt-hlc",
+        "crdt-lww_element_sets",
+        "crdt-lww_sets",
+        "crdt-pn_counters",
+        "crdt-rga",
+        "crdt-rgas",
+        "crdt-security",
+        "crdt-security-hmac",
+        "crdt-security-lms",
+        "crdt-security-sha256",
+        "crdt-sequences",
+        "crdt-sequences-fugue",
+        "crdt-sequences-naive",
+        "crdt-sequences-yjs",
+        "crdt-serialization",
+        "crdt-sync",
+        "crdt-sync-op_based",
+        "crdt-sync-state_based",
+        "crdt-sync-state_based-clocked",
+        "crdt-test_support",
+        "proof_instantiations",
+        "test_basic",
+        "test_clocks",
+        "test_convergence",
+        "test_crdt",
+        "test_engines",
+        "test_fuzz",
+        "test_gol",
+        "test_lattice",
+        "test_rga_features",
+        "test_security",
+        "test_serialization"
+      ],
+      "fallback_only_units": [],
+      "requested_ali_units": [
+        "crdt",
+        "crdt-clocks",
+        "crdt-clocks-lamport",
+        "crdt-clocks-matrix",
+        "crdt-clocks-vector",
+        "crdt-core",
+        "crdt-core-leb128",
+        "crdt-hlc",
+        "crdt-lww_element_sets",
+        "crdt-lww_sets",
+        "crdt-pn_counters",
+        "crdt-rga",
+        "crdt-rgas",
+        "crdt-security",
+        "crdt-security-hmac",
+        "crdt-security-lms",
+        "crdt-security-sha256",
+        "crdt-sequences",
+        "crdt-sequences-fugue",
+        "crdt-sequences-naive",
+        "crdt-sequences-yjs",
+        "crdt-serialization",
+        "crdt-sync",
+        "crdt-sync-op_based",
+        "crdt-sync-state_based",
+        "crdt-sync-state_based-clocked",
+        "crdt-test_support",
+        "proof_instantiations",
+        "test_basic",
+        "test_clocks",
+        "test_convergence",
+        "test_crdt",
+        "test_engines",
+        "test_fuzz",
+        "test_gol",
+        "test_lattice",
+        "test_rga_features",
+        "test_security",
+        "test_serialization"
+      ]
+    }
+  },
+  "outcome": "EXTERNAL_FAILURE_REPRODUCED_NO_MATCHING_DIAGNOSTIC",
+  "preregistration": "4b2dce69046d0ea902739c02e54e599ab1d1a8cf",
+  "probe_opportunities": {
+    "eligible_groups": [],
+    "estimate": {
+      "additional_runs_after_baseline": 0,
+      "naive_observations": 0,
+      "unique_prefix_programs": 0
+    },
+    "executed": false
+  },
+  "semantic": {
+    "ambiguous": 0,
+    "evaluated": false,
+    "exact": 0,
+    "grouping": null,
+    "reason": "no SRD002 diagnostic to enrich",
+    "triage_consolidation": null,
+    "unavailable": 0,
+    "unresolved": 0
+  },
+  "starting_main": "0b2aa64d148c4defb8e9739322c4ca5a25c73f2b",
+  "states": {
+    "control_revision_reproduced": true,
+    "core_analysis": true,
+    "externally_corroborated_structure_count": 0,
+    "failing_revision_reproduced": true,
+    "grouping_available": false,
+    "mechanically_supported_only_count": 0,
+    "not_comparable_count": 0,
+    "raw_unproved_not_covered_count": 11,
+    "semantic_evaluated": false,
+    "srd001_count": 0,
+    "srd001_evaluated": true,
+    "srd002_count": 0,
+    "srd002_evaluated": true
+  }
+}
