@@ -12,6 +12,48 @@ spec.loader.exec_module(E)
 
 
 class TestExternalValidation(unittest.TestCase):
+    def test_parse_real_shape_summary(self):
+        log = ("info: unrelated\nSuccess: all checks proved (356 checks).\n"
+               "Summary logged in /ignored/gnatprove.out\nproof_exit=0\n")
+        self.assertEqual(E.parse_gnatprove_summary(log), {
+            "checks": 356, "proved": 356, "unproved": 0, "justified": 0})
+
+    def test_parse_synthetic_nonclean_and_justified_summary(self):
+        self.assertEqual(E.parse_gnatprove_summary(
+            "Summary: 10 checks: 8 proved, 2 unproved, 0 justified.\n"),
+            {"checks": 10, "proved": 8, "unproved": 2, "justified": 0})
+        self.assertEqual(E.parse_gnatprove_summary(
+            "Summary: 10 checks: 7 proved, 2 unproved, 1 justified.\n"),
+            {"checks": 10, "proved": 7, "unproved": 2, "justified": 1})
+
+    def test_reject_missing_duplicate_and_malformed_summary(self):
+        for log in ("", "Success: all checks proved (10 checks).\n" * 2,
+                    "Success: all checks proved (ten checks).\n",
+                    "Summary: 10 checks: 8 proved, x unproved, 0 justified.\n",
+                    "Summary: 10 checks: 8 proved, 1 unproved, 0 justified.\n",
+                    "Success: all checks proved (10 checks).\n"
+                    "Summary: 10 checks: 8 proved, 2 unproved, 0 justified.\n"):
+            with self.subTest(log=log), self.assertRaises(ValueError):
+                E.parse_gnatprove_summary(log)
+
+    def test_proof_exit(self):
+        self.assertEqual(E.parse_proof_exit("proof_exit=0\n"), 0)
+        self.assertEqual(E.parse_proof_exit("proof_exit=1\n"), 1)
+        for log in ("", "proof_exit=0\nproof_exit=1\n", "proof_exit=not_a_number\n"):
+            with self.subTest(log=log), self.assertRaises(ValueError):
+                E.parse_proof_exit(log)
+
+    def test_report_states_follow_inputs(self):
+        core = {"analysis": {"rules": {}}}
+        diagnostics = {"SRD001": {"evaluated": False},
+                       "SRD002": {"evaluated": True}}
+        semantic = {"evaluated": True}
+        self.assertEqual(E.report_states(core, diagnostics, semantic,
+                                         {"group_count": 1}, ["a", "b"]), {
+            "core_analysis": True, "srd001_evaluated": False,
+            "srd002_evaluated": True, "semantic_evaluated": True,
+            "grouping_available": True, "probe_opportunities": 2})
+
     def test_selection_and_states(self):
         self.assertEqual(E.select_target(True, True), "muen")
         self.assertEqual(E.select_target(False, True), "sml-ada")

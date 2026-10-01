@@ -104,6 +104,53 @@ def estimate(occurrences: int, prefixes: int) -> dict:
             "additional_prefix_runs": max(prefixes - 1, 0)}
 
 
+def parse_gnatprove_summary(text: str) -> dict:
+    """Read exactly one GNATprove result summary, never individual messages.
+
+    Supports the observed all-proved line and explicit totals for non-clean
+    runs; any other summary shape is rejected rather than guessed.
+    """
+    candidates = [line.strip() for line in text.splitlines()
+                  if re.match(r"^(?:Success:|Summary:)\s", line.strip())
+                  and not line.strip().startswith("Summary logged in ")]
+    if len(candidates) != 1:
+        raise ValueError("expected exactly one GNATprove summary")
+    line = candidates[0]
+    all_proved = re.fullmatch(r"Success: all checks proved \(([0-9]+) checks\)\.", line)
+    totals = re.fullmatch(
+        r"Summary: ([0-9]+) checks: ([0-9]+) proved, "
+        r"([0-9]+) unproved, ([0-9]+) justified\.", line)
+    if all_proved:
+        checks = int(all_proved.group(1))
+        result = {"checks": checks, "proved": checks,
+                  "unproved": 0, "justified": 0}
+    elif totals:
+        result = dict(zip(("checks", "proved", "unproved", "justified"),
+                          map(int, totals.groups())))
+    else:
+        raise ValueError("malformed or unsupported GNATprove summary")
+    if result["checks"] != sum(result[k] for k in ("proved", "unproved", "justified")):
+        raise ValueError("inconsistent GNATprove summary totals")
+    return result
+
+
+def parse_proof_exit(text: str) -> int:
+    lines = [line for line in text.splitlines() if line.startswith("proof_exit=")]
+    if len(lines) != 1 or not re.fullmatch(r"proof_exit=[0-9]+", lines[0]):
+        raise ValueError("expected exactly one integer proof_exit")
+    return int(lines[0].split("=", 1)[1])
+
+
+def report_states(core: dict, diagnostics: dict, semantic: dict,
+                  grouping: dict | None, opportunities: list) -> dict:
+    return {"core_analysis": isinstance(core.get("analysis", {}).get("rules"), dict),
+            "srd001_evaluated": diagnostics["SRD001"]["evaluated"],
+            "srd002_evaluated": diagnostics["SRD002"]["evaluated"],
+            "semantic_evaluated": semantic["evaluated"],
+            "grouping_available": grouping is not None,
+            "probe_opportunities": len(opportunities)}
+
+
 def canonical(evidence: dict) -> str:
     def validate(value):
         if isinstance(value, dict):
@@ -144,11 +191,16 @@ def capture(root: Path, output: Path) -> dict:
         raise ValueError("report version does not match proof")
     proof_log = (root / "proof-run.log").read_text()
     wall = re.search(r"proof_wall_seconds=(\d+)", proof_log)
-    if "proof_exit=0" not in proof_log or not wall:
+    proof_exit = parse_proof_exit(proof_log)
+    summary = parse_gnatprove_summary(proof_log)
+    if proof_exit != 0 or not wall:
         raise ValueError("proof run did not complete")
     checks = structural(run.checks)
     diagnostics = diagnostics_metrics(core)
     semantic = semantic_metrics(sem)
+    grouping = group_metrics(sem)
+    opportunities: list = []
+    states = report_states(core, diagnostics, semantic, grouping, opportunities)
     evidence = {
         "result": verdict(True, True, True),
         "source": {"repo": "https://github.com/ldm5180/sml-ada.git",
@@ -157,12 +209,10 @@ def capture(root: Path, output: Path) -> dict:
         "starting_main": "de7e740dee2d17b1a5eec699048e86b224f84989",
         "preregistration": "aef0dde5567246ff9940f6e52e11f7c82fe007cc",
         "proof": {"command": "alr exec -- gnatprove -P proof/proof.gpr -j0 --level=2 --checks-as-errors=on --warnings=error --output-header",
-                  "result_dir": "proof/obj/gnatprove", "exit": 0,
+                  "result_dir": "proof/obj/gnatprove", "exit": proof_exit,
                   "gnatprove": run.tool_version, "alire": "2.1.1",
-                  "upstream_summary_checks": 356,
-                  "upstream_summary_proved": 356,
-                  "upstream_summary_unproved": 0,
-                  "upstream_summary_justified": 0},
+                  **{"upstream_summary_" + key: value
+                     for key, value in summary.items()}},
         "structural": {**checks, "sarif_spark_disputes": len(run.consistency_issues),
                        "dispute_kinds": dict(sorted(Counter(
                            issue.split(":", 1)[0]
@@ -174,14 +224,12 @@ def capture(root: Path, output: Path) -> dict:
                  "diagnostic_count": core["summary"]["diagnostic_count"],
                  "notes_count": len(core["notes"])},
         "semantic": semantic,
-        "grouping": group_metrics(sem),
-        "probe_opportunities": [],
+        "grouping": grouping,
+        "probe_opportunities": opportunities,
         "probe_estimate": estimate(0, 0),
         "descriptive_review": [],
         "states": {"target_selected": "sml-ada", "proof_reproduced": True,
-                   "core_analysis": True, "srd001_evaluated": True,
-                   "srd002_evaluated": False, "semantic_evaluated": False,
-                   "grouping_available": False, "probe_opportunities": 0},
+                   **states},
         "hashes": {"gnatprove_sarif": sha256(sarif),
                    "spark_inventory": inventory(results, ".spark"),
                    "ali_inventory": inventory(results, ".ali"),
