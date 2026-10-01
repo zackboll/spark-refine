@@ -22,4 +22,21 @@ Primary comparisons: raw unproved checks; SRD001/SRD002 surface; exact callee/Pr
 
 ## Observed results
 
-Pending functional proof.
+The preregistration commit is `aef0dde5567246ff9940f6e52e11f7c82fe007cc`.
+At detached sml-ada `3ccd0e4bf51685ebd832383c12166e795473a037`, generated proof output was removed before the only functional run. The exact command was `alr exec -- gnatprove -P proof/proof.gpr -j0 --level=2 --checks-as-errors=on --warnings=error --output-header` from the checkout root. GNATprove FSF 16.1.0 reported **356 checks, 356 proved, 0 unproved, 0 justified**, and exit 0; wall time 10 seconds (integer shell timing). Fresh output is `proof/obj/gnatprove` in the ignored external checkout. All 12 `.spark` and 12 `.ali` files in that output directory and the SARIF were produced after the recorded proof start. Both candidate tracked trees remained clean; neither has initialized submodules.
+
+Core `spark-refine explain` returned 0 in JSON and text and parsed the fresh output. Its structural SARIF inventory has 374 proved results: 356 upstream summary checks plus 18 SARIF `error`-rule entries (not counted as upstream functional checks). This discrepancy must **not** be represented as 374 GNATprove-proved checks. Nineteen SARIF checks had no matching `.spark` entry; the loader marks these disputed and emitted consistency notes. This does not prevent core report generation. The supported ALI header is GNAT Lib v16, but the dependency inventory is incomplete: `sml.ali: missing (sml.ali: no such file)`. Thus SRD001 **evaluated**, count 0; SRD002 **not evaluated**, count **not applicable** (not zero). No medium/low or precondition/assertion SRD002 cases can be counted.
+
+Raw normalized SARIF rules: `SUBPROGRAM_TERMINATION` 95; `UNINITIALIZED` 37; `ALIASING` 2; `DEPENDS_WRONG` 2; `VC_RANGE_CHECK` 91; `VC_INDEX_CHECK` 78; `VC_OVERFLOW_CHECK` 12; `VC_LENGTH_CHECK` 5; `VC_DISCRIMINANT_CHECK` 1; `VC_RAISE` 6; `VC_EXCEPTIONAL_CASE` 15; `VC_POSTCONDITION` 10; `VC_LOOP_INVARIANT_INIT` 1; `VC_LOOP_INVARIANT_PRESERV` 1; `VC_PRECONDITION` 0; `VC_ASSERT` 0; and 18 SARIF `error` entries. Runtime rule total 193, invariant 2, 35 unique SARIF source filenames, 13 attributed units. No unproved VC or diagnostic exists for descriptive source triage (empty table).
+
+Libadalang 26.0.0 was importable, and an opt-in semantic explain against the explicit `proof/proof.gpr` was attempted on the unchanged source checkout. It returned 0 but `evaluated=false` with reason `no SRD002 diagnostic to enrich`; zero exact/ambiguous/unresolved/unavailable resolutions are **not an accuracy result**. GNAT source checksum + second-resolution timestamp provenance is advertised but not exercised on an exact case. Grouping is unavailable; no repeated occurrence → unique contract consolidation can be measured. Eligible external conjunct-probe groups: none. Naive occurrence-prefix observations, unique prefix programs and baseline-reuse additional runs are all 0 (estimates only, **no probes run**).
+
+| Objective comparison | Observed |
+|---|---|
+| Raw GNATprove unproved checks | 0 of 356 |
+| SRD001 diagnostic surface | evaluated, 0 |
+| SRD002 diagnostic surface | disabled, count not applicable; missing `sml.ali` |
+| Semantic exact callee/Pre contexts | not evaluated; no SRD002 cases |
+| Triage consolidation | not available; no qualifying calls |
+
+Overall: **EXTERNAL_VALIDATION_COMPLETED** under the preregistered definition (fresh proof and current core report); not a claim that all rules or other SPARK projects are validated. Exact hashes, independent states, structural counts and timing limitations are in `docs/evidence/task015-external-validation.json`. Setup time was not instrumented and is explicitly null; explain and semantic wall times were below one-second shell resolution, recorded as 0 seconds, not instantaneous operation. SRD002's missing dependency and SARIF/.spark mismatches are concrete Task 016 investigation opportunities; no product or external source change was made. Tasks 012–014 remain unchanged. GNATprove remains the proof authority.

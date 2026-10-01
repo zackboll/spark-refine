@@ -1,0 +1,146 @@
+{
+  "core": {
+    "diagnostic_count": 0,
+    "diagnostics": {
+      "SRD001": {
+        "count": 0,
+        "evaluated": true
+      },
+      "SRD002": {
+        "count": null,
+        "evaluated": false,
+        "reason": "sml.ali: missing (sml.ali: no such file)"
+      }
+    },
+    "exit": 0,
+    "notes_count": 21,
+    "parsed": true,
+    "rules": {
+      "SRD001": {
+        "evaluated": true
+      },
+      "SRD002": {
+        "ali_status": "unavailable",
+        "ali_versions": [
+          "GNAT Lib v16"
+        ],
+        "dependency_source": "none",
+        "evaluated": false,
+        "reason": "sml.ali: missing (sml.ali: no such file)"
+      }
+    }
+  },
+  "descriptive_review": [],
+  "grouping": null,
+  "hashes": {
+    "ali_inventory": {
+      "count": 12,
+      "sha256": "fbd00edfc9e5a72b1a392fc5f663c461e4f996e61cd4199973e2564afaf2766c"
+    },
+    "core_json": "3b970fa4539d827eb7cdfa094c5e868e9b6f55f197d67c6a96f33cc62a4fa166",
+    "core_text": "fa4e66d4631833efdba9dcdde8c69c3c30f629d2572342654d0881330407fd17",
+    "gnatprove_sarif": "c86b55cd42de1b5d35d443a2c3cafc68bab9737dca51702118276d6c44999ec7",
+    "semantic_json": "ac80831573f1d98349467a0c88e25f804b19b908a09402da89284443fc6e976b",
+    "spark_inventory": {
+      "count": 12,
+      "sha256": "0c2af33ab1c45033b666cd7a335f27fae66b46614e42787ad435dfa392076cf9"
+    }
+  },
+  "preregistration": "aef0dde5567246ff9940f6e52e11f7c82fe007cc",
+  "probe_estimate": {
+    "additional_prefix_runs": 0,
+    "naive_occurrence_prefix_observations": 0,
+    "unique_callee_prefix_programs": 0
+  },
+  "probe_opportunities": [],
+  "proof": {
+    "alire": "2.1.1",
+    "command": "alr exec -- gnatprove -P proof/proof.gpr -j0 --level=2 --checks-as-errors=on --warnings=error --output-header",
+    "exit": 0,
+    "gnatprove": "FSF 16.1.0",
+    "result_dir": "proof/obj/gnatprove",
+    "upstream_summary_checks": 356,
+    "upstream_summary_justified": 0,
+    "upstream_summary_proved": 356,
+    "upstream_summary_unproved": 0
+  },
+  "result": "EXTERNAL_VALIDATION_COMPLETED",
+  "semantic": {
+    "backend": "libadalang",
+    "evaluated": false,
+    "provenance": {
+      "basis": "gnat_ali_checksum_and_timestamp",
+      "byte_exact": false,
+      "checksum": "gnat_source_checksum",
+      "layout_exact": false,
+      "timestamp_resolution": "seconds"
+    },
+    "reason": "no SRD002 diagnostic to enrich",
+    "resolutions": {
+      "ambiguous": 0,
+      "exact": 0,
+      "unavailable": 0,
+      "unresolved": 0
+    }
+  },
+  "source": {
+    "branch": "informational only: pinned detached HEAD",
+    "commit": "3ccd0e4bf51685ebd832383c12166e795473a037",
+    "repo": "https://github.com/ldm5180/sml-ada.git",
+    "status_porcelain": "",
+    "submodules": {},
+    "tree": "b2df981a0d40b524d319688ed09351f59915b620"
+  },
+  "starting_main": "de7e740dee2d17b1a5eec699048e86b224f84989",
+  "states": {
+    "core_analysis": true,
+    "grouping_available": false,
+    "probe_opportunities": 0,
+    "proof_reproduced": true,
+    "semantic_evaluated": false,
+    "srd001_evaluated": true,
+    "srd002_evaluated": false,
+    "target_selected": "sml-ada"
+  },
+  "structural": {
+    "assert": 0,
+    "dispute_kinds": {
+      "SARIF check without .spark entry": 19
+    },
+    "invariant": 2,
+    "postcondition": 10,
+    "precondition": 0,
+    "rules": {
+      "ALIASING": 2,
+      "DEPENDS_WRONG": 2,
+      "SUBPROGRAM_TERMINATION": 95,
+      "UNINITIALIZED": 37,
+      "VC_DISCRIMINANT_CHECK": 1,
+      "VC_EXCEPTIONAL_CASE": 15,
+      "VC_INDEX_CHECK": 78,
+      "VC_LENGTH_CHECK": 5,
+      "VC_LOOP_INVARIANT_INIT": 1,
+      "VC_LOOP_INVARIANT_PRESERV": 1,
+      "VC_OVERFLOW_CHECK": 12,
+      "VC_POSTCONDITION": 10,
+      "VC_RAISE": 6,
+      "VC_RANGE_CHECK": 91,
+      "error": 18
+    },
+    "runtime": 193,
+    "sarif_checks": 374,
+    "sarif_spark_disputes": 19,
+    "source_units": 35,
+    "statuses": {
+      "proved": 374
+    },
+    "unique_spark_units": 13
+  },
+  "timing": {
+    "explain_seconds": 0,
+    "precision": "integer shell SECONDS; setup not timed",
+    "proof_seconds": 10,
+    "semantic_seconds": 0,
+    "setup_seconds": null
+  }
+}
