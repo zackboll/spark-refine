@@ -7,6 +7,9 @@ only problems **already observed in this repository** (Tasks 001–004).
 
 It does not:
 
+* treat disputed SARIF entity-fallback attribution as an authoritative
+  analysed unit for ALI completeness when `.spark` UnitResults are available;
+
 * decide proof status. Only `spark-refine prove` runs GNATprove, and
   only as orchestration (see below);
 * modify, repair or generate source;

@@ -109,7 +109,7 @@ def _closure(direct: dict[str, set[str]], unit: str) -> set[str]:
 
 def build_unit_graph(run: ProofRun, ali: AliDeps | None,
                      client_units: list[str] | None = None) -> UnitGraph:
-    units = set(run.unit_names())
+    units = set(run.dependency_unit_names())
     if client_units:
         clients = {c.lower() for c in client_units}
         deps = {u: (units - clients if u in clients else set())

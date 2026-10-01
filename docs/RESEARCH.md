@@ -64,6 +64,15 @@ Research date: 2026-09-26.
 > This is evidence of ingestion, not validation of diagnostic correctness.
 > See [Task 015](tasks/015-external-validation-pilot.md).
 
+> **Task 016 compatibility finding.** The `sml.ali` request came from a
+> disputed SARIF-only termination check's entity fallback, not an analysed
+> `.spark` unit. All 12 analysed units have valid supported ALIs. The product
+> now selects dependency units from `.spark` UnitResults when available;
+> 19 unmatched SARIF checks remain conservatively disputed because their
+> expected absence is not established structurally. SRD002 evaluates with
+> zero diagnostics on the fully proved external run, not a positive external
+> validation. See [Task 016](tasks/016-external-artifact-compatibility.md).
+
 This repository was bootstrapped after surveying current SPARK/AdaCore documentation and adjacent tooling to avoid building a project that merely duplicates an existing feature.
 
 ## Key findings
