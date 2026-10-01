@@ -54,6 +54,16 @@ Research date: 2026-09-26.
 > conjunct evidence. Scratch evidence is not proof of the original
 > program; realistic/external validation and cost remain open.
 
+> **Task 015 external pilot.** At pinned sml-ada commit
+> `3ccd0e4bf51685ebd832383c12166e795473a037`, GNATprove 16.1.0
+> proved 356/356 checks. Current core explain ingested fresh artifacts;
+> SRD001 evaluated with zero diagnostics, while SRD002 was not evaluated
+> because `sml.ali` was missing from the result directory. Nineteen SARIF
+> checks had no matching `.spark` entry. No naturally unproved check was
+> available for semantic or grouping evaluation; no external probes ran.
+> This is evidence of ingestion, not validation of diagnostic correctness.
+> See [Task 015](tasks/015-external-validation-pilot.md).
+
 This repository was bootstrapped after surveying current SPARK/AdaCore documentation and adjacent tooling to avoid building a project that merely duplicates an existing feature.
 
 ## Key findings

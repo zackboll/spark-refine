@@ -687,3 +687,13 @@ check remains auxiliary rather than clean call-prefix evidence. Scratch
 evidence proves only scratch programs, not the original program. Normal
 reports still have `failed_conjunct: null` and
 `attribution: not_provided_by_gnatprove`.
+
+### Research note: external validation pilot (Task 015)
+
+The research-only `scripts/external_validation.py` hashes and normalizes a
+pinned local external proof run; it is not installed, does not invoke GNATprove
+or mutate external source, and is not part of CI proof gates. On pinned
+sml-ada, GNATprove proved 356/356 checks and the unchanged core explain
+ingested the fresh output. SRD002 did not evaluate because `sml.ali` was
+missing; this is **not** zero SRD002 findings under a complete rule. See
+`../docs/tasks/015-external-validation-pilot.md` for scope and limitations.

@@ -4,6 +4,15 @@
 
 ### Research
 
+- Task 015: preregistered external SPARK validation on pinned sml-ada
+  (fallback after Muen build-context feasibility blocker). Fresh GNATprove
+  16.1.0 proved 356/356; unchanged spark-refine core ingested the result.
+  SRD001 evaluated with no diagnostics; SRD002 could not evaluate because
+  `sml.ali` was absent, and 19 SARIF/.spark results did not pair. No source
+  patches, conjunct probes, parser changes, or new CI job. See
+  `docs/tasks/015-external-validation-pilot.md` and
+  `docs/evidence/task015-external-validation.json`.
+
 - Task 014 (experiment only, no product change): cumulative callee-contract
   prefix re-proofs on a controlled Ada call-binding corpus produced
   `CALL_BINDING_METHOD_VALIDATED_ON_PREREGISTERED_SUPPORTED_CASES`: 26
