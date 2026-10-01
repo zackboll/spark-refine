@@ -736,5 +736,16 @@ written for these diagnostics. Task 015 is not started here.
 
 ## Observed results
 
-Not yet run. The first proof observations are appended only after this
-preregistration commit, and only by a later commit.
+Local run (post-preregistration): `CALL_BINDING_METHOD_VALIDATED_ON_PREREGISTERED_SUPPORTED_CASES`.
+All six families validated. The 26 baseline targets, 60 prefix statuses and
+60 classifications matched P11/P13. The 16 programs (one control and 15
+unique callee prefixes) passed resolution, source-isolation, reparse,
+trust and auxiliary gates. A7's conversion was proved and A8's conversion
+unproved in every run; A8's three call-prefix classifications were
+`auxiliary_obligation_unproved`, not clean call-prefix evidence. All
+untouched targets retained baseline status. No target was justified or
+SARIF/.spark disputed. These are scratch-program observations only.
+
+Canonical evidence: `diagnostics/obj/task014-call-binding-reproof/evidence.json`
+(gitignored). Timing: `diagnostics/obj/task014-call-binding-reproof/timing.json`
+(measurement only). The two local runs produced byte-identical evidence.
