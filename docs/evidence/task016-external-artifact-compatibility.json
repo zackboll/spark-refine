@@ -1,4 +1,44 @@
 {
+  "after": {
+    "ali_status": "ok",
+    "disputed_units": [
+      "sml"
+    ],
+    "issues": 19,
+    "normalized_proof_statuses": {
+      "justified": 0,
+      "proved": 374,
+      "unproved": 0
+    },
+    "requested_ali_units": [
+      "bundled_proof",
+      "composite_proof",
+      "deferring_proof",
+      "effects_loop_proof",
+      "machine_scaffold",
+      "reactive_proof",
+      "regions_proof",
+      "request_block_proof",
+      "simple_proof",
+      "trace_gate_proof",
+      "tracing_proof",
+      "turnstile_proof"
+    ],
+    "srd001": {
+      "count": 0,
+      "evaluated": true
+    },
+    "srd002": {
+      "count": 0,
+      "evaluated": true,
+      "reason": null
+    },
+    "upstream_proof_checks": {
+      "justified": 0,
+      "proved": 356,
+      "unproved": 0
+    }
+  },
   "ali": [
     {
       "U": [
@@ -252,6 +292,11 @@
       "sml"
     ],
     "issues": 19,
+    "normalized_proof_statuses": {
+      "justified": 0,
+      "proved": 374,
+      "unproved": 0
+    },
     "srd001": {
       "count": 0,
       "evaluated": true

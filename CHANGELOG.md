@@ -4,6 +4,13 @@
 
 ### Research
 
+- Task 016: structural investigation of the unchanged Task 015 artifacts confirms
+  that a disputed entity-fallback `sml` unit caused an unnecessary ALI request.
+  Dependency completeness now uses analysed `.spark` units when present;
+  SARIF attribution and all 19 unexplained consistency disputes remain intact.
+  SRD002 can evaluate on the fully proved external run (zero diagnostics),
+  not an external positive-case validation. No proof rerun or new rule.
+
 - Task 015: preregistered external SPARK validation on pinned sml-ada
   (fallback after Muen build-context feasibility blocker). Fresh GNATprove
   16.1.0 proved 356/356; unchanged spark-refine core ingested the result.

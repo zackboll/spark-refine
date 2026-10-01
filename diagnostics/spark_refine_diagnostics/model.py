@@ -169,6 +169,15 @@ class ProofRun:
         names.update(c.unit for c in self.checks if c.unit)
         return sorted(names)
 
+    def dependency_unit_names(self) -> list[str]:
+        """Analysed units, not disputed entity-fallback display attribution.
+
+        Without .spark unit identity, retain the existing weaker SARIF-only
+        attribution; it cannot establish missing analysed units or edges.
+        """
+        return (sorted({u.name for u in self.units}) if self.units
+                else self.unit_names())
+
     def summary(self) -> dict:
         return {
             "checks": len(self.checks),

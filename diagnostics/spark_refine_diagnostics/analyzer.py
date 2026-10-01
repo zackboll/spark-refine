@@ -75,7 +75,7 @@ def analyze_path_report(path: Path, name: str | None = None,
                         client_units: list[str] | None = None) -> Report:
     run = load_run(path, name)
     _sarif, directory = resolve_input(path)
-    ali = load_ali_deps(directory, run.unit_names())
+    ali = load_ali_deps(directory, run.dependency_unit_names())
     return analyze_run_report(run, ali, client_units)
 
 

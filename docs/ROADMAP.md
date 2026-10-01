@@ -38,6 +38,13 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Decisions
 
+Task 016 separated check display attribution from authoritative dependency-unit
+inventory. Pinned sml-ada's 12 analysed units have supported ALIs; `sml` was
+introduced only by one unmatched termination SARIF result. The 19 unmatched
+results remain disputed, not exempted by rule or proof status. SRD002 now
+evaluates to zero on this fully proved run; an independent external positive
+SRD002 case remains unvalidated. See [Task 016](tasks/016-external-artifact-compatibility.md).
+
 * **Semantic enrichment stays opt-in (Task 010).** Libadalang is not a
   normal pip dependency, a cold hosted setup measured ~23.5 min
   (Task 009), and the core diagnostics package deliberately has zero
