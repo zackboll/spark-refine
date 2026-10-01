@@ -711,3 +711,13 @@ specific structural conditions. Semantic grouping was not evaluated; no
 conjunct probe or source patch was run. This is not positive validation of
 either rule. See `../docs/tasks/017-positive-external-validation.md` and the
 research-only `scripts/positive_external_validation.py`.
+
+### Research note: external candidate qualification (Task 018)
+
+`scripts/external_candidate_survey.py` is a pure, uninstalled pre-proof gate.
+Across five upstream projects no committed natural GNATprove-16 case had enough
+independent documentation to preregister SRD001/SRD002. The memcp `Open`
+caller failure is an uncommitted spike and was not recreated. No functional
+external proof or candidate-specific `explain` was run. Verdict:
+`NO_NATURAL_POSITIVE_CANDIDATE_QUALIFIED`. See
+`../docs/tasks/018-external-positive-candidate.md`.

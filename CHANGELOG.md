@@ -4,6 +4,13 @@
 
 ### Research
 
+- Task 018: research-only upstream candidate inventory and pure qualification
+  tests. None of the five surveyed projects furnished a committed natural
+  GNATprove-16 failure with sufficient independent SRD001/SRD002 structural
+  evidence; memcp's documented spike was explicitly rejected. No functional
+  external proof, product rule change or ALI extension. Verdict:
+  `NO_NATURAL_POSITIVE_CANDIDATE_QUALIFIED`.
+
 - Task 017: preregistered two upstream Ada_CRDT revisions and an unchanged proof policy. Fresh GNATprove 16.1.0 results reproduce 11 unproved VCs in the selected WIP revision and zero in its child. Both SRD001/SRD002 evaluate with supported ALI but produce no findings; no product or external source changes. Research-only deterministic evidence and pure tests added. Outcome: `EXTERNAL_FAILURE_REPRODUCED_NO_MATCHING_DIAGNOSTIC`.
 
 - Task 016: structural investigation of the unchanged Task 015 artifacts confirms
