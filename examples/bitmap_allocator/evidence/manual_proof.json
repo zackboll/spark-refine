@@ -1,0 +1,1196 @@
+{
+  "ablations": {
+    "ablations": {
+      "clear_length_call": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 25,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "count_invariant": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Is_Exhausted",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 21,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Free_Count",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 19,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 26,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 73,
+            "rule": "VC_RANGE_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "empty_iff": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 9,
+            "entity": "Bitmap_Allocator",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 50,
+            "rule": "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE"
+          },
+          {
+            "column": 37,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "equal_length_assert": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Equal_Length",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 4,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "equal_length_post": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 29,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 56,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 25,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "full_iff": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Initialize",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 22,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 26,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 73,
+            "rule": "VC_RANGE_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "membership_contract": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Is_Free",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 17,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 38,
+            "entity": "Bitmap_Allocator.Initialize",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 24,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 7,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 72,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 31,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 57,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_bound_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_LOOP_INVARIANT_PRESERV"
+          },
+          {
+            "column": 15,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 47,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 56,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_full_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 15,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 47,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 54,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_membership_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 30,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 11,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 46,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 54,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "padding_invariant": {
+        "exit": 0,
+        "failures": [],
+        "warnings": []
+      },
+      "scan_prefix_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 37,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "set_length_call": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 29,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 57,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "set_membership_assert": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 7,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 69,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 31,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 57,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      }
+    },
+    "ablations-first": {
+      "capacity_bound": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 28,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 60,
+            "rule": "VC_ASSERT"
+          }
+        ],
+        "warnings": []
+      },
+      "clear_equality_assert": {
+        "exit": 0,
+        "failures": [],
+        "warnings": []
+      },
+      "clear_length_call": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 25,
+            "rule": "VC_INVARIANT_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "count_invariant": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Is_Exhausted",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 21,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Free_Count",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 19,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 26,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 78,
+            "rule": "VC_RANGE_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "empty_iff": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 9,
+            "entity": "Bitmap_Allocator",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 51,
+            "rule": "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE"
+          },
+          {
+            "column": 28,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 60,
+            "rule": "VC_ASSERT"
+          },
+          {
+            "column": 37,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "equal_length_assert": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Equal_Length",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 4,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "equal_length_post": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 29,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 25,
+            "rule": "VC_INVARIANT_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "full_iff": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Initialize",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 22,
+            "rule": "VC_INVARIANT_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "membership_contract": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Is_Free",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 17,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 38,
+            "entity": "Bitmap_Allocator.Initialize",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 24,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 22,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 76,
+            "rule": "VC_ASSERT"
+          },
+          {
+            "column": 28,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 60,
+            "rule": "VC_ASSERT"
+          }
+        ],
+        "warnings": []
+      },
+      "model_bound_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_LOOP_INVARIANT_PRESERV"
+          },
+          {
+            "column": 15,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 47,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_full_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 15,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 48,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_membership_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 30,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 11,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 46,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "padding_invariant": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 28,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 60,
+            "rule": "VC_ASSERT"
+          }
+        ],
+        "warnings": []
+      },
+      "scan_count_loop": {
+        "exit": 0,
+        "failures": [],
+        "warnings": []
+      },
+      "scan_model_loop": {
+        "exit": 0,
+        "failures": [],
+        "warnings": []
+      },
+      "scan_prefix_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 37,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "set_equality_assert": {
+        "exit": 0,
+        "failures": [],
+        "warnings": []
+      },
+      "set_length_call": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 29,
+            "rule": "VC_INVARIANT_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "set_membership_assert": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 22,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 73,
+            "rule": "VC_ASSERT"
+          }
+        ],
+        "warnings": []
+      }
+    },
+    "ablations-second": {
+      "capacity_bound": {
+        "exit": 0,
+        "failures": [],
+        "warnings": []
+      },
+      "clear_length_call": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 25,
+            "rule": "VC_INVARIANT_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "count_invariant": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Is_Exhausted",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 21,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Free_Count",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 19,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 26,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 73,
+            "rule": "VC_RANGE_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "empty_iff": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 9,
+            "entity": "Bitmap_Allocator",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 51,
+            "rule": "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 57,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 37,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "equal_length_assert": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Equal_Length",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 4,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "equal_length_post": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 29,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 56,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 25,
+            "rule": "VC_INVARIANT_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "full_iff": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Initialize",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 22,
+            "rule": "VC_INVARIANT_CHECK"
+          }
+        ],
+        "warnings": []
+      },
+      "membership_contract": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 38,
+            "entity": "Bitmap_Allocator.Initialize",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 24,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Is_Free",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 17,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 7,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 72,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 31,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 57,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_bound_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_LOOP_INVARIANT_PRESERV"
+          },
+          {
+            "column": 15,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 47,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 56,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_full_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 15,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 48,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 54,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "model_membership_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 30,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 11,
+            "entity": "Bitmap_Allocator.Bitmap_Model",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 46,
+            "rule": "VC_POSTCONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 54,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "padding_invariant": {
+        "exit": 0,
+        "failures": [],
+        "warnings": []
+      },
+      "scan_prefix_loop": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 37,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 28,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 17,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 27,
+            "rule": "VC_POSTCONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "set_length_call": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 14,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.ads",
+            "kind": "open",
+            "line": 29,
+            "rule": "VC_INVARIANT_CHECK"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 57,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      },
+      "set_membership_assert": {
+        "exit": 1,
+        "failures": [
+          {
+            "column": 7,
+            "entity": "Bitmap_Allocator.Release",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 69,
+            "rule": "VC_PRECONDITION"
+          },
+          {
+            "column": 13,
+            "entity": "Bitmap_Allocator.Allocate",
+            "file": "bitmap_allocator.adb",
+            "kind": "open",
+            "line": 57,
+            "rule": "VC_PRECONDITION"
+          }
+        ],
+        "warnings": []
+      }
+    },
+    "clear_membership": {
+      "complete": true,
+      "exit": 0,
+      "failures": [],
+      "warnings": []
+    },
+    "clear_snapshot": {
+      "complete": false,
+      "exit": 1,
+      "failures": [],
+      "warnings": []
+    },
+    "padding_predicate": {
+      "complete": false,
+      "exit": 1,
+      "failures": [],
+      "warnings": []
+    },
+    "set_snapshot": {
+      "complete": false,
+      "exit": 1,
+      "failures": [],
+      "warnings": []
+    }
+  },
+  "format_version": 1,
+  "justified": 0,
+  "notes": [
+    "Clear-membership ablation can pass once but failed in the earlier clean repeat at Allocate Equal_Length precondition; retained for observed stability.",
+    "Canonical padding invariant is a frozen representation requirement, retained even when its ablation proves green.",
+    "Missing snapshots/padding predicate ablations are compile failures, not unproved-VC evidence."
+  ],
+  "positive_runs": [
+    {
+      "justified": 0,
+      "max_steps": 47169,
+      "passing_results": {
+        "application": 78,
+        "sparklib": 40
+      },
+      "passing_rules": {
+        "GLOBAL_WRONG": 5,
+        "SUBPROGRAM_TERMINATION": 19,
+        "UNINITIALIZED": 3,
+        "VC_ASSERT": 3,
+        "VC_CONTAINER_AGGR_CHECK": 4,
+        "VC_DIVISION_CHECK": 6,
+        "VC_INVARIANT_CHECK": 16,
+        "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE": 1,
+        "VC_LOOP_INVARIANT_INIT": 4,
+        "VC_LOOP_INVARIANT_PRESERV": 4,
+        "VC_POSTCONDITION": 12,
+        "VC_PRECONDITION": 23,
+        "VC_PREDICATE_CHECK": 14,
+        "VC_RANGE_CHECK": 4
+      },
+      "wall_seconds": 4.485
+    },
+    {
+      "justified": 0,
+      "max_steps": 47169,
+      "passing_results": {
+        "application": 78,
+        "sparklib": 40
+      },
+      "passing_rules": {
+        "GLOBAL_WRONG": 5,
+        "SUBPROGRAM_TERMINATION": 19,
+        "UNINITIALIZED": 3,
+        "VC_ASSERT": 3,
+        "VC_CONTAINER_AGGR_CHECK": 4,
+        "VC_DIVISION_CHECK": 6,
+        "VC_INVARIANT_CHECK": 16,
+        "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE": 1,
+        "VC_LOOP_INVARIANT_INIT": 4,
+        "VC_LOOP_INVARIANT_PRESERV": 4,
+        "VC_POSTCONDITION": 12,
+        "VC_PRECONDITION": 23,
+        "VC_PREDICATE_CHECK": 14,
+        "VC_RANGE_CHECK": 4
+      },
+      "wall_seconds": 4.29
+    },
+    {
+      "justified": 0,
+      "max_steps": 47169,
+      "passing_results": {
+        "application": 78,
+        "sparklib": 40
+      },
+      "passing_rules": {
+        "GLOBAL_WRONG": 5,
+        "SUBPROGRAM_TERMINATION": 19,
+        "UNINITIALIZED": 3,
+        "VC_ASSERT": 3,
+        "VC_CONTAINER_AGGR_CHECK": 4,
+        "VC_DIVISION_CHECK": 6,
+        "VC_INVARIANT_CHECK": 16,
+        "VC_INVARIANT_CHECK_ON_DEFAULT_VALUE": 1,
+        "VC_LOOP_INVARIANT_INIT": 4,
+        "VC_LOOP_INVARIANT_PRESERV": 4,
+        "VC_POSTCONDITION": 12,
+        "VC_PRECONDITION": 23,
+        "VC_PREDICATE_CHECK": 14,
+        "VC_RANGE_CHECK": 4
+      },
+      "wall_seconds": 4.36
+    }
+  ],
+  "runtime": {
+    "assertions": 45792,
+    "production": 45792
+  },
+  "unproved": 0
+}

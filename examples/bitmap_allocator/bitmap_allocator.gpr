@@ -1,0 +1,29 @@
+with "sparklib";
+
+project Bitmap_Allocator is
+   type On_Off is ("on", "off");
+   Assertions : On_Off := external ("BITMAP_ASSERTIONS", "off");
+   for Source_Dirs use ("variants/manual", "tests");
+   for Main use ("bitmap_allocator_runtime_tests.adb");
+   case Assertions is
+      when "off" =>
+         for Object_Dir use "obj/manual";
+         for Exec_Dir use "bin";
+      when "on" =>
+         for Object_Dir use "obj/manual-assertions";
+         for Exec_Dir use "bin/assertions";
+   end case;
+   package Compiler is
+      case Assertions is
+         when "off" =>
+            for Default_Switches ("Ada") use ("-gnat2022", "-gnatwa", "-gnatW8", "-g");
+         when "on" =>
+            for Default_Switches ("Ada") use ("-gnat2022", "-gnatwa", "-gnatW8", "-g", "-gnata");
+      end case;
+   end Compiler;
+   package Prove is
+      for Proof_Switches ("Ada") use
+        ("-U", "--mode=all", "--level=2", "--no-loop-unrolling",
+         "--report=statistics", "--checks-as-errors=on", "--warnings=error");
+   end Prove;
+end Bitmap_Allocator;
