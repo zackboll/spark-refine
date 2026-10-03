@@ -8,6 +8,9 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED = [
+    "docs/evidence/task019-bitmap-set-proof-pattern.json",
+    "examples/bitmap_allocator/scripts/closeout_bitmap_experiment.py",
+    "examples/bitmap_allocator/scripts/test_bitmap_closeout.py",
     "README.md",
     "docs/MOTIVATION.md",
     "docs/LANDSCAPE.md",

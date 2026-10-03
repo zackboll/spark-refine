@@ -383,3 +383,42 @@ Independent-instance validation, configuration rejection tests, full M1–M8
 and masking, single-prover/final performance comparisons and final Task 019
 decision remain pending. No adoption/rejection decision, final PR, bitmap CI
 job, Task 020 or further research campaign is part of this checkpoint.
+
+## Final closeout — economic non-adoption
+
+Review now closes Task 019 with **`DO_NOT_ADOPT_BITMAP_PATTERN`** for the
+measured candidate `ce13e839259e3e8b7c265678db4e119f8b4152ce`, preserved
+packed allocator/interface and documented bounded alternatives. Manual P=54,
+minimized R=56, reusable L=124, A=6; savings −2 and reduction −3.703704%.
+Both frozen predicates hold independently: R>20 and reduction<30%.
+The manual gate passed; this is not `MANUAL_SUPPORT_TOO_SMALL`.
+
+The complete local proofs recorded above remain positive evidence for this
+32-bit instance, not a new hosted reproduction claim. Earlier stages and
+the intermediate metrics/snapshot remain unchanged. This is economic
+rejection, not a claim that the proved instance is incorrect, that the generic
+is unsound, that a global minimum was found or that better integration is
+impossible. Mapping bridge and model contract/forwarding account for 31/56
+residual lines; generic proof content did not yield cheap integration here.
+Physical padding preservation remains distinct from abstract set equality.
+The contaminated aggregate report was rejected in favor of isolated closure
+measurements, without inferring a GNATprove defect.
+
+Review authorized a **post-measurement stopping decision**, not a separately
+preregistered early-stopping plan. Independent instances, other widths and
+identity kinds, invalid-configuration rejection, complete M1–M8 in both
+variants, masking, complete single-prover and final controlled performance
+comparisons, and a dedicated hosted bitmap proof gate were not performed
+before economic closeout; no result is claimed for them. Passing those checks
+would not change R or satisfy the existing candidate's frozen economics.
+Not every originally planned experiment was completed.
+
+See [task observations and coverage table](../../docs/tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit)
+and [separate canonical closeout evidence](../../docs/evidence/task019-bitmap-set-proof-pattern.json).
+The read-only closeout verifier checks evidence/source identity and arithmetic,
+not proof reproduction. Candidate sources and ignored logs remain at their
+recorded paths, unsupported research retained for reproducibility and trust
+scanning. Imported-unit assertion execution remains unestablished; padding
+equivalence is one representation check, not three independent instances.
+Prefix_Sets remains the established supported pattern. No bitmap redesign,
+second supported pattern, release, or Task 020 is authorized by this closeout.

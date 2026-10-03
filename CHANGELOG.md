@@ -4,6 +4,16 @@
 
 ### Research
 
+- Task 019 closed with `DO_NOT_ADOPT_BITMAP_PATTERN`: manual P=54,
+  minimized library-backed R=56, library L=124, A=6 (−3.703704% reduction).
+  The 32-bit candidate reached complete local proofs; broader validation and
+  falsification were not completed before the post-measurement economic
+  closeout. Source and historical metrics are retained for reproducibility,
+  not adoption. Prefix_Sets remains the one established supported pattern.
+  Added separate deterministic closeout evidence, a read-only integrity
+  verifier and pure tests; structural CI does not reproduce the bitmap proof.
+  No new bitmap proof job, release or Task 020.
+
 - Task 018: research-only upstream candidate inventory and pure qualification
   tests. None of the five surveyed projects furnished a committed natural
   GNATprove-16 failure with sufficient independent SRD001/SRD002 structural

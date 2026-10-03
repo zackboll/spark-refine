@@ -19,6 +19,15 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Completed
 
+Task 019: **closed experiment, `DO_NOT_ADOPT_BITMAP_PATTERN`**. Manual P=54,
+minimized library-backed R=56, library L=124 (−3.703704% reduction).
+The 32-bit candidate reached complete local proofs; broader validation and
+falsification were not completed. Post-measurement review stopped the remaining
+campaigns after economic rejection. No further optimization of this candidate
+is planned, no second supported bitmap pattern was adopted, and Prefix_Sets
+remains the established reusable pattern.
+See [closeout](tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit).
+
 Task 018: independent upstream qualification across the five proposed projects
 found no committed natural GNATprove-16 failure with sufficient documented
 SRD001/SRD002 structure. No functional external proof was run; the memcp spike
@@ -68,12 +77,13 @@ SRD002 case remains unvalidated. See [Task 016](tasks/016-external-artifact-comp
 
 ## Near term
 
-* **Task 016 candidate (evidence-gated).** Investigate the observed missing
-  `.ali` dependency and 19 SARIF/.spark mismatches on pinned sml-ada output;
-  measure external behavior with natural unproved checks only if a future
-  independently selected reproducible target provides them. Task 015 ran no
-  conjunct probes and made no attribution claim. Normal reports retain
-  `failed_conjunct: null`.
+* **Possible developer/agent usage evaluation.** Observe actual use of the
+  established pattern and diagnostics under the authoritative-specification
+  policy. This is a possible next direction, not a started task or a promised
+  successful result. Task 020 has not started.
+* **External positive validation remains deferred** until an independently
+  selected natural case qualifies. Tasks 016–018 do not supply that positive
+  evidence. Normal reports retain `failed_conjunct: null`.
 
 ## Later
 

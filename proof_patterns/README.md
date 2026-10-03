@@ -4,7 +4,7 @@ Hand-written, reusable SPARK generics that carry recurring *refinement
 proof* knowledge, so that applications do not re-derive it. Nothing here
 is generated.
 
-## `SPARK_Refine_Prefix_Sets`
+## Established supported pattern: `SPARK_Refine_Prefix_Sets`
 
 A unique active prefix of a bounded array, read as a
 `SPARK.Containers.Functional.Sets` set over a finite identity type.
@@ -57,3 +57,17 @@ Version-1 restrictions:
   `python3 examples/fixed_pool/scripts/check_proof_results.py
   library-validation`.
 * No claim is made for instances that are not proved.
+
+## Non-adopted research artifact: `SPARK_Refine_Bitmap_Sets`
+
+Task 019 is closed with **`DO_NOT_ADOPT_BITMAP_PATTERN`**: manual P=54,
+minimized library-backed R=56, reusable L=124, A=6 (−3.703704% reduction).
+The 32-bit allocator candidate reached complete local proofs, but failed the
+frozen economic criteria. Broader instances/configurations and complete
+falsification were not validated before the post-measurement closeout.
+
+Its retained location does not make it a supported second pattern. It is
+retained for reproducibility, not promoted for adoption, and remains in trust
+scanning. Prefix_Sets is the one established reusable pattern.
+See [closeout](../docs/tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit)
+and [measured source checkpoint](https://github.com/zackboll/spark-refine/tree/ce13e839259e3e8b7c265678db4e119f8b4152ce).

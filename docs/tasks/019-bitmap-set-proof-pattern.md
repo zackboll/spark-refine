@@ -122,4 +122,120 @@ no external positive-validation work.
 
 ## Observations (append only after preregistration commit)
 
-Pending manual proof baseline.
+### Adoption decision and scope
+
+**ADOPTION DECISION: `DO_NOT_ADOPT_BITMAP_PATTERN`.** Task 019 is closed
+economically for the candidate measured at
+`ce13e839259e3e8b7c265678db4e119f8b4152ce`: the preserved packed allocator
+and production interface, recorded proof architecture and tested bounded
+minimization alternatives. This is not `MANUAL_SUPPORT_TOO_SMALL`: the manual
+gate passed (P=54, 52 generic support lines).
+
+| Measurement | Value |
+|---|---:|
+| Manual application support P | 54 |
+| Unminimized library application support R_start | 110 |
+| Minimized application support R | 56 |
+| Reusable library L | 124 |
+| Generic actual concepts A | 6 |
+| Support saved P−R | −2 |
+| Reduction 100(P−R)/P | −200/54 = −3.703704% |
+
+Both independent frozen non-adoption predicates hold: **R=56 >20** and
+**reduction=−3.703704% <30%**. The candidate reached complete local proofs;
+rejection is economic, not a finding that its proved 32-bit instance is
+incorrect. No supported second pattern, package release or adoption results
+from this experiment. Prefix_Sets remains the established reusable pattern.
+
+### Recorded evidence (not new hosted reproduction)
+
+* [Manual metrics](../../examples/bitmap_allocator/BASELINE_METRICS.md),
+  [inventory](../../examples/bitmap_allocator/evidence/manual_inventory.json)
+  and [proof evidence](../../examples/bitmap_allocator/evidence/manual_proof.json):
+  P=54, 52 generic lines; recorded clean proof 118/118; 45,792 runtime checks
+  in each recorded build mode. Baseline checkpoint:
+  `029f2907c7993da3854ed72583c166de4b79faa5`.
+* [Library metrics](../../examples/bitmap_allocator/LIBRARY_METRICS.md),
+  [minimization snapshot](../../examples/bitmap_allocator/evidence/library_minimization.json)
+  and [timings](../../examples/bitmap_allocator/evidence/library_minimization_timings.json):
+  R_start=110 explicitly unminimized, R=56 after bounded minimization, L=124,
+  A=6. Three clean 174/174 proofs of identical source, zero unproved and
+  justified results, recorded wall times 7.609, 7.269, 7.275 seconds.
+  Public contracts and all 42 production lines preserved; runtime tests
+  passed in both recorded modes (45,792 checks each). First-green checkpoint:
+  `fee271fbeaf9fcd1077ede3a9e3a2f276e3ea907`.
+* Standalone arbitrary-raw-storage padding equivalence: 25 Ada SLOC,
+  recorded 104/104 result in the snapshot. This validates one specific
+  representation relationship, **not three materially different generic
+  validation instances**.
+* Imported-unit assertion execution was not established by these runtime
+  checks: the assertion-enabled claim covers allocator and runtime driver,
+  not imported generic/SPARKlib units.
+* The snapshot remains historical intermediate evidence, SHA-256
+  `6655666c27ad24322dd1719d7b46e13e24005d6dd40dd9abae3842520da28cb6`.
+  [Progress ledger](../../examples/bitmap_allocator/LIBRARY_EXPERIMENT_PROGRESS.md)
+  preserves prior stages and ablations. Ignored local logs/snapshots are retained.
+
+### Experimental execution and coverage
+
+**Closed early after economic rejection; not every originally planned
+validation campaign completed.** Review authorized stopping after observing
+the economic result. This is a **post-measurement stopping decision**, not a
+separately preregistered early-stopping plan.
+
+| Campaign | Coverage at closeout |
+|---|---|
+| Independent generic-instance campaign | Not performed before economic closeout; no result claimed |
+| Other word widths and identity kinds | Not performed before economic closeout; no result claimed |
+| Invalid-configuration rejection tests | Not performed before economic closeout; no result claimed |
+| Complete M1–M8 campaign, manual and library variants | Not performed before economic closeout; no result claimed |
+| Masking experiments | Not performed before economic closeout; no result claimed |
+| Complete single-prover comparison | Not performed before economic closeout; no result claimed |
+| Final controlled performance comparison | Not performed before economic closeout; no result claimed |
+| Dedicated hosted bitmap proof gate | Not performed before economic closeout; no result claimed |
+
+Passing these checks would not change measured R or make this existing
+candidate satisfy the frozen economic criteria. They were therefore not
+pursued after review elected to close it. This does not make such checks
+permanently unnecessary for any future candidate. No new bitmap proof CI job
+was added; structural CI checks only closeout integrity and pure regressions.
+No external validation, further bitmap redesign, or Task 020 was started.
+
+### Technical findings and limits
+
+**Direct measurement:** the mapping bridge (10 lines) and model
+contract/forwarding body (21) account for 31 of the 56 residual support lines.
+The checked local/generic model relationship removed substantial duplicated
+reasoning but did not make this integration smaller than the manual proof.
+The contaminated aggregate report (331 results, inherited manual outputs)
+was rejected; isolated project-closure output reproduced the unchanged
+first-green candidate at 213/213 before accepted minimized measurements.
+
+**Engineering interpretation from this candidate:** generic proof content
+does not guarantee cheap application integration. Physical padding
+preservation is distinct from abstract set equality; valid-ID membership
+does not describe unused physical bits. The standalone padding check and
+retained physical-update premises address that distinction.
+
+**Unresolved:** broader instances, configurations, complete falsification,
+single-prover robustness and controlled performance remain unvalidated.
+No global minimum, generic unsoundness, GNATprove defect or compiler theorem
+is claimed. This does not show that no useful bitmap proof library or better
+integration is possible, nor that library-first universally failed.
+
+### Closeout artifact and retention
+
+[Canonical closeout evidence](../evidence/task019-bitmap-set-proof-pattern.json)
+is separate from the preserved minimization snapshot. The standard-library
+[helper](../../examples/bitmap_allocator/scripts/closeout_bitmap_experiment.py)
+binds reviewed inventory metadata to current source/configuration hashes,
+derives the economic predicates and serializes documented coverage limits.
+It does not parse Ada semantics, launch GNATprove, independently reproduce
+proofs or verify the human stopping decision. `--check` is read-only and
+requires no historical Git object, ignored logs, toolchain or network.
+
+Candidate source remains at its measured paths for reproducibility, as an
+unsupported research artifact, still covered by trust scanning. The manual
+benchmark is not a production-ready supported container merely because its
+positive proof passed. Task 019 is closed with incomplete planned validation;
+the research branch is delivered for review, not automatic merge.

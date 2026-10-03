@@ -1,4 +1,22 @@
-# Task 019 manual packed bitmap allocator
+# Task 019 packed bitmap benchmark and non-adopted research candidate
+
+**Closed: `DO_NOT_ADOPT_BITMAP_PATTERN`.** Manual P=54; minimized
+library-backed R=56; library L=124; A=6; reduction −3.703704%.
+The 32-bit candidate reached complete local proofs but failed the frozen
+economic criteria. Broader independent validation and complete falsification
+were not completed; remaining campaigns stopped by post-measurement review.
+Neither variant is presented as a production-ready supported container.
+
+The manual benchmark is in `variants/manual/`; the unsupported research
+candidate remains in `variants/library_backed/` at its measured paths.
+See [closeout and coverage](../../docs/tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit),
+[manual metrics](BASELINE_METRICS.md), [historical library metrics](LIBRARY_METRICS.md),
+[progress ledger](LIBRARY_EXPERIMENT_PROGRESS.md) and
+[closeout evidence](../../docs/evidence/task019-bitmap-set-proof-pattern.json).
+The intermediate metrics are preserved, not rewritten as adoption evidence.
+Prefix_Sets remains the established reusable pattern; no second supported
+bitmap pattern or release was adopted. Historical commands below are for
+reproducibility, not instructions to resume optimization or validation.
 
 Seventy identities (0 .. 69) occupy three `Interfaces.Unsigned_32` words.
 One means free; zero means allocated. The last word has six valid bits and
@@ -11,7 +29,8 @@ entity chooses a production word, mask, identity or Count value.
 
 Local manual proof support operates on raw `Word_Array`, independently of
 Pool validity. The Pool invariant ties Count to the raw model's length and
-requires canonical padding. There is no reusable bitmap library yet.
+requires canonical padding. A non-adopted generic research artifact is retained
+in `proof_patterns/src/`; broader configurations have not been validated.
 
 From this directory:
 

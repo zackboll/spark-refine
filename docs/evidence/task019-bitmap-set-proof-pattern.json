@@ -1,0 +1,117 @@
+{
+  "campaigns": {
+    "Complete M1–M8 campaign, manual and library variants": "not performed before economic closeout; no result claimed",
+    "Complete single-prover comparison": "not performed before economic closeout; no result claimed",
+    "Dedicated hosted bitmap proof gate": "not performed before economic closeout; no result claimed",
+    "Final controlled performance comparison": "not performed before economic closeout; no result claimed",
+    "Independent generic-instance campaign": "not performed before economic closeout; no result claimed",
+    "Invalid-configuration rejection tests": "not performed before economic closeout; no result claimed",
+    "Masking experiments": "not performed before economic closeout; no result claimed",
+    "Other word widths and identity kinds": "not performed before economic closeout; no result claimed"
+  },
+  "checkpoints": {
+    "first_green": "fee271fbeaf9fcd1077ede3a9e3a2f276e3ea907",
+    "manual_baseline": "029f2907c7993da3854ed72583c166de4b79faa5",
+    "measured_candidate": "ce13e839259e3e8b7c265678db4e119f8b4152ce",
+    "preregistration": "a3265d455d2420daf435a02127455af1ee07a9d0"
+  },
+  "counts": {
+    "A": 6,
+    "L": 124,
+    "P": 54,
+    "R": 56,
+    "R_start_unminimized": 110,
+    "generic_manual_support": 52
+  },
+  "decision_scope": "Measured packed allocator, preserved production interface, recorded proof architecture and bounded minimization alternatives; not a global minimum or impossibility claim.",
+  "documented_stopping_decision": {
+    "execution": "closed early after economic rejection; not all planned campaigns completed",
+    "rationale": "Passing remaining checks would not change measured R or satisfy the frozen economic criteria; review elected not to pursue them.",
+    "timing": "post-measurement review decision, not a preregistered early-stopping plan",
+    "verification_limit": "Human authorization is a documented input, not independently verified by software."
+  },
+  "economics": {
+    "R_gt_20": true,
+    "decision": "DO_NOT_ADOPT_BITMAP_PATTERN",
+    "independent_validation": null,
+    "reduction": {
+      "denominator": 54,
+      "displayed_percentage": "-3.703704%",
+      "numerator": -200
+    },
+    "reduction_lt_30_percent": true,
+    "support_saved": -2
+  },
+  "format_version": 1,
+  "input_evidence_sha256": {
+    "examples/bitmap_allocator/evidence/library_minimization.json": "6655666c27ad24322dd1719d7b46e13e24005d6dd40dd9abae3842520da28cb6",
+    "examples/bitmap_allocator/evidence/library_minimization_timings.json": "5518b7c7f0bc36fca350dbb690c74eee287bf67bece36c15a25fa01e1b2e0370",
+    "examples/bitmap_allocator/evidence/manual_inventory.json": "219556259161cfab72a8b34af680b50ab689f091195d98d8d8aad53a5848e51d",
+    "examples/bitmap_allocator/evidence/manual_proof.json": "bd4416ea7686a1391bd6818f94d5ab0a69c806ec1a9c876538eb22cd91f13595"
+  },
+  "measured_source_sha256": {
+    "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+    "examples/bitmap_allocator/bitmap_padding_validation.gpr": "2f4d44e55567bc88c797b935f93bd585567bc6354218fbf745c538f6823fead2",
+    "examples/bitmap_allocator/tests/bitmap_allocator_runtime_tests.adb": "82ddd6b80d2b981d1d444b624da6b7b9707b45b543e8b8ebe418dfdeb849a856",
+    "examples/bitmap_allocator/validation/bitmap_padding_validation.adb": "940aea7fe72186a1d3e29a2271d88488cfc2ae411f5e8a59f073635afdd4bcb1",
+    "examples/bitmap_allocator/validation/bitmap_padding_validation.ads": "2179b77b3071805bd5d2dd726dc74b64b7b09373233e9a2be92a757bc2bda6a1",
+    "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "6c6c0eef9ed6f9f200de78fbfba5a9511cff653a59f3205bcc032ced5821e06e",
+    "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "e865516ae1f39b9aa89f0cea59d3e18834dc35f1e7c6b61a17ef3b0a9fc2456c",
+    "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+    "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+  },
+  "recorded_local_coverage": {
+    "assertions_scope": "allocator and runtime driver; imported library/SPARKlib units not claimed assertions-enabled",
+    "candidate_clean_proofs": [
+      {
+        "agreement": true,
+        "failures": [],
+        "justified": 0,
+        "passes": 174,
+        "total": 174
+      },
+      {
+        "agreement": true,
+        "failures": [],
+        "justified": 0,
+        "passes": 174,
+        "total": 174
+      },
+      {
+        "agreement": true,
+        "failures": [],
+        "justified": 0,
+        "passes": 174,
+        "total": 174
+      }
+    ],
+    "candidate_clean_wall_seconds": [
+      7.609,
+      7.269,
+      7.275
+    ],
+    "candidate_runtime": {
+      "off": 45792,
+      "on": 45792
+    },
+    "manual": {
+      "justified": 0,
+      "passed": 118,
+      "unproved": 0
+    },
+    "manual_runtime": {
+      "assertions": 45792,
+      "production": 45792
+    },
+    "padding": {
+      "justified": 0,
+      "passed": 104,
+      "unproved": 0
+    },
+    "padding_scope": "One arbitrary-raw-storage representation relationship, not three independent generic instances.",
+    "padding_sloc": 25,
+    "production_lines": 42,
+    "public_API_equivalence": true,
+    "reproduction_claim": "Recorded local observations only; this helper verifies integrity, not proofs."
+  }
+}

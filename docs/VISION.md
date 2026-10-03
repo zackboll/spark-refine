@@ -30,6 +30,15 @@ two things instead:
 
 ## Developer experience we want
 
+Task 019 tested the limits of library integration: manual P=54 versus
+minimized library-backed R=56 (library L=124). The 32-bit candidate reached
+complete local proofs but closed economically with
+`DO_NOT_ADOPT_BITMAP_PATTERN`; broader validation and falsification were
+not completed. No second supported bitmap pattern was adopted. Prefix_Sets
+remains the established reusable pattern; generic proof content alone does
+not guarantee cheap application integration.
+See [bounded conclusion and coverage](tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit).
+
 ```text
 write implementation + authoritative contracts
               │

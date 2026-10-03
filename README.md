@@ -25,6 +25,13 @@ support of the fixed-pool benchmark from 36 to 10 SLOC
 **2. Proof-aware diagnostics**, in [`diagnostics/`](diagnostics/), command
 `spark-refine`
 
+Task 019 closed with **`DO_NOT_ADOPT_BITMAP_PATTERN`**: manual P=54,
+minimized library-backed R=56, library L=124. The 32-bit bitmap candidate
+reached complete local proofs, but failed the economic criteria; broader
+validation and falsification were not completed. Its source is retained as
+unsupported research, not a second supported pattern. Prefix_Sets remains
+the one established reusable pattern. See [closeout](docs/tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit).
+
 A deterministic analyzer over GNATprove's machine-readable output
 (`gnatprove.sarif`, `*.spark`, `*.ali`). It turns low-level check
 outcomes into proof-engineering diagnostics. It serves humans directly
