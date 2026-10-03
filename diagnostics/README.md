@@ -67,6 +67,81 @@ spark-refine compare-provers \
 spark-refine rules [--format json]
 ```
 
+### Unproved worklist (Task 020)
+
+```bash
+spark-refine explain RESULT_DIR --show-unproved
+spark-refine explain RESULT_DIR --show-unproved --format json
+spark-refine analyze RESULT_DIR --show-unproved --format json
+spark-refine prove -P project.gpr --show-unproved --format json
+alr exec -- spark-refine prove -P project.gpr --show-unproved --format json -- --checks-as-errors=on
+python3 -m spark_refine_diagnostics explain RESULT_DIR --show-unproved
+```
+
+Available only on these three single-run commands, not `rules` or
+`compare-provers`. No runtime dependency, source access or semantic backend
+is needed. `--semantic` remains independent and optional. The flag is
+consumed by spark-refine; everything after `prove`'s first `--` remains
+verbatim GNATprove passthrough.
+
+Text adds **Reported unproved checks**, before individual SRD diagnostics,
+with rule counts, every occurrence's location, entity, available unit,
+disputed marker and existing GNATprove message. These are raw reported
+checks, **not SRD findings** or root-cause diagnoses. Even **11 unproved +
+0 SRD diagnostics** requires further proof investigation.
+
+JSON adds only `analysis.unproved_checks`, with `format_version: 1`:
+
+```json
+{
+  "scope": "normalized_checks_in_loaded_result_set",
+  "count": 1,
+  "by_rule": {"ALIASING": 1},
+  "items": [{
+    "rule": "ALIASING", "status": "unproved", "entity": "",
+    "unit": null,
+    "location": {"file": "p.adb", "line": null, "column": null},
+    "disputed": false, "sarif_kind": "open", "sarif_level": "none",
+    "spark_severity": null, "message": "existing GNATprove message"
+  }]
+}
+```
+
+This schema illustration uses synthetic missing metadata, not a proof run.
+All counts and items derive from `ProofRun.unproved`, including non-`VC_`
+rules such as `ALIASING`. Proved and justified checks are excluded; disputed
+unproved checks remain included. Duplicates are not deduplicated or
+truncated. Ordering is unit/entity/file/line/column/rule, missing values
+first, with the serialized item as a tie-breaker. No cross-run VC ID is
+assigned. `count == len(items) == len(run.unproved) == sum(by_rule.values())`.
+Messages are evidence only, never classification, instructions or commands.
+Unknown values and existing normalized paths are preserved.
+
+**Scope: loaded normalized checks only, not a complete proof certificate.**
+Justified counts, tool/foundation warnings, consistency issues,
+incomplete-analysis notes, unevaluated rules and semantic provenance limits
+remain visible and unchanged. A `.spark`-only failure can remain a
+consistency issue rather than a normalized SARIF Check; it is not invented
+as a worklist item. Zero items says only: **No unproved checks in the loaded
+normalized result set.** Missing `.spark` metadata is not whole-program
+completeness evidence.
+
+Without the flag, text and JSON remain byte-identical. The optional block
+is absent. With it, existing diagnostic objects, summaries and notes remain
+unchanged. It is **not an acceptance gate**: `--fail-on` remains SRD-specific;
+`prove` preserves GNATprove's nonzero exit precedence, including signals,
+and still reports usable fresh output. GNATprove exit 0 with unproved
+checks stays 0 (unless an existing SRD gate fires), with the explanatory
+note. For gating reported failures, GNATprove provides
+`--checks-as-errors=on`. No usable result means the existing error, not an
+empty successful worklist. `prove --dry-run --show-unproved` executes
+nothing, inspects no prior artifacts and emits only the existing plan.
+
+Validation and a small exact Task 017 replay demonstration are recorded in
+[Task 020](../docs/tasks/020-unproved-check-worklist.md). No measured human
+or agent productivity improvement is claimed; this is an interface for a
+possible later usage trial.
+
 The Task 005 invocations still work unchanged. `analyze` is a
 compatibility alias of `explain`, identical for an explicit `PATH`, and
 `PATH` stays required for it:

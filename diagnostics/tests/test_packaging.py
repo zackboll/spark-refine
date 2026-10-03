@@ -104,6 +104,7 @@ class PackagingConfig(unittest.TestCase):
     def test_wheel_allow_list(self):
         bad = _smoke().wheel_disallowed
         good = ["spark_refine_diagnostics/__init__.py",
+                "spark_refine_diagnostics/check_inventory.py",
                 "spark_refine_diagnostics/cli.py",
                 "spark_refine-0.0.0.dev0.dist-info/METADATA",
                 "spark_refine-0.0.0.dev0.dist-info/licenses/LICENSE"]

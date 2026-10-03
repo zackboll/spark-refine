@@ -242,6 +242,51 @@ def installed_cli_checks(venv: Path, work: Path, editable: bool) -> None:
     check(True, "python -m spark_refine_diagnostics rules works")
 
     prove_checks(exe, py, work, env, p5)
+    worklist_checks(exe, py, work, env)
+
+
+def worklist_checks(exe: Path, py: Path, work: Path, env: dict) -> None:
+    """Task 020: all single-run commands/formats/entry points, installed."""
+    fixture = (FIXTURES / "ring_b5").resolve()
+    project = work / "worklist project"
+    project.mkdir()
+    fake = work / "worklist gnatprove"
+    fake.write_text(FAKE_GNATPROVE.format(python=py), encoding="utf-8")
+    fake.chmod(0o755)
+    for prefix in ([exe], [py, "-m", PACKAGE]):
+        for fmt in ("text", "json"):
+            outputs = []
+            for command in ("explain", "analyze", "prove"):
+                target = (["-P", "fake.gpr", "--gnatprove", fake]
+                          if command == "prove" else [fixture])
+                args = [*prefix, command, *target, "--format", fmt]
+                run_env = {**env, "FAKE_WRITE": str(fixture), "FAKE_EXIT": "0"}
+                base = run(args, cwd=project, env=run_env).stdout
+                shown = run([*args, "--show-unproved"], cwd=project,
+                            env=run_env).stdout
+                if fmt == "json":
+                    doc = json.loads(shown)
+                    inv = doc["analysis"].pop("unproved_checks")
+                    check(inv["count"] == len(inv["items"]) ==
+                          doc["runs"][0]["unproved"] == sum(inv["by_rule"].values())
+                          and inv["count"] > 0 and
+                          doc["summary"]["diagnostic_count"] == 0,
+                          f"{command}: unproved without SRD, complete inventory")
+                    check(json.dumps(doc, indent=2) + "\n" == base,
+                          f"{command}: additive JSON only")
+                else:
+                    start = shown.index("\n\nReported unproved checks:")
+                    end = shown.index("\n\nno SRD diagnostics", start)
+                    check(shown[:start] + shown[end:] == base,
+                          f"{command}: additive text only")
+                outputs.append(shown)
+            check(outputs[0] == outputs[1], "worklist explain/analyze equality")
+    # Semantic enrichment can be unavailable; inventory needs no sources/backend.
+    doc = json.loads(run([exe, "explain", fixture, "--semantic", "-P", "missing.gpr",
+                          "--show-unproved", "--format", "json"],
+                         cwd=project, env=env).stdout)
+    check(doc["analysis"]["unproved_checks"]["count"] > 0,
+          "worklist remains available with --semantic")
 
 
 FAKE_GNATPROVE = """#!{python}

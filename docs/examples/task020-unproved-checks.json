@@ -1,0 +1,231 @@
+{
+  "replay": "exact raw artifact-hash replay",
+  "revision": "5fa2c0cee62deb86368fcc84a8d3b06726028276",
+  "analysis": {
+    "unproved_checks": {
+      "scope": "normalized_checks_in_loaded_result_set",
+      "count": 11,
+      "by_rule": {
+        "ALIASING": 1,
+        "VC_OVERFLOW_CHECK": 9,
+        "VC_POSTCONDITION": 1
+      },
+      "items": [
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.Coef",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 43,
+            "column": 67
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for (S'Last - S'First)"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.U32_At",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 178,
+            "column": 24
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for (S'Last - S'First)"
+        },
+        {
+          "rule": "VC_POSTCONDITION",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.U32_At",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 181,
+            "column": 17
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "postcondition might fail"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.U32_At",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 190,
+            "column": 25
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for (B0 * 256 + B1)"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.U32_At",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 190,
+            "column": 31
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for (B0 * 256 + B1) * 256"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.U32_At",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 190,
+            "column": 37
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for ((B0 * 256 + B1) * 256 + B2)"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.U32_At",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 190,
+            "column": 43
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for ((B0 * 256 + B1) * 256 + B2) * 256"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.LMS.U32_At",
+          "unit": "crdt-security-lms",
+          "location": {
+            "file": "crdt-security-lms.adb",
+            "line": 190,
+            "column": 49
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for ((B0 * 256 + B1) * 256 + B2) * 256 + B3"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.SHA256.Update",
+          "unit": "crdt-security-sha256",
+          "location": {
+            "file": "crdt-security-sha256.adb",
+            "line": 112,
+            "column": 44
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove lower bound for (Long_Long_Integer (Bytes'Last) - Long_Long_Integer (Bytes'First))"
+        },
+        {
+          "rule": "VC_OVERFLOW_CHECK",
+          "status": "unproved",
+          "entity": "CRDT.Security.SHA256.Update",
+          "unit": "crdt-security-sha256",
+          "location": {
+            "file": "crdt-security-sha256.adb",
+            "line": 112,
+            "column": 79
+          },
+          "disputed": false,
+          "sarif_kind": "open",
+          "sarif_level": "none",
+          "spark_severity": "medium",
+          "message": "overflow check might fail, cannot prove upper bound for (Long_Long_Integer (Bytes'Last) - Long_Long_Integer (Bytes'First)) + 1"
+        },
+        {
+          "rule": "ALIASING",
+          "status": "unproved",
+          "entity": "CRDT.Security.SHA256.Update",
+          "unit": "crdt-security-sha256",
+          "location": {
+            "file": "crdt-security-sha256.adb",
+            "line": 125,
+            "column": 23
+          },
+          "disputed": false,
+          "sarif_kind": "fail",
+          "sarif_level": "none",
+          "spark_severity": "high",
+          "message": "formal parameters \"Ctx\" and \"Block\" are aliased (SPARK RM 6.4.2)"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "diagnostic_count": 0,
+    "by_code": {
+      "SRD001": 0,
+      "SRD002": 0,
+      "SRD003": 0
+    },
+    "by_confidence": {
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "by_category": {
+      "proof_context": 0,
+      "abstraction_boundary": 0,
+      "prover_portfolio": 0
+    },
+    "by_action": {
+      "fix_invariant_then_reprove": 0,
+      "validate_client_goal_then_review_public_contracts": 0,
+      "preserve_portfolio_or_strengthen_proof": 0
+    }
+  },
+  "notes": [
+    "consistency: SARIF check without .spark entry: error  crdt-security-lms.adb:193:14",
+    "consistency: SARIF check without .spark entry: error  crdt-security-sha256.adb:62:14",
+    "consistency: SARIF check without .spark entry: error  crdt-security-hmac.adb:14:13",
+    "unit crdt-clocks-matrix: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-clocks-vector: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-lww_element_sets: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-lww_sets: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-rga: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-rgas: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-sequences-fugue: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-sequences-naive: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-sequences-yjs: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial",
+    "unit crdt-sync-state_based-clocked: analysis stopped early (STOP_REASON_GENERIC_UNIT); results are partial"
+  ]
+}

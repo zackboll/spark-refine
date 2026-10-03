@@ -418,7 +418,24 @@ def e2e_srd001() -> dict:
           "--variant", "head_tail_count", "--only", "head_advances_wrong"],
          ex, [out.parent])
     _fresh(out, since)
-    return _cli(["analyze", str(out), "--name", "fresh_ring_b3"], "srd001")
+    report = _cli(["analyze", str(out), "--name", "fresh_ring_b3"], "srd001")
+    # Task 020: reuse this fresh negative proof, no extra proof invocation.
+    inventory_report = _cli(["explain", str(out), "--name", "fresh_ring_b3",
+                             "--show-unproved"], "unproved")
+    sys.path.insert(0, str(DIAGNOSTICS))
+    from spark_refine_diagnostics import load_run
+    from spark_refine_diagnostics.check_inventory import unproved_checks
+    inventory = inventory_report["analysis"].pop("unproved_checks")
+    run = load_run(out)
+    if (inventory != unproved_checks(run) or
+            inventory["count"] != len(run.unproved) or
+            inventory["count"] != sum(inventory["by_rule"].values()) or
+            inventory_report != report):
+        raise E2EError("unproved worklist differs from fresh loaded checks "
+                       "or changes the original report")
+    print(f"   worklist: {inventory['count']} fresh unproved occurrence(s); "
+          "exact loaded-check parity; original report unchanged", flush=True)
+    return report
 
 
 def e2e_srd002() -> dict:

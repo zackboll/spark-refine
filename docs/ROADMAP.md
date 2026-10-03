@@ -19,6 +19,15 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Completed
 
+Task 020: opt-in `--show-unproved` on `explain`, `analyze` and `prove`.
+Every loaded normalized unproved occurrence is exposed in text and optional
+`analysis.unproved_checks` JSON, independently of SRD diagnostics. No new
+rule, loader, proof policy or repair; defaults stay unchanged. Pure/real
+fixture, packaging and same-fresh-output E2E checks cover the interface;
+Task 017's hash-verified raw artifacts expose all 11 checks with zero SRDs.
+This enables a possible later usage trial, not a measured productivity claim.
+See [Task 020](tasks/020-unproved-check-worklist.md).
+
 Task 019: **closed experiment, `DO_NOT_ADOPT_BITMAP_PATTERN`**. Manual P=54,
 minimized library-backed R=56, library L=124 (−3.703704% reduction).
 The 32-bit candidate reached complete local proofs; broader validation and
@@ -80,7 +89,8 @@ SRD002 case remains unvalidated. See [Task 016](tasks/016-external-artifact-comp
 * **Possible developer/agent usage evaluation.** Observe actual use of the
   established pattern and diagnostics under the authoritative-specification
   policy. This is a possible next direction, not a started task or a promised
-  successful result. Task 020 has not started.
+  successful result. Task 020 delivers a reporting interface only; no usage
+  trial or Task 021 has started.
 * **External positive validation remains deferred** until an independently
   selected natural case qualifies. Tasks 016–018 do not supply that positive
   evidence. Normal reports retain `failed_conjunct: null`.
