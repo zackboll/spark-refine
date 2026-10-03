@@ -4,7 +4,7 @@
 > reviewed SPARK generic libraries in `proof_patterns/`, not as generator
 > templates ([ADR 0005](adr/0005-library-and-diagnostics-first.md)).
 >
-> * The only implemented pattern is `SPARK_Refine_Prefix_Sets` (see
+> * The only established supported pattern is `SPARK_Refine_Prefix_Sets` (see
 >   "Evidence from Task 004" below and `proof_patterns/README.md`).
 > * The circular-sequence notes are design and evidence records. No
 >   circular-sequence library exists, because Tasks 001–002 found its
@@ -327,6 +327,13 @@ Decision: **PIVOT** (library + diagnostics). See
 `examples/fixed_pool/LIBRARY_METRICS.md`.
 
 ## Pattern 003 candidate: bitmap set/allocator
+
+**Task 019 closed: `DO_NOT_ADOPT_BITMAP_PATTERN`.** Manual P=54,
+minimized application R=56, library L=124. The retained 32-bit candidate
+reached complete local proofs, but failed economic criteria. Broader
+validation and falsification were not completed. Its source is unsupported
+research, not an adopted second pattern; Prefix_Sets remains established.
+See [closeout and coverage](tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit).
 
 ### Abstract meaning
 

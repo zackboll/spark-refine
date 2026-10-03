@@ -1,0 +1,21 @@
+{
+  "adapter": 13.449,
+  "clear-length": 10.968,
+  "clear-post": 16.375,
+  "independent": 6.732,
+  "input": 10.145,
+  "input-isolated": 10.626,
+  "length-clause": 15.349,
+  "mapping-loop": 13.742,
+  "model-path": 10.471,
+  "model-path-actual": 9.735,
+  "mutation-support": 10.788,
+  "old-facts": 6.898,
+  "scan": 21.949,
+  "set-length": 12.358,
+  "snapshots": 7.086,
+  "stable-1": 7.609,
+  "stable-2": 7.269,
+  "stable-3": 7.275,
+  "universe": 7.639
+}

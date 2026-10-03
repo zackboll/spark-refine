@@ -41,6 +41,14 @@ historical or deferred. See the README section "Where to start".
 
 ## 2. Overview
 
+The established supported reusable pattern remains Prefix_Sets. Task 019's
+Bitmap_Sets source is retained in place as unsupported research, still in
+trust scanning, not a second supported pattern. Manual P=54, minimized
+application R=56 and library L=124 led to `DO_NOT_ADOPT_BITMAP_PATTERN`.
+The 32-bit candidate reached complete local proofs; broader validation and
+falsification were not completed before economic closeout.
+See [decision scope](tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit).
+
 ```text
                 Ada/SPARK application
       (implementation + authoritative contracts)

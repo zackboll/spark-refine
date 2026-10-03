@@ -1,0 +1,159 @@
+# Nonoverlapping physical-line inventory, benchmark source only.
+# Runtime tests are reported separately, not part of P.
+format_version = 1
+
+[[span]]
+file = "variants/manual/bitmap_allocator.ads"
+start = 1
+end = 33
+class = "specification"
+reason = "Public types, finite-set instantiation, API and behavior contracts"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.ads"
+start = 34
+end = 39
+class = "production"
+reason = "Packed word storage type and real runtime mapping/membership"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.ads"
+start = 40
+end = 50
+class = "mechanical"
+generic = true
+reason = "Raw padding predicate, model membership and finite-universe facts"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.ads"
+start = 51
+end = 54
+class = "production"
+reason = "Mutable packed words and redundant Count, including default state"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.ads"
+start = 55
+end = 57
+class = "mechanical"
+generic = true
+reason = "Canonical padding and redundant cardinality invariant"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.ads"
+start = 58
+end = 58
+class = "specification"
+reason = "Package closure"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 1
+end = 1
+class = "production"
+reason = "Implementation unit header"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 2
+end = 8
+class = "mechanical"
+generic = true
+reason = "Proved extensional set equality to equal-length bridge"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 10
+end = 14
+class = "production"
+reason = "Runtime bitmap membership and redundant Count queries"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 16
+end = 35
+class = "mechanical"
+generic = true
+reason = "Raw set model construction, adapter and three prefix loop invariants"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 37
+end = 45
+class = "production"
+reason = "Initialize implementation and Allocate header"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 46
+end = 47
+class = "mechanical"
+generic = true
+reason = "Clear-operation old model and raw words snapshots"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 48
+end = 50
+class = "production"
+reason = "Allocate setup and actual valid-ID scan"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 51
+end = 52
+class = "mechanical"
+generic = false
+reason = "Each line supports this allocator's low-to-high scan termination path; public semantics do not promise low-first allocation"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 53
+end = 57
+class = "production"
+reason = "Actual ID selection, packed clear and Count decrement"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 58
+end = 61
+class = "mechanical"
+generic = true
+reason = "Clear membership preservation and Remove cardinality bridge call"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 62
+end = 67
+class = "production"
+reason = "Allocate return/closure and Release header"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 68
+end = 69
+class = "mechanical"
+generic = true
+reason = "Set-operation old model and raw words snapshots"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 70
+end = 72
+class = "production"
+reason = "Actual packed bit set"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 73
+end = 76
+class = "mechanical"
+generic = true
+reason = "Set membership preservation and Add cardinality bridge call"
+
+[[span]]
+file = "variants/manual/bitmap_allocator.adb"
+start = 77
+end = 79
+class = "production"
+reason = "Count increment and unit closures"

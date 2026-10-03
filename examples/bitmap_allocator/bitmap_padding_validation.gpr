@@ -1,0 +1,14 @@
+with "sparklib";
+with "../../proof_patterns/spark_refine_proof_patterns.gpr";
+project Bitmap_Padding_Validation is
+   for Source_Dirs use ("validation");
+   for Object_Dir use "obj/padding-validation";
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-gnatwa", "-gnatW8", "-g");
+   end Compiler;
+   package Prove is
+      for Proof_Switches ("Ada") use
+        ("-U", "--mode=all", "--level=2", "--no-loop-unrolling",
+         "--report=statistics", "--checks-as-errors=on", "--warnings=error");
+   end Prove;
+end Bitmap_Padding_Validation;

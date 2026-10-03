@@ -16,6 +16,10 @@ jobs:
         run: python3 scripts/check_repo.py
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
+      - name: Task 019 closeout evidence integrity and pure regressions (not proof reproduction)
+        run: |
+          python3 examples/bitmap_allocator/scripts/closeout_bitmap_experiment.py --check
+          python3 -m unittest discover -s examples/bitmap_allocator/scripts -p 'test_bitmap_closeout.py' -v
       # Task 005: proof-diagnostics MVP. Runs on the committed, sanitized
       # GNATprove 16.1.0 fixtures (diagnostics/tests/fixtures); no toolchain.
       - name: Proof-diagnostics tests (SRD001-SRD003)

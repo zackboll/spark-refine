@@ -1,5 +1,22 @@
 # Research Notes and References
 
+## Task 019: economic non-adoption of the measured bitmap candidate
+
+**`DO_NOT_ADOPT_BITMAP_PATTERN`**: manual P=54, minimized library-backed
+R=56, reusable L=124, A=6; savings −2, reduction −3.703704%. The 32-bit
+candidate reached complete local proofs, but both R>20 and reduction<30%
+hold. Broader validation and falsification were not completed; review elected
+a post-measurement closeout. No second supported bitmap pattern was adopted;
+Prefix_Sets remains the established reusable pattern.
+
+Direct measurement: mapping bridge plus model contract/forwarding body
+consume 31/56 residual lines. Engineering interpretation: generic proof
+content does not guarantee cheap integration; physical padding preservation
+is distinct from abstract set equality. Better integrations and broader
+instances remain unresolved, not disproved. The contaminated aggregate report
+was rejected in favor of isolated project-closure measurements; no GNATprove
+defect is inferred. [Evidence, scope and coverage](tasks/019-bitmap-set-proof-pattern.md#observations-append-only-after-preregistration-commit).
+
 ## Task 018: candidate qualification without proof-based selection
 
 Surveyed SPARKTLS, memcp, flyology, SPARKling-MuJoCo and the previously

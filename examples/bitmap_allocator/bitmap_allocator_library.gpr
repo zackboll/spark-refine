@@ -1,0 +1,7 @@
+with "sparklib";
+with "../../proof_patterns/spark_refine_proof_patterns.gpr";
+project Bitmap_Allocator_Library extends "bitmap_allocator.gpr" is
+   for Source_Dirs use ("variants/library_backed", "tests");
+   for Object_Dir use "obj/library_backed";
+   for Exec_Dir use "bin/library_backed";
+end Bitmap_Allocator_Library;

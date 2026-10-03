@@ -1,0 +1,366 @@
+{
+  "G_percent": 96.296296,
+  "P": 54,
+  "application_specific_P": 2,
+  "format_version": 1,
+  "generic_P": 52,
+  "library_gate": "PASS",
+  "runtime_test_sloc_excluded": 54,
+  "source_sha256": {
+    "variants/manual/bitmap_allocator.adb": "56faaf3245c9d40fa2251eec3247f3a6ffd9327f9ef190eac5c7d9ddcb02f893",
+    "variants/manual/bitmap_allocator.ads": "4a4a1da2b868f44abdea7222de5a0141de6bd073def374195d0f30d3e0744e36"
+  },
+  "spans": [
+    {
+      "active_lines": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        33
+      ],
+      "class": "specification",
+      "end": 33,
+      "file": "variants/manual/bitmap_allocator.ads",
+      "reason": "Public types, finite-set instantiation, API and behavior contracts",
+      "sloc": 30,
+      "start": 1
+    },
+    {
+      "active_lines": [
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "class": "production",
+      "end": 39,
+      "file": "variants/manual/bitmap_allocator.ads",
+      "reason": "Packed word storage type and real runtime mapping/membership",
+      "sloc": 6,
+      "start": 34
+    },
+    {
+      "active_lines": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50
+      ],
+      "class": "mechanical",
+      "end": 50,
+      "file": "variants/manual/bitmap_allocator.ads",
+      "generic": true,
+      "reason": "Raw padding predicate, model membership and finite-universe facts",
+      "sloc": 11,
+      "start": 40
+    },
+    {
+      "active_lines": [
+        51,
+        52,
+        53,
+        54
+      ],
+      "class": "production",
+      "end": 54,
+      "file": "variants/manual/bitmap_allocator.ads",
+      "reason": "Mutable packed words and redundant Count, including default state",
+      "sloc": 4,
+      "start": 51
+    },
+    {
+      "active_lines": [
+        55,
+        56,
+        57
+      ],
+      "class": "mechanical",
+      "end": 57,
+      "file": "variants/manual/bitmap_allocator.ads",
+      "generic": true,
+      "reason": "Canonical padding and redundant cardinality invariant",
+      "sloc": 3,
+      "start": 55
+    },
+    {
+      "active_lines": [
+        58
+      ],
+      "class": "specification",
+      "end": 58,
+      "file": "variants/manual/bitmap_allocator.ads",
+      "reason": "Package closure",
+      "sloc": 1,
+      "start": 58
+    },
+    {
+      "active_lines": [
+        1
+      ],
+      "class": "production",
+      "end": 1,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Implementation unit header",
+      "sloc": 1,
+      "start": 1
+    },
+    {
+      "active_lines": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "class": "mechanical",
+      "end": 8,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "generic": true,
+      "reason": "Proved extensional set equality to equal-length bridge",
+      "sloc": 7,
+      "start": 2
+    },
+    {
+      "active_lines": [
+        10,
+        11,
+        13,
+        14
+      ],
+      "class": "production",
+      "end": 14,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Runtime bitmap membership and redundant Count queries",
+      "sloc": 4,
+      "start": 10
+    },
+    {
+      "active_lines": [
+        16,
+        17,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35
+      ],
+      "class": "mechanical",
+      "end": 35,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "generic": true,
+      "reason": "Raw set model construction, adapter and three prefix loop invariants",
+      "sloc": 19,
+      "start": 16
+    },
+    {
+      "active_lines": [
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        45
+      ],
+      "class": "production",
+      "end": 45,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Initialize implementation and Allocate header",
+      "sloc": 8,
+      "start": 37
+    },
+    {
+      "active_lines": [
+        46,
+        47
+      ],
+      "class": "mechanical",
+      "end": 47,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "generic": true,
+      "reason": "Clear-operation old model and raw words snapshots",
+      "sloc": 2,
+      "start": 46
+    },
+    {
+      "active_lines": [
+        48,
+        49,
+        50
+      ],
+      "class": "production",
+      "end": 50,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Allocate setup and actual valid-ID scan",
+      "sloc": 3,
+      "start": 48
+    },
+    {
+      "active_lines": [
+        51,
+        52
+      ],
+      "class": "mechanical",
+      "end": 52,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "generic": false,
+      "reason": "Each line supports this allocator's low-to-high scan termination path; public semantics do not promise low-first allocation",
+      "sloc": 2,
+      "start": 51
+    },
+    {
+      "active_lines": [
+        53,
+        54,
+        55,
+        56,
+        57
+      ],
+      "class": "production",
+      "end": 57,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Actual ID selection, packed clear and Count decrement",
+      "sloc": 5,
+      "start": 53
+    },
+    {
+      "active_lines": [
+        58,
+        59,
+        60,
+        61
+      ],
+      "class": "mechanical",
+      "end": 61,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "generic": true,
+      "reason": "Clear membership preservation and Remove cardinality bridge call",
+      "sloc": 4,
+      "start": 58
+    },
+    {
+      "active_lines": [
+        62,
+        63,
+        64,
+        65,
+        67
+      ],
+      "class": "production",
+      "end": 67,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Allocate return/closure and Release header",
+      "sloc": 5,
+      "start": 62
+    },
+    {
+      "active_lines": [
+        68,
+        69
+      ],
+      "class": "mechanical",
+      "end": 69,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "generic": true,
+      "reason": "Set-operation old model and raw words snapshots",
+      "sloc": 2,
+      "start": 68
+    },
+    {
+      "active_lines": [
+        70,
+        71,
+        72
+      ],
+      "class": "production",
+      "end": 72,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Actual packed bit set",
+      "sloc": 3,
+      "start": 70
+    },
+    {
+      "active_lines": [
+        73,
+        74,
+        75,
+        76
+      ],
+      "class": "mechanical",
+      "end": 76,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "generic": true,
+      "reason": "Set membership preservation and Add cardinality bridge call",
+      "sloc": 4,
+      "start": 73
+    },
+    {
+      "active_lines": [
+        77,
+        78,
+        79
+      ],
+      "class": "production",
+      "end": 79,
+      "file": "variants/manual/bitmap_allocator.adb",
+      "reason": "Count increment and unit closures",
+      "sloc": 3,
+      "start": 77
+    }
+  ],
+  "totals": {
+    "mechanical": 54,
+    "production": 42,
+    "specification": 31
+  }
+}
