@@ -78,6 +78,29 @@ What `spark-refine prove` does (Task 008):
 
 For an Alire crate: `alr exec -- spark-refine prove -P my_project.gpr`.
 
+**Opt-in raw unproved worklist (Task 020):** add `--show-unproved` to
+`explain`, `analyze`, or `prove`, in text or JSON:
+
+```bash
+spark-refine explain RESULT_DIR --show-unproved
+spark-refine analyze RESULT_DIR --show-unproved --format json
+alr exec -- spark-refine prove -P my_project.gpr --show-unproved --format json -- --checks-as-errors=on
+```
+
+This lists every loaded normalized unproved check, independently of SRD
+diagnostics. **11 unproved checks + 0 SRD diagnostics still means proof work
+remains.** JSON adds optional `analysis.unproved_checks` (`scope`, `count`,
+`by_rule`, `items`), retaining `format_version: 1`. Duplicate occurrences
+remain separate; missing metadata stays unknown; disputed unproved checks
+are marked. Proved and justified checks are excluded. The worklist is not a
+complete proof certificate: inspect justifications, warnings, consistency
+and incomplete-analysis notes alongside it. No source access or Libadalang
+is required; it works with `--semantic` too. Without the flag reports are
+unchanged. The flag is reporting-only, not an exit gate; use GNATprove's
+`--checks-as-errors=on` after `prove`'s first `--` if desired. Dry-run still
+only shows the plan. See [details](diagnostics/README.md#unproved-worklist-task-020)
+and [human/agent workflow](docs/AGENT_INTEGRATION.md#the-loop-preferred).
+
 **Experimental, opt-in (Task 009):** add `--semantic` (with `-P`, plus
 `-X NAME=VALUE` scenario values where the project needs them) to
 `prove`/`explain` when Libadalang is installed

@@ -1,6 +1,7 @@
 """Command-line interface.
 
   spark-refine explain [PATH] [--client-unit U ...] [--format text|json]
+                               [--show-unproved]
                               [--fail-on SRD00x ...]
                               [--semantic -P PROJECT [-X NAME=VALUE ...]]
   spark-refine analyze PATH   (compatibility alias of explain; PATH
@@ -9,7 +10,7 @@
                                [--reference NAME=PATH]
   spark-refine rules [--format text|json]
   spark-refine prove -P PROJECT [--gnatprove PATH] [--results PATH]
-                     [--dry-run] [--client-unit U ...]
+                     [--dry-run] [--show-unproved] [--client-unit U ...]
                      [--format text|json] [--fail-on SRD00x ...]
                      [--semantic [-X NAME=VALUE ...]]
                      [-- GNATPROVE_ARGS...]
@@ -62,6 +63,7 @@ from pathlib import Path
 
 from . import __version__
 from .analyzer import analyze_path_report, compare_provers_report
+from .check_inventory import unproved_checks
 from .discovery import DiscoveryError, discover
 from .loader import load_run, resolve_input
 from .orchestration import (DEFAULT_GNATPROVE, Freshness, FreshnessError,
@@ -183,6 +185,10 @@ def _parser(prog: str = PROG) -> argparse.ArgumentParser:
                     help="as for explain")
 
     for s in (e, a, pr):
+        s.add_argument("--show-unproved", action="store_true",
+                       help="list every unproved check in the loaded "
+                            "normalized result set (reporting only; "
+                            "not an acceptance gate)")
         s.add_argument("--semantic", action="store_true",
                        help="experimental (Task 009): add Libadalang source "
                             "semantics to SRD002 (called subprogram, its "
@@ -286,6 +292,8 @@ def prove(args, passthrough: list[str]) -> int:
         return 2
     report.analysis["orchestration"] = metadata(argv, raw, selection)
     _semantic(report, resolve_input(selection.path)[1], args)
+    if args.show_unproved:
+        report.analysis["unproved_checks"] = unproved_checks(report.runs[0])
     if code == 0:
         note = _unproved_note(report)
         if note:
@@ -317,6 +325,9 @@ def main(argv: list[str] | None = None, prog: str = PROG) -> int:
             if source is not None:
                 report.analysis["input"] = source
             _semantic(report, resolve_input(path)[1], args)
+            if args.show_unproved:
+                report.analysis["unproved_checks"] = unproved_checks(
+                    report.runs[0])
         else:
             if len(args.run) < 2:
                 print("compare-provers needs at least two --run",

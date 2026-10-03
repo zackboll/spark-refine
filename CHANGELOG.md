@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Added
+
+- Task 020: reporting-only `--show-unproved` on `explain`, `analyze`, and
+  `prove`. Deterministic raw worklist and optional `analysis.unproved_checks`
+  JSON (`format_version: 1`), retaining duplicates and disputed checks,
+  excluding proved/justified results. Scope is loaded normalized checks,
+  not a complete proof certificate. Default reports, SRD objects/counts,
+  loader/classification, proof invocation and exit policy are unchanged.
+  Pure/real-fixture, installed wheel/editable and fresh-negative E2E coverage;
+  exact hash-verified Task 017 replay exposes 11 checks with zero diagnostics.
+  No proof repair, contract weakening, bitmap reopening or productivity claim.
+
 ### Research
 
 - Task 019 closed with `DO_NOT_ADOPT_BITMAP_PATTERN`: manual P=54,

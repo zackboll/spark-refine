@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import shlex
 
+from .check_inventory import inventory_text
 from .model import Diagnostic, ProofRun
 from .model import Confidence
 from .rules import RULES
@@ -292,6 +293,9 @@ def to_text(runs: list[ProofRun], diags: list[Diagnostic],
     if groups is not None:
         out.append("")
         out += semantic_groups_text(groups)
+    if analysis and "unproved_checks" in analysis:
+        out.append("")
+        out += inventory_text(analysis["unproved_checks"])
     out.append("")
     if not diags:
         out.append("no SRD diagnostics")

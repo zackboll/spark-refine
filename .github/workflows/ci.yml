@@ -22,7 +22,7 @@ jobs:
           python3 -m unittest discover -s examples/bitmap_allocator/scripts -p 'test_bitmap_closeout.py' -v
       # Task 005: proof-diagnostics MVP. Runs on the committed, sanitized
       # GNATprove 16.1.0 fixtures (diagnostics/tests/fixtures); no toolchain.
-      - name: Proof-diagnostics tests (SRD001-SRD003)
+      - name: Proof-diagnostics tests (SRD001-SRD003 and opt-in unproved worklist)
         working-directory: diagnostics
         run: python3 -m unittest discover -s tests -t tests -v
 
@@ -58,6 +58,7 @@ jobs:
   # through the benchmarks' own unchanged scripts, on exactly three cases,
   # and analyses the fresh SARIF/.spark/.ali with the diagnostics CLI:
   #   E2E-A  SRD001  ring buffer B3 head_advances_wrong
+  #                 plus explain --show-unproved on that same fresh output
   #   E2E-B  SRD002  ring buffer no_is_full_post (fresh .ali -> ali.py)
   #   E2E-C  SRD003  library-backed fixed pool, cvc5 / z3 / altergo alone
   #   E2E-D  prove   (Task 008) fresh ring buffer baseline, exit 0
