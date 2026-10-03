@@ -262,3 +262,124 @@ Development snapshot and complete raw logs/SARIF/.spark/headers/manifest:
 This is ignored local evidence, not a final deterministic evaluation bundle.
 No final R/L/A, independent instances, M1–M8, adoption decision, final PR,
 or Task 020 work has been undertaken. Stop for review after normal checkpoint.
+
+## Single-instance minimization continuation — intermediate checkpoint
+
+**INTERMEDIATE — SINGLE-INSTANCE MINIMIZATION**
+**INDEPENDENT VALIDATION AND FALSIFICATION PENDING**
+
+Input checkpoint: `fee271fbeaf9fcd1077ede3a9e3a2f276e3ea907`.
+Fetch/status/HEAD/log confirmed the expected clean branch before editing.
+Existing boundary snapshots were preserved; new scratch evidence is in
+`obj/minimize-wjklz2u8/`. No history rewrite or destructive worktree reset.
+
+### Reproduction and isolation
+
+The first unchanged run returned 331 passes, but its report included both
+manual and candidate allocator entities. Inherited project object artifacts
+contaminated the aggregate report. This was not accepted as candidate coverage.
+Fresh `--subdirs=minimize-input-isolated` for the entire project closure
+reproduced 213/213 in 10.626 seconds. The original contaminated run remains
+in the ledger. Every subsequent proof used a fresh subdirectory and a distinct
+PROOF_PATTERNS_VARIANT, sequentially, with the frozen project policy and
+`-j0 --output-header --output=oneline`. No proof resources were increased.
+
+### Checked interface and controlled removals
+
+One principal adapter design was tested: Bitmap_Model's checked Post now
+states set equality with Bitmap.Model(Words), and explicitly equates their
+lengths, retaining membership/full/empty clauses. Installed SPARKlib equality
+is extensional; its Num_Overlaps contract underlies the generic Equal_Length
+body. Equality alone is not treated as a cardinality theorem.
+
+The strengthened adapter body proved immediately. With the old scaffolding,
+Release's Equal_Length precondition and public Add postcondition failed.
+Removing Allocate's call left only Release's postcondition failure; removing
+Release's call yielded 211/211. No generic source or mutation contract changed.
+
+Targeted dependency-group decisions (complete structural locations, hashes,
+counts and invocations are in the generated evidence):
+
+* Removing Clear membership/Count/padding post assertions together failed its
+  public Remove postcondition. Membership was restored; Count and padding
+  post assertions were subsequently removed successfully at both operations.
+* Release's post-lemma witness loop, membership assertion and dependent length
+  reasoning were removed as a group. Physical delta assertions, old raw words,
+  production/generic mapping calls and checked mutation lemmas remain.
+* Model_Interface_Check and its duplicate mapping/fullness composition were
+  removed. One mapping witness loop remains in Bitmap_Model. Removing that
+  loop failed the full-model contract; the loop was restored.
+* An edit script initially failed before changing source; the resulting
+  unchanged `model-path` proof is recorded, not represented as an ablation.
+* Repeated Universe_Size assertion and both unused Old_Model snapshots were
+  removed. Both Old_Words snapshots remain before mutation.
+* Removing the scan-prefix invariant failed three Allocate obligations
+  (assertion, Remove precondition and old-membership postcondition); restored.
+* Old membership and padding assertions at both mutations were removed;
+  the invariant and Mapping_Bridge still establish required physical facts.
+* Removing the explicit adapter length clause failed invariant checks at
+  both Allocate and Release; restored as required in this tested design.
+* Padding_Interface_Check contributes no needed allocator fact. Its call
+  and body were removed from the allocator. Independent validation checks
+  arbitrary raw arrays without a Pool parameter/Pre: 25 Ada SLOC, 104/104
+  checks. The allocator proofs exclude this validation project entirely.
+
+No alternate architecture, callback redesign, set-building loop, suppression,
+assumption, imported theorem or justification was introduced.
+
+### Final observed stability and accounting
+
+| Run | Results/passed | Unproved | Justified | Wall seconds |
+|---|---:|---:|---:|---:|
+| stable-1 | 174/174 | 0 | 0 | 7.609 |
+| stable-2 | 174/174 | 0 | 0 | 7.269 |
+| stable-3 | 174/174 | 0 | 0 | 7.275 |
+
+Identical source hashes in all three runs; SARIF/.spark agree. No failed
+stability run occurred. This is observed host-specific stability, not a
+universal guarantee. The decrease from 213 reflects removed checked helpers,
+assertions/calls and witness scaffolding, not reduced application coverage.
+Initialize, queries, Allocate/fallthrough, Release/range and invariant checks
+remain analyzed. Bitmap.Model, both physical mutation lemma bodies,
+Equal_Length and mapping/padding/arithmetic are still analyzed through
+Bitmap_Allocator.Bitmap. Runtime driver is intentionally SPARK_Mode Off;
+its presence in the analysis inventory is not a proved client harness.
+Unchanged external SPARKlib bodies and documented Big_Integers foundation
+messages are not application oracles or justified checks.
+
+Unminimized checkpoint measurement: R_start = 110, L_start = 124, A_start = 6.
+Final continuation: R = 56, L = 124, A = 6. All six actual concepts remain.
+P stays 54, generic manual support stays 52, G stays 52/54.
+Savings = -2; reduction = -3.703704%. R <= 15 and reduction >= 50% are both
+not met. **R > 20: this current minimized design fails the frozen residual-size
+criterion.** Removing 54 lines relative to the unminimized checkpoint does
+not constitute savings relative to the manual baseline.
+
+Generated LIBRARY_METRICS.md and evidence/library_minimization.json include
+complete line-by-line inventories, every active Ada line classified exactly
+once, source hashes, residual breakdown and supporting artifact counts.
+Captured timings are separate in library_minimization_timings.json.
+The serializer never launches proof; twice-regeneration tests verify identical
+captured observations produce identical evidence and metrics. Measurement
+tooling is candidate-only and does not replace any counted Ada proof support.
+
+### Regression validation and pending gates
+
+Normal and isolated forced assertions-enabled runtime builds each passed
+45,792 checks. Allocator and runtime-driver .ali compilation records include
+-gnata only in the assertions mode. Imported proof-pattern/SPARKlib units
+are not claimed to execute assertions. Public authoritative API token gate
+passes; all 42 production lines (10 spec/private representation, 32 body)
+remain byte-identical modulo indentation and in order.
+
+Candidate forbidden-pattern scan, established 31-file trust scan, frozen
+manual trust scan and repository checks pass. Four root tests pass.
+Diagnostics: 467 tests, 34 unavailable semantic-support checks skipped, not
+passed. Two new inventory/regeneration tests pass. Frozen manual clean proof:
+118/118. Existing Prefix_Sets clean validation: 356/356. Frozen source/config,
+manual metrics/evidence, preregistration and Tasks 015–018 are unchanged.
+
+Independent-instance validation, configuration rejection tests, full M1–M8
+and masking, single-prover/final performance comparisons and final Task 019
+decision remain pending. No adoption/rejection decision, final PR, bitmap CI
+job, Task 020 or further research campaign is part of this checkpoint.

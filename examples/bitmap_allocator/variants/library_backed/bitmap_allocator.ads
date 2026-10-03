@@ -47,7 +47,9 @@ private
           and Bitmap.Bit_Is_Set (Words, Id) = Bitmap_Contains (Words, Id);
    function Bitmap_Model (Words : Word_Array) return Id_Sets.Set
    with Ghost,
-        Post => (for all Id in Object_Id =>
+        Post => Bitmap_Model'Result = Bitmap.Model (Words)
+          and Id_Sets.Length (Bitmap_Model'Result) = Id_Sets.Length (Bitmap.Model (Words))
+          and (for all Id in Object_Id =>
           Id_Sets.Contains (Bitmap_Model'Result, Id) = Bitmap_Contains (Words, Id))
           and ((Id_Sets.Length (Bitmap_Model'Result) = Capacity)
             = (for all Id in Object_Id => Bitmap_Contains (Words, Id)))

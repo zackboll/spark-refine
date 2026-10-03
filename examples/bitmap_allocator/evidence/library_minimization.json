@@ -1,0 +1,4696 @@
+{
+  "A_current": 6,
+  "G": "52/54",
+  "L_current": 124,
+  "L_start": 124,
+  "P": 54,
+  "R_final_for_this_continuation": 56,
+  "R_start": 110,
+  "candidate_configuration_sha256": {
+    "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+    "examples/bitmap_allocator/bitmap_padding_validation.gpr": "2f4d44e55567bc88c797b935f93bd585567bc6354218fbf745c538f6823fead2"
+  },
+  "current": {
+    "files": {
+      "examples/bitmap_allocator/tests/bitmap_allocator_runtime_tests.adb": {
+        "lines": [
+          {
+            "category": "standalone_validation_test",
+            "line": 1,
+            "text": "with Ada.Text_IO; use Ada.Text_IO;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 2,
+            "text": "with Bitmap_Allocator; use Bitmap_Allocator;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 4,
+            "text": "procedure Bitmap_Allocator_Runtime_Tests with SPARK_Mode => Off is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 5,
+            "text": "type Flags is array (Object_Id) of Boolean;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 6,
+            "text": "P : Pool;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 7,
+            "text": "Free : Flags := [others => True];"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 8,
+            "text": "Id : Object_Id;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 9,
+            "text": "Checks : Natural := 0;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 10,
+            "text": "procedure Check (Condition : Boolean) is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 11,
+            "text": "begin"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 12,
+            "text": "Checks := Checks + 1;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 13,
+            "text": "if not Condition then"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 14,
+            "text": "raise Program_Error with \"bitmap mismatch at check\" & Checks'Image;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 15,
+            "text": "end if;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 16,
+            "text": "end Check;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 17,
+            "text": "procedure Consistent is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 18,
+            "text": "N : Natural := 0;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 19,
+            "text": "begin"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 20,
+            "text": "for J in Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 21,
+            "text": "Check (Is_Free (P, J) = Free (J));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 22,
+            "text": "if Free (J) then N := N + 1; end if;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 23,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 24,
+            "text": "Check (Free_Count (P) = N);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 25,
+            "text": "Check (Is_Exhausted (P) = (N = 0));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 26,
+            "text": "end Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 27,
+            "text": "begin"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 28,
+            "text": "for Cycle in 1 .. 3 loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 29,
+            "text": "Initialize (P);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 30,
+            "text": "Free := [others => True];"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 31,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 32,
+            "text": "Check (Is_Free (P, 0) and Is_Free (P, 31) and Is_Free (P, 32)"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 33,
+            "text": "and Is_Free (P, 63) and Is_Free (P, 64) and Is_Free (P, 69));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 34,
+            "text": "for J in Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 35,
+            "text": "Allocate (P, Id);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 36,
+            "text": "Check (Free (Id));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 37,
+            "text": "Free (Id) := False;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 38,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 39,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 40,
+            "text": "Check (Is_Exhausted (P));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 41,
+            "text": "for J in reverse Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 42,
+            "text": "Release (P, J);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 43,
+            "text": "Free (J) := True;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 44,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 45,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 46,
+            "text": "for J in Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 47,
+            "text": "Allocate (P, Id);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 48,
+            "text": "Free (Id) := False;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 49,
+            "text": "Release (P, Id);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 50,
+            "text": "Free (Id) := True;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 51,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 52,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 53,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 54,
+            "text": "Put_Line (\"bitmap runtime: \" & Checks'Image & \" checks passed\");"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 55,
+            "text": "end Bitmap_Allocator_Runtime_Tests;"
+          }
+        ],
+        "sha256": "82ddd6b80d2b981d1d444b624da6b7b9707b45b543e8b8ebe418dfdeb849a856"
+      },
+      "examples/bitmap_allocator/validation/bitmap_padding_validation.adb": {
+        "lines": [
+          {
+            "category": "standalone_validation_test",
+            "line": 1,
+            "text": "package body Bitmap_Padding_Validation with SPARK_Mode is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 2,
+            "text": "procedure Check (Words : Word_Array) is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 3,
+            "text": "begin"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 4,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 5,
+            "text": "(Bitmap.Padding_Is_Canonical (Words)"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 6,
+            "text": "= ((Words (2) and not Interfaces.Unsigned_32 (2 ** 6 - 1)) = 0));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 7,
+            "text": "end Check;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 8,
+            "text": "end Bitmap_Padding_Validation;"
+          }
+        ],
+        "sha256": "940aea7fe72186a1d3e29a2271d88488cfc2ae411f5e8a59f073635afdd4bcb1"
+      },
+      "examples/bitmap_allocator/validation/bitmap_padding_validation.ads": {
+        "lines": [
+          {
+            "category": "standalone_validation_test",
+            "line": 1,
+            "text": "with Interfaces;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 2,
+            "text": "with SPARK.Containers.Functional.Sets;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 3,
+            "text": "with SPARK_Refine_Bitmap_Sets;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 6,
+            "text": "package Bitmap_Padding_Validation with SPARK_Mode is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 7,
+            "text": "subtype Object_Id is Natural range 0 .. 69;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 8,
+            "text": "subtype Word_Index is Natural range 0 .. 2;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 9,
+            "text": "type Word_Array is array (Word_Index) of Interfaces.Unsigned_32;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 10,
+            "text": "package Id_Sets is new SPARK.Containers.Functional.Sets"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 11,
+            "text": "(Element_Type => Object_Id);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 12,
+            "text": "package Bitmap is new SPARK_Refine_Bitmap_Sets"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 13,
+            "text": "(Object_Id, Interfaces.Unsigned_32, Word_Index, Word_Array, Id_Sets, 32);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 14,
+            "text": "use type Interfaces.Unsigned_32;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 15,
+            "text": "procedure Check (Words : Word_Array)"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 16,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 17,
+            "text": "Post => Bitmap.Padding_Is_Canonical (Words)"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 18,
+            "text": "= ((Words (2) and not Interfaces.Unsigned_32 (2 ** 6 - 1)) = 0);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 19,
+            "text": "end Bitmap_Padding_Validation;"
+          }
+        ],
+        "sha256": "2179b77b3071805bd5d2dd726dc74b64b7b09373233e9a2be92a757bc2bda6a1"
+      },
+      "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": {
+        "lines": [
+          {
+            "category": "production",
+            "line": 1,
+            "text": "package body Bitmap_Allocator with SPARK_Mode is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 2,
+            "text": "procedure Mapping_Bridge (Words : Word_Array; Id : Object_Id) is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 3,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 4,
+            "text": "pragma Assert (Bitmap.Word_Index (Id) = Id / 32);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 5,
+            "text": "pragma Assert (Bitmap.Mask (Id) = Mask (Id));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 6,
+            "text": "end Mapping_Bridge;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 8,
+            "text": "function Bitmap_Model (Words : Word_Array) return Id_Sets.Set is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 9,
+            "text": "S : constant Id_Sets.Set := Bitmap.Model (Words);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 10,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 11,
+            "text": "for Id in Object_Id loop"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 12,
+            "text": "Mapping_Bridge (Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 13,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 14,
+            "text": "(for all J in Object_Id'First .. Id =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 15,
+            "text": "Bitmap.Bit_Is_Set (Words, J) = Bitmap_Contains (Words, J));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 16,
+            "text": "end loop;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 17,
+            "text": "return S;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 18,
+            "text": "end Bitmap_Model;"
+          },
+          {
+            "category": "production",
+            "line": 20,
+            "text": "function Is_Free (P : Pool; Id : Object_Id) return Boolean is"
+          },
+          {
+            "category": "production",
+            "line": 21,
+            "text": "(Bitmap_Contains (P.Words, Id));"
+          },
+          {
+            "category": "production",
+            "line": 23,
+            "text": "function Free_Count (P : Pool) return Pool_Count is (P.Count);"
+          },
+          {
+            "category": "production",
+            "line": 24,
+            "text": "function Is_Exhausted (P : Pool) return Boolean is (P.Count = 0);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 26,
+            "text": "function Free_Model (P : Pool) return Id_Sets.Set is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 27,
+            "text": "(Bitmap_Model (P.Words));"
+          },
+          {
+            "category": "production",
+            "line": 29,
+            "text": "procedure Initialize (P : out Pool) is"
+          },
+          {
+            "category": "production",
+            "line": 30,
+            "text": "begin"
+          },
+          {
+            "category": "production",
+            "line": 31,
+            "text": "P := (Words => [0 => Interfaces.Unsigned_32'Last,"
+          },
+          {
+            "category": "production",
+            "line": 32,
+            "text": "1 => Interfaces.Unsigned_32'Last,"
+          },
+          {
+            "category": "production",
+            "line": 33,
+            "text": "2 => 2 ** 6 - 1],"
+          },
+          {
+            "category": "production",
+            "line": 34,
+            "text": "Count => Capacity);"
+          },
+          {
+            "category": "production",
+            "line": 35,
+            "text": "end Initialize;"
+          },
+          {
+            "category": "production",
+            "line": 37,
+            "text": "procedure Allocate (P : in out Pool; Id : out Object_Id) is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 38,
+            "text": "Old_Words : constant Word_Array := P.Words with Ghost;"
+          },
+          {
+            "category": "production",
+            "line": 39,
+            "text": "begin"
+          },
+          {
+            "category": "production",
+            "line": 40,
+            "text": "Id := Object_Id'First;"
+          },
+          {
+            "category": "production",
+            "line": 41,
+            "text": "for Candidate in Object_Id loop"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 42,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 43,
+            "text": "(for all J in Object_Id'First .. Candidate - 1 => not Bitmap_Contains (P.Words, J));"
+          },
+          {
+            "category": "production",
+            "line": 44,
+            "text": "if Is_Free (P, Candidate) then"
+          },
+          {
+            "category": "production",
+            "line": 45,
+            "text": "Id := Candidate;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 46,
+            "text": "Mapping_Bridge (Old_Words, Id);"
+          },
+          {
+            "category": "production",
+            "line": 47,
+            "text": "P.Words (Natural (Id) / 32) :="
+          },
+          {
+            "category": "production",
+            "line": 48,
+            "text": "P.Words (Natural (Id) / 32) and not Mask (Id);"
+          },
+          {
+            "category": "production",
+            "line": 49,
+            "text": "P.Count := P.Count - 1;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 50,
+            "text": "pragma Assert (P.Words = (Old_Words with delta"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 51,
+            "text": "Bitmap.Word_Index (Id) => Old_Words (Bitmap.Word_Index (Id))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 52,
+            "text": "and not Bitmap.Mask (Id)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 53,
+            "text": "Bitmap.Lemma_Clear_Bit (Old_Words, P.Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 54,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 55,
+            "text": "(for all J in Object_Id => Bitmap_Contains (P.Words, J)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 56,
+            "text": "= (J /= Id and then Bitmap_Contains (Old_Words, J)));"
+          },
+          {
+            "category": "production",
+            "line": 57,
+            "text": "return;"
+          },
+          {
+            "category": "production",
+            "line": 58,
+            "text": "end if;"
+          },
+          {
+            "category": "production",
+            "line": 59,
+            "text": "end loop;"
+          },
+          {
+            "category": "production",
+            "line": 60,
+            "text": "end Allocate;"
+          },
+          {
+            "category": "production",
+            "line": 62,
+            "text": "procedure Release (P : in out Pool; Id : Object_Id) is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 63,
+            "text": "Old_Words : constant Word_Array := P.Words with Ghost;"
+          },
+          {
+            "category": "production",
+            "line": 64,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 65,
+            "text": "Mapping_Bridge (Old_Words, Id);"
+          },
+          {
+            "category": "production",
+            "line": 66,
+            "text": "P.Words (Natural (Id) / 32) :="
+          },
+          {
+            "category": "production",
+            "line": 67,
+            "text": "P.Words (Natural (Id) / 32) or Mask (Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 68,
+            "text": "pragma Assert (P.Words = (Old_Words with delta"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 69,
+            "text": "Bitmap.Word_Index (Id) => Old_Words (Bitmap.Word_Index (Id))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 70,
+            "text": "or Bitmap.Mask (Id)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 71,
+            "text": "Bitmap.Lemma_Set_Bit (Old_Words, P.Words, Id);"
+          },
+          {
+            "category": "production",
+            "line": 72,
+            "text": "P.Count := P.Count + 1;"
+          },
+          {
+            "category": "production",
+            "line": 73,
+            "text": "end Release;"
+          },
+          {
+            "category": "production",
+            "line": 74,
+            "text": "end Bitmap_Allocator;"
+          }
+        ],
+        "sha256": "6c6c0eef9ed6f9f200de78fbfba5a9511cff653a59f3205bcc032ced5821e06e"
+      },
+      "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": {
+        "lines": [
+          {
+            "category": "local_mechanical_support",
+            "line": 1,
+            "text": "private with SPARK_Refine_Bitmap_Sets;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 2,
+            "text": "with Interfaces;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 3,
+            "text": "use type Interfaces.Unsigned_32;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 4,
+            "text": "with SPARK.Big_Integers; use SPARK.Big_Integers;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 5,
+            "text": "with SPARK.Containers.Functional.Sets;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 7,
+            "text": "package Bitmap_Allocator with SPARK_Mode is"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 8,
+            "text": "Capacity : constant := 70;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 9,
+            "text": "subtype Object_Id is Natural range 0 .. Capacity - 1;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 10,
+            "text": "subtype Pool_Count is Natural range 0 .. Capacity;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 11,
+            "text": "package Id_Sets is new SPARK.Containers.Functional.Sets"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 12,
+            "text": "(Element_Type => Object_Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 13,
+            "text": "use type Id_Sets.Set;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 15,
+            "text": "type Pool is private;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 16,
+            "text": "function Free_Model (P : Pool) return Id_Sets.Set with Ghost;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 17,
+            "text": "function Is_Free (P : Pool; Id : Object_Id) return Boolean"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 18,
+            "text": "with Post => Is_Free'Result = Id_Sets.Contains (Free_Model (P), Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 19,
+            "text": "function Free_Count (P : Pool) return Pool_Count"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 20,
+            "text": "with Post => To_Big_Integer (Free_Count'Result) = Id_Sets.Length (Free_Model (P));"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 21,
+            "text": "function Is_Exhausted (P : Pool) return Boolean"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 22,
+            "text": "with Post => Is_Exhausted'Result = (Id_Sets.Length (Free_Model (P)) = 0);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 23,
+            "text": "procedure Initialize (P : out Pool)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 24,
+            "text": "with Post => Free_Count (P) = Capacity"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 25,
+            "text": "and (for all Id in Object_Id => Id_Sets.Contains (Free_Model (P), Id));"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 26,
+            "text": "procedure Allocate (P : in out Pool; Id : out Object_Id)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 27,
+            "text": "with Pre => not Is_Exhausted (P),"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 28,
+            "text": "Post => Id_Sets.Contains (Free_Model (P)'Old, Id)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 29,
+            "text": "and Free_Model (P) = Id_Sets.Remove (Free_Model (P)'Old, Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 30,
+            "text": "procedure Release (P : in out Pool; Id : Object_Id)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 31,
+            "text": "with Pre => not Id_Sets.Contains (Free_Model (P), Id),"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 32,
+            "text": "Post => Free_Model (P) = Id_Sets.Add (Free_Model (P)'Old, Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 34,
+            "text": "private"
+          },
+          {
+            "category": "production",
+            "line": 35,
+            "text": "subtype Word_Index is Natural range 0 .. 2;"
+          },
+          {
+            "category": "production",
+            "line": 36,
+            "text": "type Word_Array is array (Word_Index) of Interfaces.Unsigned_32;"
+          },
+          {
+            "category": "production",
+            "line": 37,
+            "text": "function Mask (Id : Object_Id) return Interfaces.Unsigned_32 is"
+          },
+          {
+            "category": "production",
+            "line": 38,
+            "text": "(Interfaces.Shift_Left (Interfaces.Unsigned_32 (1), Id mod 32));"
+          },
+          {
+            "category": "production",
+            "line": 39,
+            "text": "function Bitmap_Contains (Words : Word_Array; Id : Object_Id) return Boolean is"
+          },
+          {
+            "category": "production",
+            "line": 40,
+            "text": "((Words (Id / 32) and Mask (Id)) /= 0);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 41,
+            "text": "package Bitmap is new SPARK_Refine_Bitmap_Sets"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 42,
+            "text": "(Object_Id, Interfaces.Unsigned_32, Word_Index, Word_Array, Id_Sets, 32);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 43,
+            "text": "procedure Mapping_Bridge (Words : Word_Array; Id : Object_Id)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 44,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 45,
+            "text": "Post => Bitmap.Word_Index (Id) = Id / 32"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 46,
+            "text": "and Bitmap.Mask (Id) = Mask (Id)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 47,
+            "text": "and Bitmap.Bit_Is_Set (Words, Id) = Bitmap_Contains (Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 48,
+            "text": "function Bitmap_Model (Words : Word_Array) return Id_Sets.Set"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 49,
+            "text": "with Ghost,"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 50,
+            "text": "Post => Bitmap_Model'Result = Bitmap.Model (Words)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 51,
+            "text": "and Id_Sets.Length (Bitmap_Model'Result) = Id_Sets.Length (Bitmap.Model (Words))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 52,
+            "text": "and (for all Id in Object_Id =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 53,
+            "text": "Id_Sets.Contains (Bitmap_Model'Result, Id) = Bitmap_Contains (Words, Id))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 54,
+            "text": "and ((Id_Sets.Length (Bitmap_Model'Result) = Capacity)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 55,
+            "text": "= (for all Id in Object_Id => Bitmap_Contains (Words, Id)))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 56,
+            "text": "and ((Id_Sets.Length (Bitmap_Model'Result) = 0)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 57,
+            "text": "= (for all Id in Object_Id => not Bitmap_Contains (Words, Id)));"
+          },
+          {
+            "category": "production",
+            "line": 58,
+            "text": "type Pool is record"
+          },
+          {
+            "category": "production",
+            "line": 59,
+            "text": "Words : Word_Array := [others => 0];"
+          },
+          {
+            "category": "production",
+            "line": 60,
+            "text": "Count : Pool_Count := 0;"
+          },
+          {
+            "category": "production",
+            "line": 61,
+            "text": "end record"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 62,
+            "text": "with Type_Invariant =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 63,
+            "text": "Bitmap.Padding_Is_Canonical (Pool.Words)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 64,
+            "text": "and To_Big_Integer (Pool.Count) = Id_Sets.Length (Bitmap_Model (Pool.Words));"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 65,
+            "text": "end Bitmap_Allocator;"
+          }
+        ],
+        "sha256": "e865516ae1f39b9aa89f0cea59d3e18834dc35f1e7c6b61a17ef3b0a9fc2456c"
+      },
+      "proof_patterns/src/spark_refine_bitmap_sets.adb": {
+        "lines": [
+          {
+            "category": "reusable_library",
+            "line": 1,
+            "text": "package body SPARK_Refine_Bitmap_Sets with SPARK_Mode is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 2,
+            "text": "procedure Equal_Length (Left, Right : Element_Sets.Set) is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 3,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 4,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "reusable_library",
+            "line": 5,
+            "text": "(Element_Sets.Num_Overlaps (Left, Right) = Element_Sets.Length (Left));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 6,
+            "text": "end Equal_Length;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 8,
+            "text": "function Model (Words : Storage_Array) return Element_Sets.Set is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 9,
+            "text": "Result : Element_Sets.Set;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 10,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 11,
+            "text": "for E in Element_Type loop"
+          },
+          {
+            "category": "reusable_library",
+            "line": 12,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "reusable_library",
+            "line": 13,
+            "text": "(for all J in Element_Type => Element_Sets.Contains (Result, J)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 14,
+            "text": "= (J < E and then Bit_Is_Set (Words, J)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 15,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "reusable_library",
+            "line": 16,
+            "text": "(Element_Sets.Length (Result) <= To_Big_Integer (Offset (E)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 17,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "reusable_library",
+            "line": 18,
+            "text": "((Element_Sets.Length (Result) = To_Big_Integer (Offset (E)))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 19,
+            "text": "= (for all J in Element_Type =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 20,
+            "text": "(if J < E then Bit_Is_Set (Words, J))));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 21,
+            "text": "if Bit_Is_Set (Words, E) then"
+          },
+          {
+            "category": "reusable_library",
+            "line": 22,
+            "text": "Result := Element_Sets.Add (Result, E);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 23,
+            "text": "end if;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 24,
+            "text": "end loop;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 25,
+            "text": "return Result;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 26,
+            "text": "end Model;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 28,
+            "text": "procedure Lemma_Clear_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 29,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type) is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 30,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 31,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "reusable_library",
+            "line": 32,
+            "text": "(for all J in Element_Type => Bit_Is_Set (New_Words, J)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 33,
+            "text": "= (J /= E and then Bit_Is_Set (Old_Words, J)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 34,
+            "text": "Equal_Length (Model (New_Words), Element_Sets.Remove (Model (Old_Words), E));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 35,
+            "text": "end Lemma_Clear_Bit;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 37,
+            "text": "procedure Lemma_Set_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 38,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type) is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 39,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 40,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "reusable_library",
+            "line": 41,
+            "text": "(for all J in Element_Type => Bit_Is_Set (New_Words, J)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 42,
+            "text": "= (J = E or else Bit_Is_Set (Old_Words, J)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 43,
+            "text": "Equal_Length (Model (New_Words), Element_Sets.Add (Model (Old_Words), E));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 44,
+            "text": "end Lemma_Set_Bit;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 45,
+            "text": "end SPARK_Refine_Bitmap_Sets;"
+          }
+        ],
+        "sha256": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c"
+      },
+      "proof_patterns/src/spark_refine_bitmap_sets.ads": {
+        "lines": [
+          {
+            "category": "reusable_library",
+            "line": 1,
+            "text": "with SPARK.Big_Integers; use SPARK.Big_Integers;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 2,
+            "text": "with SPARK.Containers.Functional.Sets;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 8,
+            "text": "generic"
+          },
+          {
+            "category": "reusable_library",
+            "line": 9,
+            "text": "type Element_Type is (<>);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 10,
+            "text": "type Word_Type is mod <>;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 11,
+            "text": "type Word_Index_Type is range <>;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 12,
+            "text": "type Storage_Array is array (Word_Index_Type) of Word_Type;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 13,
+            "text": "with package Element_Sets is new SPARK.Containers.Functional.Sets"
+          },
+          {
+            "category": "reusable_library",
+            "line": 14,
+            "text": "(Element_Type => Element_Type, Equivalent_Elements => \"=\", others => <>);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 15,
+            "text": "Bits_Per_Word : Positive;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 16,
+            "text": "package SPARK_Refine_Bitmap_Sets with SPARK_Mode, Always_Terminates is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 17,
+            "text": "pragma Compile_Time_Error"
+          },
+          {
+            "category": "reusable_library",
+            "line": 18,
+            "text": "(Word_Type'Modulus /= 2 ** Bits_Per_Word, \"binary word modulus required\");"
+          },
+          {
+            "category": "reusable_library",
+            "line": 19,
+            "text": "pragma Compile_Time_Error"
+          },
+          {
+            "category": "reusable_library",
+            "line": 20,
+            "text": "((Word_Index_Type'Pos (Word_Index_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 21,
+            "text": "- Word_Index_Type'Pos (Word_Index_Type'First) + 1) * Bits_Per_Word"
+          },
+          {
+            "category": "reusable_library",
+            "line": 22,
+            "text": "< Element_Type'Pos (Element_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 23,
+            "text": "- Element_Type'Pos (Element_Type'First) + 1,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 24,
+            "text": "\"storage cannot hold identity universe\");"
+          },
+          {
+            "category": "reusable_library",
+            "line": 26,
+            "text": "function Offset (E : Element_Type) return Natural is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 27,
+            "text": "(Element_Type'Pos (E) - Element_Type'Pos (Element_Type'First))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 28,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 29,
+            "text": "function Word_Index (E : Element_Type) return Word_Index_Type is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 30,
+            "text": "(Word_Index_Type'Val"
+          },
+          {
+            "category": "reusable_library",
+            "line": 31,
+            "text": "(Word_Index_Type'Pos (Word_Index_Type'First) + Offset (E) / Bits_Per_Word))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 32,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 33,
+            "text": "function Mask (E : Element_Type) return Word_Type is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 34,
+            "text": "(2 ** (Offset (E) mod Bits_Per_Word))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 35,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 36,
+            "text": "function Bit_Is_Set (Words : Storage_Array; E : Element_Type) return Boolean is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 37,
+            "text": "((Words (Word_Index (E)) and Mask (E)) /= 0)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 38,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 39,
+            "text": "function Universe_Size return Big_Natural is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 40,
+            "text": "(To_Big_Integer (Element_Type'Pos (Element_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 41,
+            "text": "- Element_Type'Pos (Element_Type'First) + 1))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 42,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 43,
+            "text": "function Padding_Is_Canonical (Words : Storage_Array) return Boolean is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 44,
+            "text": "(for all I in Word_Index_Type =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 45,
+            "text": "(for all B in 0 .. Bits_Per_Word - 1 =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 46,
+            "text": "(if (Word_Index_Type'Pos (I)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 47,
+            "text": "- Word_Index_Type'Pos (Word_Index_Type'First)) * Bits_Per_Word + B"
+          },
+          {
+            "category": "reusable_library",
+            "line": 48,
+            "text": "> Offset (Element_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 49,
+            "text": "then (Words (I) and 2 ** B) = 0)))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 50,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 51,
+            "text": "function Model (Words : Storage_Array) return Element_Sets.Set"
+          },
+          {
+            "category": "reusable_library",
+            "line": 52,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 53,
+            "text": "Post => (for all E in Element_Type =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 54,
+            "text": "Element_Sets.Contains (Model'Result, E) = Bit_Is_Set (Words, E))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 55,
+            "text": "and Element_Sets.Length (Model'Result) <= Universe_Size"
+          },
+          {
+            "category": "reusable_library",
+            "line": 56,
+            "text": "and ((Element_Sets.Length (Model'Result) = Universe_Size)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 57,
+            "text": "= (for all E in Element_Type => Bit_Is_Set (Words, E)))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 58,
+            "text": "and ((Element_Sets.Length (Model'Result) = 0)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 59,
+            "text": "= (for all E in Element_Type => not Bit_Is_Set (Words, E)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 61,
+            "text": "procedure Equal_Length (Left, Right : Element_Sets.Set)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 62,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 63,
+            "text": "Pre => Element_Sets.\"=\" (Left, Right),"
+          },
+          {
+            "category": "reusable_library",
+            "line": 64,
+            "text": "Post => Element_Sets.Length (Left) = Element_Sets.Length (Right);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 66,
+            "text": "procedure Lemma_Clear_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 67,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 68,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 69,
+            "text": "Pre => Bit_Is_Set (Old_Words, E)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 70,
+            "text": "and New_Words = (Old_Words with delta"
+          },
+          {
+            "category": "reusable_library",
+            "line": 71,
+            "text": "Word_Index (E) => Old_Words (Word_Index (E)) and not Mask (E)),"
+          },
+          {
+            "category": "reusable_library",
+            "line": 72,
+            "text": "Post => Element_Sets.\"=\""
+          },
+          {
+            "category": "reusable_library",
+            "line": 73,
+            "text": "(Model (New_Words), Element_Sets.Remove (Model (Old_Words), E))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 74,
+            "text": "and Element_Sets.Length (Model (New_Words))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 75,
+            "text": "= Element_Sets.Length (Model (Old_Words)) - 1"
+          },
+          {
+            "category": "reusable_library",
+            "line": 76,
+            "text": "and (if Padding_Is_Canonical (Old_Words)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 77,
+            "text": "then Padding_Is_Canonical (New_Words));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 79,
+            "text": "procedure Lemma_Set_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 80,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 81,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 82,
+            "text": "Pre => not Bit_Is_Set (Old_Words, E)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 83,
+            "text": "and New_Words = (Old_Words with delta"
+          },
+          {
+            "category": "reusable_library",
+            "line": 84,
+            "text": "Word_Index (E) => Old_Words (Word_Index (E)) or Mask (E)),"
+          },
+          {
+            "category": "reusable_library",
+            "line": 85,
+            "text": "Post => Element_Sets.\"=\""
+          },
+          {
+            "category": "reusable_library",
+            "line": 86,
+            "text": "(Model (New_Words), Element_Sets.Add (Model (Old_Words), E))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 87,
+            "text": "and Element_Sets.Length (Model (New_Words))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 88,
+            "text": "= Element_Sets.Length (Model (Old_Words)) + 1"
+          },
+          {
+            "category": "reusable_library",
+            "line": 89,
+            "text": "and (if Padding_Is_Canonical (Old_Words)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 90,
+            "text": "then Padding_Is_Canonical (New_Words));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 91,
+            "text": "end SPARK_Refine_Bitmap_Sets;"
+          }
+        ],
+        "sha256": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      }
+    },
+    "totals": {
+      "authoritative_specification": 31,
+      "local_mechanical_support": 56,
+      "production": 42,
+      "reusable_library": 124,
+      "standalone_validation_test": 79
+    }
+  },
+  "decisions": {
+    "adapter": {
+      "disposition": "replaced_by_checked_interface",
+      "observation": "checked set and explicit length equality; existing membership/full/empty retained; no generic changes"
+    },
+    "adapter_run": {
+      "disposition": "inconclusive",
+      "observation": "body proved; Release precondition/postcondition failed with old Equal_Length support"
+    },
+    "clear-length": {
+      "disposition": "removed",
+      "observation": "removed; Allocate green, Release public post still failed"
+    },
+    "clear-post": {
+      "disposition": "retained_required_in_tested_design",
+      "observation": "retained_required_in_tested_design: removing membership, Count and padding group failed Remove post"
+    },
+    "independent": {
+      "disposition": "moved_to_independent_validation",
+      "observation": "moved_to_independent_validation: arbitrary raw padding equivalence; allocator proves without helper"
+    },
+    "input": {
+      "disposition": "inconclusive",
+      "observation": "first report contaminated by inherited manual object artifacts; fresh subdirs reproduced 213; no semantic source correction"
+    },
+    "length-clause": {
+      "disposition": "retained_required_in_tested_design",
+      "observation": "retained_required_in_tested_design: both operation invariant checks failed"
+    },
+    "mapping-loop": {
+      "disposition": "retained_required_in_tested_design",
+      "observation": "retained_required_in_tested_design: full-model contract failed"
+    },
+    "model-path": {
+      "disposition": "removed",
+      "observation": "removed duplicate Model_Interface_Check and padding call; one accidental unchanged run model-path retained honestly after edit script error"
+    },
+    "mutation-support": {
+      "disposition": "removed",
+      "observation": "removed Release witness loop/membership group and both Count/padding post assertions; Clear membership retained"
+    },
+    "old-facts": {
+      "disposition": "removed",
+      "observation": "removed old membership/padding assertions, Mapping_Bridge and exact delta retained"
+    },
+    "scan": {
+      "disposition": "retained_required_in_tested_design",
+      "observation": "retained_required_in_tested_design: three Allocate structural failures"
+    },
+    "set-length": {
+      "disposition": "removed",
+      "observation": "removed; whole candidate green"
+    },
+    "snapshots": {
+      "disposition": "removed",
+      "observation": "removed both Old_Model; Old_Words retained for physical delta premises"
+    },
+    "universe": {
+      "disposition": "removed",
+      "observation": "removed"
+    }
+  },
+  "generic_manual_support": 52,
+  "input_checkpoint": "fee271fbeaf9fcd1077ede3a9e3a2f276e3ea907",
+  "observations": {
+    "adapter": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-adapter",
+        "--subdirs=minimize-adapter",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 1,
+      "failures": [
+        [
+          "VC_PRECONDITION",
+          "bitmap_allocator.adb",
+          129,
+          13
+        ],
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          32,
+          17
+        ]
+      ],
+      "justified": 0,
+      "passes": 213,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "a5f434fb2abd14f1e9454ce75467a6ea9b321015d0dc55a832e02861d0bbc8ac",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [
+        [
+          "VC_PRECONDITION",
+          "bitmap_allocator.adb",
+          129,
+          13
+        ],
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          32,
+          17
+        ]
+      ],
+      "total": 215,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "clear-length": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-clear-length",
+        "--subdirs=minimize-clear-length",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 1,
+      "failures": [
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          32,
+          17
+        ]
+      ],
+      "justified": 0,
+      "passes": 212,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "98836ca768e6eb51fcf983d7d7a7778e63d70cbad9a5a27486673ae53ef9913e",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          32,
+          17
+        ]
+      ],
+      "total": 213,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "clear-post": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-clear-post",
+        "--subdirs=minimize-clear-post",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 1,
+      "failures": [
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          29,
+          13
+        ]
+      ],
+      "justified": 0,
+      "passes": 206,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "3cda59155c8f0c441ecaea5ed170ea587c4e56f1d9e8342387490db520f78053",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          29,
+          13
+        ]
+      ],
+      "total": 207,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "independent": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-independent",
+        "--subdirs=minimize-independent",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 178,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "f39366c01f82dfd16a0e3fab07d27f25cfd1704e8174ce62fde8a3d59a2dd3bf",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 178,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "input": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-input",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 331,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "a5f434fb2abd14f1e9454ce75467a6ea9b321015d0dc55a832e02861d0bbc8ac",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "0b473195435dc51f3168799af23d6af3d8781aa9ed64e14db3e3bb11d01e34f6",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 331,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "input-isolated": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-input-isolated",
+        "--subdirs=minimize-input-isolated",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 213,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "a5f434fb2abd14f1e9454ce75467a6ea9b321015d0dc55a832e02861d0bbc8ac",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "0b473195435dc51f3168799af23d6af3d8781aa9ed64e14db3e3bb11d01e34f6",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 213,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "length-clause": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-length-clause",
+        "--subdirs=minimize-length-clause",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 1,
+      "failures": [
+        [
+          "VC_INVARIANT_CHECK",
+          "bitmap_allocator.ads",
+          30,
+          14
+        ],
+        [
+          "VC_INVARIANT_CHECK",
+          "bitmap_allocator.ads",
+          26,
+          14
+        ]
+      ],
+      "justified": 0,
+      "passes": 170,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "6c6c0eef9ed6f9f200de78fbfba5a9511cff653a59f3205bcc032ced5821e06e",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "b5423a7f35678896bf5963abe201e03f1bd50f33edfaf10054694b062945cc66",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [
+        [
+          "VC_INVARIANT_CHECK",
+          "bitmap_allocator.ads",
+          30,
+          14
+        ],
+        [
+          "VC_INVARIANT_CHECK",
+          "bitmap_allocator.ads",
+          26,
+          14
+        ]
+      ],
+      "total": 172,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "mapping-loop": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-mapping-loop",
+        "--subdirs=minimize-mapping-loop",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 1,
+      "failures": [
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          54,
+          15
+        ]
+      ],
+      "justified": 0,
+      "passes": 178,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "42450ed94634b87035f151e59938143a4f10d72abd028c4c9a5d09822bffda0c",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          54,
+          15
+        ]
+      ],
+      "total": 179,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "model-path": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-model-path",
+        "--subdirs=minimize-model-path",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 200,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "dd97dc4588328ec58e4bb91b12a5cff532459b61a7fd10349ae08b88da824707",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 200,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "model-path-actual": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-model-path-actual",
+        "--subdirs=minimize-model-path-actual",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 183,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "96f396e12aad9f9416b0fe796419d8a71d2dd89ecbdbc5426828efed249cbdb1",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 183,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "mutation-support": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-mutation-support",
+        "--subdirs=minimize-mutation-support",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 200,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "dd97dc4588328ec58e4bb91b12a5cff532459b61a7fd10349ae08b88da824707",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 200,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "old-facts": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-old-facts",
+        "--subdirs=minimize-old-facts",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 174,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "6c6c0eef9ed6f9f200de78fbfba5a9511cff653a59f3205bcc032ced5821e06e",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "e865516ae1f39b9aa89f0cea59d3e18834dc35f1e7c6b61a17ef3b0a9fc2456c",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 174,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "scan": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-scan",
+        "--subdirs=minimize-scan",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 1,
+      "failures": [
+        [
+          "VC_ASSERT",
+          "bitmap_allocator.adb",
+          66,
+          42
+        ],
+        [
+          "VC_PRECONDITION",
+          "bitmap_allocator.ads",
+          29,
+          37
+        ],
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          28,
+          17
+        ]
+      ],
+      "justified": 0,
+      "passes": 175,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "4adc02fcb3d8e6973b24424ffb72acd068e11e4a5de0ad9b9ff6d7a932134ece",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [
+        [
+          "VC_ASSERT",
+          "bitmap_allocator.adb",
+          66,
+          42
+        ],
+        [
+          "VC_PRECONDITION",
+          "bitmap_allocator.ads",
+          29,
+          37
+        ],
+        [
+          "VC_POSTCONDITION",
+          "bitmap_allocator.ads",
+          28,
+          17
+        ]
+      ],
+      "total": 178,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "set-length": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-set-length",
+        "--subdirs=minimize-set-length",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 211,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "51ebfc61f6233ab12d573a752f128fe44fd5c71c8f4809f3124bc497f956bec8",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 211,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "snapshots": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-snapshots",
+        "--subdirs=minimize-snapshots",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 183,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "4739131e0c3e4839300eb951493d5b5f5a20b5908280bdfd670fd77a5554fe82",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 183,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "stable-1": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-stable-1",
+        "--subdirs=minimize-stable-1",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 174,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "6c6c0eef9ed6f9f200de78fbfba5a9511cff653a59f3205bcc032ced5821e06e",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "e865516ae1f39b9aa89f0cea59d3e18834dc35f1e7c6b61a17ef3b0a9fc2456c",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 174,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "stable-2": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-stable-2",
+        "--subdirs=minimize-stable-2",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 174,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "6c6c0eef9ed6f9f200de78fbfba5a9511cff653a59f3205bcc032ced5821e06e",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "e865516ae1f39b9aa89f0cea59d3e18834dc35f1e7c6b61a17ef3b0a9fc2456c",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 174,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "stable-3": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-stable-3",
+        "--subdirs=minimize-stable-3",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 174,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "6c6c0eef9ed6f9f200de78fbfba5a9511cff653a59f3205bcc032ced5821e06e",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "e865516ae1f39b9aa89f0cea59d3e18834dc35f1e7c6b61a17ef3b0a9fc2456c",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 174,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    },
+    "universe": {
+      "agreement": true,
+      "command": [
+        "alr",
+        "-n",
+        "exec",
+        "--",
+        "gnatprove",
+        "-P",
+        "bitmap_allocator_library.gpr",
+        "-XPROOF_PATTERNS_VARIANT=minimize-universe",
+        "--subdirs=minimize-universe",
+        "-j0",
+        "--output-header",
+        "--output=oneline"
+      ],
+      "exit": 0,
+      "failures": [],
+      "justified": 0,
+      "passes": 181,
+      "source_sha256": {
+        "examples/bitmap_allocator/bitmap_allocator_library.gpr": "effd4de285beb37f6da817f312b6249607c3085277e84a72c09b0734e793a431",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": "749347cbef0fa5cb2591ead85e83bed8f809d51933609cad7f72b7bdb322e047",
+        "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": "1f7df1516cd440a20329c414ccf18e1ef676ffa4a7828ef09642ba5013530e68",
+        "proof_patterns/src/spark_refine_bitmap_sets.adb": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c",
+        "proof_patterns/src/spark_refine_bitmap_sets.ads": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      },
+      "spark_failures": [],
+      "total": 181,
+      "units": {
+        "bitmap_allocator.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        },
+        "bitmap_allocator_runtime_tests.spark": {
+          "pragma_assume": [],
+          "progress": "PROGRESS_PROOF",
+          "skip_flow_proof": [],
+          "skip_proof": [],
+          "stop_reason": "STOP_REASON_NONE"
+        }
+      }
+    }
+  },
+  "outstanding": [
+    "independent instances",
+    "configuration rejection",
+    "M1–M8 and masking",
+    "single-prover and final performance",
+    "final Task 019 decision"
+  ],
+  "reduction_percentage": -3.7037037037037037,
+  "regressions": {
+    "API_equivalence": true,
+    "assertions_scope": "allocator and runtime driver; imported library/SPARKlib units not claimed assertions-enabled",
+    "candidate_trust": true,
+    "diagnostics_tests": 467,
+    "established_trust_files": 31,
+    "manual": {
+      "justified": 0,
+      "passed": 118,
+      "unproved": 0
+    },
+    "padding": {
+      "justified": 0,
+      "passed": 104,
+      "unproved": 0
+    },
+    "prefix": {
+      "justified": 0,
+      "passed": 356,
+      "unproved": 0
+    },
+    "production_line_identity_order": true,
+    "repository_checks": true,
+    "root_tests": 4,
+    "runtime": {
+      "off": 45792,
+      "on": 45792
+    },
+    "semantic_support_skips": 34
+  },
+  "residual_breakdown": {
+    "Free_Model_adapter": 2,
+    "clear_membership_assertion": 3,
+    "mapping_bridge_declaration_and_body": 10,
+    "model_contract_and_forwarding_body": 21,
+    "mutation_lemma_calls": 2,
+    "operation_mapping_calls": 2,
+    "physical_delta_assertions": 6,
+    "private_with_and_instantiation": 3,
+    "raw_snapshots": 2,
+    "representation_invariant": 3,
+    "scan_prefix_invariant": 2
+  },
+  "standalone_padding_validation_sloc": 25,
+  "start": {
+    "files": {
+      "examples/bitmap_allocator/tests/bitmap_allocator_runtime_tests.adb": {
+        "lines": [
+          {
+            "category": "standalone_validation_test",
+            "line": 1,
+            "text": "with Ada.Text_IO; use Ada.Text_IO;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 2,
+            "text": "with Bitmap_Allocator; use Bitmap_Allocator;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 4,
+            "text": "procedure Bitmap_Allocator_Runtime_Tests with SPARK_Mode => Off is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 5,
+            "text": "type Flags is array (Object_Id) of Boolean;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 6,
+            "text": "P : Pool;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 7,
+            "text": "Free : Flags := [others => True];"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 8,
+            "text": "Id : Object_Id;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 9,
+            "text": "Checks : Natural := 0;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 10,
+            "text": "procedure Check (Condition : Boolean) is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 11,
+            "text": "begin"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 12,
+            "text": "Checks := Checks + 1;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 13,
+            "text": "if not Condition then"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 14,
+            "text": "raise Program_Error with \"bitmap mismatch at check\" & Checks'Image;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 15,
+            "text": "end if;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 16,
+            "text": "end Check;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 17,
+            "text": "procedure Consistent is"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 18,
+            "text": "N : Natural := 0;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 19,
+            "text": "begin"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 20,
+            "text": "for J in Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 21,
+            "text": "Check (Is_Free (P, J) = Free (J));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 22,
+            "text": "if Free (J) then N := N + 1; end if;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 23,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 24,
+            "text": "Check (Free_Count (P) = N);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 25,
+            "text": "Check (Is_Exhausted (P) = (N = 0));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 26,
+            "text": "end Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 27,
+            "text": "begin"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 28,
+            "text": "for Cycle in 1 .. 3 loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 29,
+            "text": "Initialize (P);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 30,
+            "text": "Free := [others => True];"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 31,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 32,
+            "text": "Check (Is_Free (P, 0) and Is_Free (P, 31) and Is_Free (P, 32)"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 33,
+            "text": "and Is_Free (P, 63) and Is_Free (P, 64) and Is_Free (P, 69));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 34,
+            "text": "for J in Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 35,
+            "text": "Allocate (P, Id);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 36,
+            "text": "Check (Free (Id));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 37,
+            "text": "Free (Id) := False;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 38,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 39,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 40,
+            "text": "Check (Is_Exhausted (P));"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 41,
+            "text": "for J in reverse Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 42,
+            "text": "Release (P, J);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 43,
+            "text": "Free (J) := True;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 44,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 45,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 46,
+            "text": "for J in Object_Id loop"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 47,
+            "text": "Allocate (P, Id);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 48,
+            "text": "Free (Id) := False;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 49,
+            "text": "Release (P, Id);"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 50,
+            "text": "Free (Id) := True;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 51,
+            "text": "Consistent;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 52,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 53,
+            "text": "end loop;"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 54,
+            "text": "Put_Line (\"bitmap runtime: \" & Checks'Image & \" checks passed\");"
+          },
+          {
+            "category": "standalone_validation_test",
+            "line": 55,
+            "text": "end Bitmap_Allocator_Runtime_Tests;"
+          }
+        ],
+        "sha256": "82ddd6b80d2b981d1d444b624da6b7b9707b45b543e8b8ebe418dfdeb849a856"
+      },
+      "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.adb": {
+        "lines": [
+          {
+            "category": "production",
+            "line": 1,
+            "text": "package body Bitmap_Allocator with SPARK_Mode is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 2,
+            "text": "procedure Mapping_Bridge (Words : Word_Array; Id : Object_Id) is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 3,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 4,
+            "text": "pragma Assert (Bitmap.Word_Index (Id) = Id / 32);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 5,
+            "text": "pragma Assert (Bitmap.Mask (Id) = Mask (Id));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 6,
+            "text": "end Mapping_Bridge;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 8,
+            "text": "procedure Padding_Interface_Check (Words : Word_Array)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 9,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 10,
+            "text": "Post => Bitmap.Padding_Is_Canonical (Words)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 11,
+            "text": "= ((Words (2) and not Interfaces.Unsigned_32 (2 ** 6 - 1)) = 0)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 12,
+            "text": "is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 13,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 14,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 15,
+            "text": "(Bitmap.Padding_Is_Canonical (Words)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 16,
+            "text": "= ((Words (2) and not Interfaces.Unsigned_32 (2 ** 6 - 1)) = 0));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 17,
+            "text": "end Padding_Interface_Check;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 20,
+            "text": "procedure Model_Interface_Check (Words : Word_Array)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 21,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 22,
+            "text": "Post => Bitmap.Universe_Size = To_Big_Integer (Capacity)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 23,
+            "text": "and ((Id_Sets.Length (Bitmap.Model (Words)) = Capacity)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 24,
+            "text": "= (for all Id in Object_Id => Bitmap_Contains (Words, Id)))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 25,
+            "text": "is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 26,
+            "text": "S : constant Id_Sets.Set := Bitmap.Model (Words);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 27,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 28,
+            "text": "pragma Assert (Bitmap.Universe_Size = To_Big_Integer (Capacity));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 29,
+            "text": "pragma Assert ((Id_Sets.Length (S) = Bitmap.Universe_Size)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 30,
+            "text": "= (for all Id in Object_Id => Bitmap.Bit_Is_Set (Words, Id)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 31,
+            "text": "for Id in Object_Id loop"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 32,
+            "text": "Mapping_Bridge (Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 33,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 34,
+            "text": "(for all J in Object_Id'First .. Id =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 35,
+            "text": "Bitmap.Bit_Is_Set (Words, J) = Bitmap_Contains (Words, J));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 36,
+            "text": "end loop;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 37,
+            "text": "pragma Assert ((Id_Sets.Length (S) = Capacity)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 38,
+            "text": "= (for all Id in Object_Id => Bitmap_Contains (Words, Id)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 39,
+            "text": "end Model_Interface_Check;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 41,
+            "text": "function Bitmap_Model (Words : Word_Array) return Id_Sets.Set is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 42,
+            "text": "S : constant Id_Sets.Set := Bitmap.Model (Words);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 43,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 44,
+            "text": "Model_Interface_Check (Words);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 45,
+            "text": "Padding_Interface_Check (Words);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 46,
+            "text": "for Id in Object_Id loop"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 47,
+            "text": "Mapping_Bridge (Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 48,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 49,
+            "text": "(for all J in Object_Id'First .. Id =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 50,
+            "text": "Bitmap.Bit_Is_Set (Words, J) = Bitmap_Contains (Words, J));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 51,
+            "text": "end loop;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 52,
+            "text": "pragma Assert (Bitmap.Universe_Size = To_Big_Integer (Capacity));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 53,
+            "text": "return S;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 54,
+            "text": "end Bitmap_Model;"
+          },
+          {
+            "category": "production",
+            "line": 56,
+            "text": "function Is_Free (P : Pool; Id : Object_Id) return Boolean is"
+          },
+          {
+            "category": "production",
+            "line": 57,
+            "text": "(Bitmap_Contains (P.Words, Id));"
+          },
+          {
+            "category": "production",
+            "line": 59,
+            "text": "function Free_Count (P : Pool) return Pool_Count is (P.Count);"
+          },
+          {
+            "category": "production",
+            "line": 60,
+            "text": "function Is_Exhausted (P : Pool) return Boolean is (P.Count = 0);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 62,
+            "text": "function Free_Model (P : Pool) return Id_Sets.Set is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 63,
+            "text": "(Bitmap_Model (P.Words));"
+          },
+          {
+            "category": "production",
+            "line": 65,
+            "text": "procedure Initialize (P : out Pool) is"
+          },
+          {
+            "category": "production",
+            "line": 66,
+            "text": "begin"
+          },
+          {
+            "category": "production",
+            "line": 67,
+            "text": "P := (Words => [0 => Interfaces.Unsigned_32'Last,"
+          },
+          {
+            "category": "production",
+            "line": 68,
+            "text": "1 => Interfaces.Unsigned_32'Last,"
+          },
+          {
+            "category": "production",
+            "line": 69,
+            "text": "2 => 2 ** 6 - 1],"
+          },
+          {
+            "category": "production",
+            "line": 70,
+            "text": "Count => Capacity);"
+          },
+          {
+            "category": "production",
+            "line": 71,
+            "text": "end Initialize;"
+          },
+          {
+            "category": "production",
+            "line": 73,
+            "text": "procedure Allocate (P : in out Pool; Id : out Object_Id) is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 74,
+            "text": "Old_Model : constant Id_Sets.Set := Bitmap_Model (P.Words) with Ghost;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 75,
+            "text": "Old_Words : constant Word_Array := P.Words with Ghost;"
+          },
+          {
+            "category": "production",
+            "line": 76,
+            "text": "begin"
+          },
+          {
+            "category": "production",
+            "line": 77,
+            "text": "Id := Object_Id'First;"
+          },
+          {
+            "category": "production",
+            "line": 78,
+            "text": "for Candidate in Object_Id loop"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 79,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 80,
+            "text": "(for all J in Object_Id'First .. Candidate - 1 => not Bitmap_Contains (P.Words, J));"
+          },
+          {
+            "category": "production",
+            "line": 81,
+            "text": "if Is_Free (P, Candidate) then"
+          },
+          {
+            "category": "production",
+            "line": 82,
+            "text": "Id := Candidate;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 83,
+            "text": "Mapping_Bridge (Old_Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 84,
+            "text": "pragma Assert (Bitmap.Bit_Is_Set (Old_Words, Id));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 85,
+            "text": "pragma Assert (Bitmap.Padding_Is_Canonical (Old_Words));"
+          },
+          {
+            "category": "production",
+            "line": 86,
+            "text": "P.Words (Natural (Id) / 32) :="
+          },
+          {
+            "category": "production",
+            "line": 87,
+            "text": "P.Words (Natural (Id) / 32) and not Mask (Id);"
+          },
+          {
+            "category": "production",
+            "line": 88,
+            "text": "P.Count := P.Count - 1;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 89,
+            "text": "pragma Assert (P.Words = (Old_Words with delta"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 90,
+            "text": "Bitmap.Word_Index (Id) => Old_Words (Bitmap.Word_Index (Id))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 91,
+            "text": "and not Bitmap.Mask (Id)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 92,
+            "text": "Bitmap.Lemma_Clear_Bit (Old_Words, P.Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 93,
+            "text": "pragma Assert (Bitmap.Padding_Is_Canonical (P.Words));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 94,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 95,
+            "text": "(for all J in Object_Id => Bitmap_Contains (P.Words, J)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 96,
+            "text": "= (J /= Id and then Bitmap_Contains (Old_Words, J)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 97,
+            "text": "Bitmap.Equal_Length (Bitmap_Model (P.Words), Id_Sets.Remove (Old_Model, Id));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 98,
+            "text": "pragma Assert (To_Big_Integer (P.Count) = Id_Sets.Length (Bitmap_Model (P.Words)));"
+          },
+          {
+            "category": "production",
+            "line": 99,
+            "text": "return;"
+          },
+          {
+            "category": "production",
+            "line": 100,
+            "text": "end if;"
+          },
+          {
+            "category": "production",
+            "line": 101,
+            "text": "end loop;"
+          },
+          {
+            "category": "production",
+            "line": 102,
+            "text": "end Allocate;"
+          },
+          {
+            "category": "production",
+            "line": 104,
+            "text": "procedure Release (P : in out Pool; Id : Object_Id) is"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 105,
+            "text": "Old_Model : constant Id_Sets.Set := Bitmap_Model (P.Words) with Ghost;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 106,
+            "text": "Old_Words : constant Word_Array := P.Words with Ghost;"
+          },
+          {
+            "category": "production",
+            "line": 107,
+            "text": "begin"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 108,
+            "text": "Mapping_Bridge (Old_Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 109,
+            "text": "pragma Assert (not Bitmap.Bit_Is_Set (Old_Words, Id));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 110,
+            "text": "pragma Assert (Bitmap.Padding_Is_Canonical (Old_Words));"
+          },
+          {
+            "category": "production",
+            "line": 111,
+            "text": "P.Words (Natural (Id) / 32) :="
+          },
+          {
+            "category": "production",
+            "line": 112,
+            "text": "P.Words (Natural (Id) / 32) or Mask (Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 113,
+            "text": "pragma Assert (P.Words = (Old_Words with delta"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 114,
+            "text": "Bitmap.Word_Index (Id) => Old_Words (Bitmap.Word_Index (Id))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 115,
+            "text": "or Bitmap.Mask (Id)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 116,
+            "text": "Bitmap.Lemma_Set_Bit (Old_Words, P.Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 117,
+            "text": "pragma Assert (Bitmap.Padding_Is_Canonical (P.Words));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 118,
+            "text": "for J in Object_Id loop"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 119,
+            "text": "Mapping_Bridge (Old_Words, J);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 120,
+            "text": "Mapping_Bridge (P.Words, J);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 121,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 122,
+            "text": "(for all K in Object_Id'First .. J =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 123,
+            "text": "Bitmap_Contains (P.Words, K)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 124,
+            "text": "= (K = Id or else Bitmap_Contains (Old_Words, K)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 125,
+            "text": "end loop;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 126,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 127,
+            "text": "(for all J in Object_Id => Bitmap_Contains (P.Words, J)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 128,
+            "text": "= (J = Id or else Bitmap_Contains (Old_Words, J)));"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 129,
+            "text": "Bitmap.Equal_Length (Bitmap_Model (P.Words), Id_Sets.Add (Old_Model, Id));"
+          },
+          {
+            "category": "production",
+            "line": 130,
+            "text": "P.Count := P.Count + 1;"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 131,
+            "text": "pragma Assert (To_Big_Integer (P.Count) = Id_Sets.Length (Bitmap_Model (P.Words)));"
+          },
+          {
+            "category": "production",
+            "line": 132,
+            "text": "end Release;"
+          },
+          {
+            "category": "production",
+            "line": 133,
+            "text": "end Bitmap_Allocator;"
+          }
+        ],
+        "sha256": "a5f434fb2abd14f1e9454ce75467a6ea9b321015d0dc55a832e02861d0bbc8ac"
+      },
+      "examples/bitmap_allocator/variants/library_backed/bitmap_allocator.ads": {
+        "lines": [
+          {
+            "category": "local_mechanical_support",
+            "line": 1,
+            "text": "private with SPARK_Refine_Bitmap_Sets;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 2,
+            "text": "with Interfaces;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 3,
+            "text": "use type Interfaces.Unsigned_32;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 4,
+            "text": "with SPARK.Big_Integers; use SPARK.Big_Integers;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 5,
+            "text": "with SPARK.Containers.Functional.Sets;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 7,
+            "text": "package Bitmap_Allocator with SPARK_Mode is"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 8,
+            "text": "Capacity : constant := 70;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 9,
+            "text": "subtype Object_Id is Natural range 0 .. Capacity - 1;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 10,
+            "text": "subtype Pool_Count is Natural range 0 .. Capacity;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 11,
+            "text": "package Id_Sets is new SPARK.Containers.Functional.Sets"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 12,
+            "text": "(Element_Type => Object_Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 13,
+            "text": "use type Id_Sets.Set;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 15,
+            "text": "type Pool is private;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 16,
+            "text": "function Free_Model (P : Pool) return Id_Sets.Set with Ghost;"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 17,
+            "text": "function Is_Free (P : Pool; Id : Object_Id) return Boolean"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 18,
+            "text": "with Post => Is_Free'Result = Id_Sets.Contains (Free_Model (P), Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 19,
+            "text": "function Free_Count (P : Pool) return Pool_Count"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 20,
+            "text": "with Post => To_Big_Integer (Free_Count'Result) = Id_Sets.Length (Free_Model (P));"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 21,
+            "text": "function Is_Exhausted (P : Pool) return Boolean"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 22,
+            "text": "with Post => Is_Exhausted'Result = (Id_Sets.Length (Free_Model (P)) = 0);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 23,
+            "text": "procedure Initialize (P : out Pool)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 24,
+            "text": "with Post => Free_Count (P) = Capacity"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 25,
+            "text": "and (for all Id in Object_Id => Id_Sets.Contains (Free_Model (P), Id));"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 26,
+            "text": "procedure Allocate (P : in out Pool; Id : out Object_Id)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 27,
+            "text": "with Pre => not Is_Exhausted (P),"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 28,
+            "text": "Post => Id_Sets.Contains (Free_Model (P)'Old, Id)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 29,
+            "text": "and Free_Model (P) = Id_Sets.Remove (Free_Model (P)'Old, Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 30,
+            "text": "procedure Release (P : in out Pool; Id : Object_Id)"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 31,
+            "text": "with Pre => not Id_Sets.Contains (Free_Model (P), Id),"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 32,
+            "text": "Post => Free_Model (P) = Id_Sets.Add (Free_Model (P)'Old, Id);"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 34,
+            "text": "private"
+          },
+          {
+            "category": "production",
+            "line": 35,
+            "text": "subtype Word_Index is Natural range 0 .. 2;"
+          },
+          {
+            "category": "production",
+            "line": 36,
+            "text": "type Word_Array is array (Word_Index) of Interfaces.Unsigned_32;"
+          },
+          {
+            "category": "production",
+            "line": 37,
+            "text": "function Mask (Id : Object_Id) return Interfaces.Unsigned_32 is"
+          },
+          {
+            "category": "production",
+            "line": 38,
+            "text": "(Interfaces.Shift_Left (Interfaces.Unsigned_32 (1), Id mod 32));"
+          },
+          {
+            "category": "production",
+            "line": 39,
+            "text": "function Bitmap_Contains (Words : Word_Array; Id : Object_Id) return Boolean is"
+          },
+          {
+            "category": "production",
+            "line": 40,
+            "text": "((Words (Id / 32) and Mask (Id)) /= 0);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 41,
+            "text": "package Bitmap is new SPARK_Refine_Bitmap_Sets"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 42,
+            "text": "(Object_Id, Interfaces.Unsigned_32, Word_Index, Word_Array, Id_Sets, 32);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 43,
+            "text": "procedure Mapping_Bridge (Words : Word_Array; Id : Object_Id)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 44,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 45,
+            "text": "Post => Bitmap.Word_Index (Id) = Id / 32"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 46,
+            "text": "and Bitmap.Mask (Id) = Mask (Id)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 47,
+            "text": "and Bitmap.Bit_Is_Set (Words, Id) = Bitmap_Contains (Words, Id);"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 48,
+            "text": "function Bitmap_Model (Words : Word_Array) return Id_Sets.Set"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 49,
+            "text": "with Ghost,"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 50,
+            "text": "Post => (for all Id in Object_Id =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 51,
+            "text": "Id_Sets.Contains (Bitmap_Model'Result, Id) = Bitmap_Contains (Words, Id))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 52,
+            "text": "and ((Id_Sets.Length (Bitmap_Model'Result) = Capacity)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 53,
+            "text": "= (for all Id in Object_Id => Bitmap_Contains (Words, Id)))"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 54,
+            "text": "and ((Id_Sets.Length (Bitmap_Model'Result) = 0)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 55,
+            "text": "= (for all Id in Object_Id => not Bitmap_Contains (Words, Id)));"
+          },
+          {
+            "category": "production",
+            "line": 56,
+            "text": "type Pool is record"
+          },
+          {
+            "category": "production",
+            "line": 57,
+            "text": "Words : Word_Array := [others => 0];"
+          },
+          {
+            "category": "production",
+            "line": 58,
+            "text": "Count : Pool_Count := 0;"
+          },
+          {
+            "category": "production",
+            "line": 59,
+            "text": "end record"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 60,
+            "text": "with Type_Invariant =>"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 61,
+            "text": "Bitmap.Padding_Is_Canonical (Pool.Words)"
+          },
+          {
+            "category": "local_mechanical_support",
+            "line": 62,
+            "text": "and To_Big_Integer (Pool.Count) = Id_Sets.Length (Bitmap_Model (Pool.Words));"
+          },
+          {
+            "category": "authoritative_specification",
+            "line": 63,
+            "text": "end Bitmap_Allocator;"
+          }
+        ],
+        "sha256": "0b473195435dc51f3168799af23d6af3d8781aa9ed64e14db3e3bb11d01e34f6"
+      },
+      "proof_patterns/src/spark_refine_bitmap_sets.adb": {
+        "lines": [
+          {
+            "category": "reusable_library",
+            "line": 1,
+            "text": "package body SPARK_Refine_Bitmap_Sets with SPARK_Mode is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 2,
+            "text": "procedure Equal_Length (Left, Right : Element_Sets.Set) is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 3,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 4,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "reusable_library",
+            "line": 5,
+            "text": "(Element_Sets.Num_Overlaps (Left, Right) = Element_Sets.Length (Left));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 6,
+            "text": "end Equal_Length;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 8,
+            "text": "function Model (Words : Storage_Array) return Element_Sets.Set is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 9,
+            "text": "Result : Element_Sets.Set;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 10,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 11,
+            "text": "for E in Element_Type loop"
+          },
+          {
+            "category": "reusable_library",
+            "line": 12,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "reusable_library",
+            "line": 13,
+            "text": "(for all J in Element_Type => Element_Sets.Contains (Result, J)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 14,
+            "text": "= (J < E and then Bit_Is_Set (Words, J)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 15,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "reusable_library",
+            "line": 16,
+            "text": "(Element_Sets.Length (Result) <= To_Big_Integer (Offset (E)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 17,
+            "text": "pragma Loop_Invariant"
+          },
+          {
+            "category": "reusable_library",
+            "line": 18,
+            "text": "((Element_Sets.Length (Result) = To_Big_Integer (Offset (E)))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 19,
+            "text": "= (for all J in Element_Type =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 20,
+            "text": "(if J < E then Bit_Is_Set (Words, J))));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 21,
+            "text": "if Bit_Is_Set (Words, E) then"
+          },
+          {
+            "category": "reusable_library",
+            "line": 22,
+            "text": "Result := Element_Sets.Add (Result, E);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 23,
+            "text": "end if;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 24,
+            "text": "end loop;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 25,
+            "text": "return Result;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 26,
+            "text": "end Model;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 28,
+            "text": "procedure Lemma_Clear_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 29,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type) is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 30,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 31,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "reusable_library",
+            "line": 32,
+            "text": "(for all J in Element_Type => Bit_Is_Set (New_Words, J)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 33,
+            "text": "= (J /= E and then Bit_Is_Set (Old_Words, J)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 34,
+            "text": "Equal_Length (Model (New_Words), Element_Sets.Remove (Model (Old_Words), E));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 35,
+            "text": "end Lemma_Clear_Bit;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 37,
+            "text": "procedure Lemma_Set_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 38,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type) is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 39,
+            "text": "begin"
+          },
+          {
+            "category": "reusable_library",
+            "line": 40,
+            "text": "pragma Assert"
+          },
+          {
+            "category": "reusable_library",
+            "line": 41,
+            "text": "(for all J in Element_Type => Bit_Is_Set (New_Words, J)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 42,
+            "text": "= (J = E or else Bit_Is_Set (Old_Words, J)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 43,
+            "text": "Equal_Length (Model (New_Words), Element_Sets.Add (Model (Old_Words), E));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 44,
+            "text": "end Lemma_Set_Bit;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 45,
+            "text": "end SPARK_Refine_Bitmap_Sets;"
+          }
+        ],
+        "sha256": "8d049009ae08e2e737d82c27c7a055dbf5362462877890f25c7be603bb9c212c"
+      },
+      "proof_patterns/src/spark_refine_bitmap_sets.ads": {
+        "lines": [
+          {
+            "category": "reusable_library",
+            "line": 1,
+            "text": "with SPARK.Big_Integers; use SPARK.Big_Integers;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 2,
+            "text": "with SPARK.Containers.Functional.Sets;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 8,
+            "text": "generic"
+          },
+          {
+            "category": "reusable_library",
+            "line": 9,
+            "text": "type Element_Type is (<>);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 10,
+            "text": "type Word_Type is mod <>;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 11,
+            "text": "type Word_Index_Type is range <>;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 12,
+            "text": "type Storage_Array is array (Word_Index_Type) of Word_Type;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 13,
+            "text": "with package Element_Sets is new SPARK.Containers.Functional.Sets"
+          },
+          {
+            "category": "reusable_library",
+            "line": 14,
+            "text": "(Element_Type => Element_Type, Equivalent_Elements => \"=\", others => <>);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 15,
+            "text": "Bits_Per_Word : Positive;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 16,
+            "text": "package SPARK_Refine_Bitmap_Sets with SPARK_Mode, Always_Terminates is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 17,
+            "text": "pragma Compile_Time_Error"
+          },
+          {
+            "category": "reusable_library",
+            "line": 18,
+            "text": "(Word_Type'Modulus /= 2 ** Bits_Per_Word, \"binary word modulus required\");"
+          },
+          {
+            "category": "reusable_library",
+            "line": 19,
+            "text": "pragma Compile_Time_Error"
+          },
+          {
+            "category": "reusable_library",
+            "line": 20,
+            "text": "((Word_Index_Type'Pos (Word_Index_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 21,
+            "text": "- Word_Index_Type'Pos (Word_Index_Type'First) + 1) * Bits_Per_Word"
+          },
+          {
+            "category": "reusable_library",
+            "line": 22,
+            "text": "< Element_Type'Pos (Element_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 23,
+            "text": "- Element_Type'Pos (Element_Type'First) + 1,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 24,
+            "text": "\"storage cannot hold identity universe\");"
+          },
+          {
+            "category": "reusable_library",
+            "line": 26,
+            "text": "function Offset (E : Element_Type) return Natural is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 27,
+            "text": "(Element_Type'Pos (E) - Element_Type'Pos (Element_Type'First))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 28,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 29,
+            "text": "function Word_Index (E : Element_Type) return Word_Index_Type is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 30,
+            "text": "(Word_Index_Type'Val"
+          },
+          {
+            "category": "reusable_library",
+            "line": 31,
+            "text": "(Word_Index_Type'Pos (Word_Index_Type'First) + Offset (E) / Bits_Per_Word))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 32,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 33,
+            "text": "function Mask (E : Element_Type) return Word_Type is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 34,
+            "text": "(2 ** (Offset (E) mod Bits_Per_Word))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 35,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 36,
+            "text": "function Bit_Is_Set (Words : Storage_Array; E : Element_Type) return Boolean is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 37,
+            "text": "((Words (Word_Index (E)) and Mask (E)) /= 0)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 38,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 39,
+            "text": "function Universe_Size return Big_Natural is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 40,
+            "text": "(To_Big_Integer (Element_Type'Pos (Element_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 41,
+            "text": "- Element_Type'Pos (Element_Type'First) + 1))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 42,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 43,
+            "text": "function Padding_Is_Canonical (Words : Storage_Array) return Boolean is"
+          },
+          {
+            "category": "reusable_library",
+            "line": 44,
+            "text": "(for all I in Word_Index_Type =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 45,
+            "text": "(for all B in 0 .. Bits_Per_Word - 1 =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 46,
+            "text": "(if (Word_Index_Type'Pos (I)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 47,
+            "text": "- Word_Index_Type'Pos (Word_Index_Type'First)) * Bits_Per_Word + B"
+          },
+          {
+            "category": "reusable_library",
+            "line": 48,
+            "text": "> Offset (Element_Type'Last)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 49,
+            "text": "then (Words (I) and 2 ** B) = 0)))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 50,
+            "text": "with Ghost;"
+          },
+          {
+            "category": "reusable_library",
+            "line": 51,
+            "text": "function Model (Words : Storage_Array) return Element_Sets.Set"
+          },
+          {
+            "category": "reusable_library",
+            "line": 52,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 53,
+            "text": "Post => (for all E in Element_Type =>"
+          },
+          {
+            "category": "reusable_library",
+            "line": 54,
+            "text": "Element_Sets.Contains (Model'Result, E) = Bit_Is_Set (Words, E))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 55,
+            "text": "and Element_Sets.Length (Model'Result) <= Universe_Size"
+          },
+          {
+            "category": "reusable_library",
+            "line": 56,
+            "text": "and ((Element_Sets.Length (Model'Result) = Universe_Size)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 57,
+            "text": "= (for all E in Element_Type => Bit_Is_Set (Words, E)))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 58,
+            "text": "and ((Element_Sets.Length (Model'Result) = 0)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 59,
+            "text": "= (for all E in Element_Type => not Bit_Is_Set (Words, E)));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 61,
+            "text": "procedure Equal_Length (Left, Right : Element_Sets.Set)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 62,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 63,
+            "text": "Pre => Element_Sets.\"=\" (Left, Right),"
+          },
+          {
+            "category": "reusable_library",
+            "line": 64,
+            "text": "Post => Element_Sets.Length (Left) = Element_Sets.Length (Right);"
+          },
+          {
+            "category": "reusable_library",
+            "line": 66,
+            "text": "procedure Lemma_Clear_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 67,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 68,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 69,
+            "text": "Pre => Bit_Is_Set (Old_Words, E)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 70,
+            "text": "and New_Words = (Old_Words with delta"
+          },
+          {
+            "category": "reusable_library",
+            "line": 71,
+            "text": "Word_Index (E) => Old_Words (Word_Index (E)) and not Mask (E)),"
+          },
+          {
+            "category": "reusable_library",
+            "line": 72,
+            "text": "Post => Element_Sets.\"=\""
+          },
+          {
+            "category": "reusable_library",
+            "line": 73,
+            "text": "(Model (New_Words), Element_Sets.Remove (Model (Old_Words), E))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 74,
+            "text": "and Element_Sets.Length (Model (New_Words))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 75,
+            "text": "= Element_Sets.Length (Model (Old_Words)) - 1"
+          },
+          {
+            "category": "reusable_library",
+            "line": 76,
+            "text": "and (if Padding_Is_Canonical (Old_Words)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 77,
+            "text": "then Padding_Is_Canonical (New_Words));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 79,
+            "text": "procedure Lemma_Set_Bit"
+          },
+          {
+            "category": "reusable_library",
+            "line": 80,
+            "text": "(Old_Words, New_Words : Storage_Array; E : Element_Type)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 81,
+            "text": "with Ghost, Global => null,"
+          },
+          {
+            "category": "reusable_library",
+            "line": 82,
+            "text": "Pre => not Bit_Is_Set (Old_Words, E)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 83,
+            "text": "and New_Words = (Old_Words with delta"
+          },
+          {
+            "category": "reusable_library",
+            "line": 84,
+            "text": "Word_Index (E) => Old_Words (Word_Index (E)) or Mask (E)),"
+          },
+          {
+            "category": "reusable_library",
+            "line": 85,
+            "text": "Post => Element_Sets.\"=\""
+          },
+          {
+            "category": "reusable_library",
+            "line": 86,
+            "text": "(Model (New_Words), Element_Sets.Add (Model (Old_Words), E))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 87,
+            "text": "and Element_Sets.Length (Model (New_Words))"
+          },
+          {
+            "category": "reusable_library",
+            "line": 88,
+            "text": "= Element_Sets.Length (Model (Old_Words)) + 1"
+          },
+          {
+            "category": "reusable_library",
+            "line": 89,
+            "text": "and (if Padding_Is_Canonical (Old_Words)"
+          },
+          {
+            "category": "reusable_library",
+            "line": 90,
+            "text": "then Padding_Is_Canonical (New_Words));"
+          },
+          {
+            "category": "reusable_library",
+            "line": 91,
+            "text": "end SPARK_Refine_Bitmap_Sets;"
+          }
+        ],
+        "sha256": "e49b72bd09dda59c64baff88ae98703c604628aa317465260e0f241e46e8b7a2"
+      }
+    },
+    "totals": {
+      "authoritative_specification": 31,
+      "local_mechanical_support": 110,
+      "production": 42,
+      "reusable_library": 124,
+      "standalone_validation_test": 54
+    }
+  },
+  "status": "INTERMEDIATE — SINGLE-INSTANCE MINIMIZATION; INDEPENDENT VALIDATION AND FALSIFICATION PENDING",
+  "support_saved": -2,
+  "supporting_counts": {
+    "assertions": 5,
+    "local_helpers": 2,
+    "loop_invariants": 2,
+    "mapping_bridge_calls": 3,
+    "model_adapters": 1,
+    "mutation_lemma_calls": 2,
+    "production_scan_loops": 1,
+    "proof_witness_loops": 1,
+    "snapshots": 2
+  }
+}
