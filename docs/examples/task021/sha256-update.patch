@@ -1,0 +1,35 @@
+diff --git a/src/security/crdt-security-sha256.adb b/src/security/crdt-security-sha256.adb
+index 9b8f60f..f8595e6 100644
+--- a/src/security/crdt-security-sha256.adb
++++ b/src/security/crdt-security-sha256.adb
+@@ -104,16 +104,2 @@ is
+    begin
+-      --  The byte counter is a 64-bit modular value: it accumulates
+-      --  without overflow and wraps exactly like the 64-bit bit-length
+-      --  field of the FIPS 180-4 padding rule.  The length is taken as
+-      --  a Long_Long_Integer difference of the slice bounds: null
+-      --  slices add zero, and no attribute conversion can fail.
+-      declare
+-         Diff : constant Long_Long_Integer :=
+-           (Long_Long_Integer (Bytes'Last) - Long_Long_Integer (Bytes'First)) + 1;
+-      begin
+-         if Diff > 0 then
+-            Ctx.Len := Ctx.Len + Count (Diff);
+-         end if;
+-      end;
+-
+       --  Stream one byte at a time through the partial block buffer.
+@@ -122,5 +108,12 @@ is
+       for I in Bytes'Range loop
++         --  Count consumed bytes using modular arithmetic, independent
++         --  of the input bounds.  A null range leaves the count unchanged.
++         Ctx.Len := Ctx.Len + 1;
+          Ctx.Buf (Ctx.BufN + 1) := Bytes (I);
+          if Ctx.BufN + 1 = Block_Length then
+-            Compress (Ctx, Ctx.Buf);
++            declare
++               Block : constant Byte_Array_64 := Ctx.Buf;
++            begin
++               Compress (Ctx, Block);
++            end;
+             Ctx.BufN := 0;

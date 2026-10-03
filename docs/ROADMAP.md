@@ -19,6 +19,14 @@ Two pillars, with GNATprove as the proof authority:
 
 ## Completed
 
+Task 021: bounded historical SHA256.Update maintenance pilot using the existing
+worklist. **TARGET_REPAIRED_AND_VALIDATED**: 3→0 target unproved, 11→8 overall;
+two fresh unchanged confirmations and independent runtime checks pass. Only a
+retained external implementation patch, usage report and replay artifacts;
+no production feature or contract change. Workflow usable, with little
+incremental value observed in this known case; no causal speedup claim or
+new product change justified. See [Task 021](tasks/021-proof-workflow-pilot.md).
+
 Task 020: opt-in `--show-unproved` on `explain`, `analyze` and `prove`.
 Every loaded normalized unproved occurrence is exposed in text and optional
 `analysis.unproved_checks` JSON, independently of SRD diagnostics. No new
